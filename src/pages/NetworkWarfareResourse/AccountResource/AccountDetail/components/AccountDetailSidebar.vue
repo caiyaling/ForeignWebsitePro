@@ -16,7 +16,7 @@ const allMenuItems = [
   { id: 'account-ops', title: '账号运维信息' },
   { id: 'account-fans-chart', title: '账号粉丝情况' },
   { id: 'post-behavior', title: '发帖行为记录' },
-  { id: 'boost-record', title: '助推烘托行为' },
+  { id: 'boost-record', title: '助推烘托记录' },
   { id: 'appeal-record', title: '申诉/替换记录' }
 ]
 

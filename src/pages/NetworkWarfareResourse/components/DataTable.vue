@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { ElTable, ElTableColumn, ElTag, ElProgress, ElPagination, ElSelect, ElOption, ElDatePicker, ElTooltip } from 'element-plus'
+import { ElTable, ElTableColumn, ElTag, ElProgress, ElPagination, ElSelect, ElOption, ElDatePicker, ElTooltip, ElInput, ElButton, ElIcon } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import SearchBar from './SearchBar.vue'
 
 const router = useRouter()
@@ -103,14 +104,64 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  // 表格最大高度限制
-  maxTableHeight: {
+  // 表格最大高度（用于滚动，默认400px）
+  maxHeight: {
+    type: Number,
+    default: 400
+  },
+  // 是否隐藏默认搜索栏
+  hideSearchBar: {
     type: Boolean,
     default: false
+  },
+  // 设备模式：显示设备页面的搜索栏
+  deviceMode: {
+    type: Boolean,
+    default: false
+  },
+  // 设备模式 - 所属项目选项
+  projectOptions: {
+    type: Array,
+    default: () => []
+  },
+  // 设备模式 - 品牌选项
+  brandOptions: {
+    type: Array,
+    default: () => []
+  },
+  // 设备模式 - 是否显示操作按钮
+  showActionButtons: {
+    type: Boolean,
+    default: true
+  },
+  // 设备模式 - 导入按钮文字
+  importButtonText: {
+    type: String,
+    default: '批量导入'
+  },
+  // 设备模式 - 导出按钮文字
+  exportButtonText: {
+    type: String,
+    default: '批量导出'
+  },
+  // 设备模式 - 搜索框placeholder
+  searchPlaceholder: {
+    type: String,
+    default: '关键词：编号'
+  },
+  // 设备模式 - 是否显示第二个下拉筛选器（品牌）
+  showBrandFilter: {
+    type: Boolean,
+    default: true
+  },
+  // 设备模式 - 第二个下拉筛选器的placeholder
+  brandPlaceholder: {
+    type: String,
+    default: '选择品牌'
   }
 })
 
-const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'update:selectValue', 'update:selectValue2'])
+const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'update:selectValue', 'update:selectValue2', 'delete', 'batchImport', 'batchExport'])
 
 const handleSearch = () => {
   emit('search')
@@ -132,6 +183,21 @@ const handleSelectChange2 = (val) => {
   emit('update:selectValue2', val)
 }
 
+// 设备模式筛选器更新
+const updateDeviceFilter = (key, value) => {
+  emit('update:filters', { ...props.filters, [key]: value })
+}
+
+// 批量导入
+const handleBatchImport = () => {
+  emit('batchImport')
+}
+
+// 批量导出
+const handleBatchExport = () => {
+  emit('batchExport')
+}
+
 // 点击详情跳转到账号详情页
 const handleDetailClick = (row) => {
   router.push({
@@ -142,6 +208,11 @@ const handleDetailClick = (row) => {
       accountType: row.accountType || ''
     }
   })
+}
+
+// 点击删除
+const handleDeleteClick = (row) => {
+  emit('delete', row)
 }
 
 // 获取申诉结果样式类名
@@ -210,7 +281,7 @@ const getResultClass = (result) => {
     </div>
 
     <!-- 列表模式搜索栏 -->
-    <div v-if="!detailMode" class="search-bar-wrapper">
+    <div v-if="!detailMode && !hideSearchBar && !deviceMode" class="search-bar-wrapper">
       <search-bar
         :title="title"
         :filters="filters"
@@ -222,13 +293,69 @@ const getResultClass = (result) => {
       />
     </div>
 
+    <!-- 设备模式搜索栏 -->
+    <div v-if="deviceMode" class="search-bar-wrapper">
+      <div class="device-search-bar">
+        <div class="title-spacer"></div>
+        <span class="table-title">{{ title }}</span>
+        <div class="filters">
+          <div class="search-input-wrapper">
+            <div class="search-prefix">
+              <el-icon :size="14"><Search /></el-icon>
+            </div>
+            <el-input
+              :model-value="filters.keyword"
+              :placeholder="searchPlaceholder"
+              clearable
+              class="search-input"
+              @update:model-value="val => updateDeviceFilter('keyword', val)"
+            />
+          </div>
+          <el-select
+            :model-value="filters.project"
+            placeholder="所属项目"
+            clearable
+            class="filter-select"
+            @update:model-value="val => updateDeviceFilter('project', val)"
+          >
+            <el-option
+              v-for="item in projectOptions"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
+          <el-select
+            v-if="showBrandFilter"
+            :model-value="filters.brand"
+            :placeholder="brandPlaceholder"
+            clearable
+            class="filter-select"
+            @update:model-value="val => updateDeviceFilter('brand', val)"
+          >
+            <el-option
+              v-for="item in brandOptions"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <div class="table-header-spacer"></div>
+        </div>
+        <div v-if="showActionButtons" class="action-buttons">
+          <el-button class="outline-btn" @click="handleBatchImport">{{ importButtonText }}</el-button>
+          <el-button class="outline-btn" @click="handleBatchExport">{{ exportButtonText }}</el-button>
+        </div>
+      </div>
+    </div>
+
     <div class="table-wrapper">
       <el-table
         :data="tableData"
         stripe
         class="data-table"
-        :height="maxTableHeight ? 400 : '100%'"
-        :max-height="maxTableHeight ? 400 : null"
+        :max-height="maxHeight"
       >
       <el-table-column type="index" label="序号" width="60" align="center" />
 
@@ -358,7 +485,8 @@ const getResultClass = (result) => {
         >
           <template #default="{ row }">
             <div class="action-buttons">
-              <span class="action-btn" @click="handleDetailClick(row)">详情</span>
+              <span v-if="col.actionType === 'delete'" class="action-btn delete-btn" @click="handleDeleteClick(row)">删除</span>
+              <span v-else class="action-btn" @click="handleDetailClick(row)">详情</span>
             </div>
           </template>
         </el-table-column>
@@ -409,6 +537,177 @@ const getResultClass = (result) => {
 .search-bar-wrapper {
   flex-shrink: 0;
   margin-bottom: 16px;
+}
+
+/* 设备模式搜索栏样式 */
+.device-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-spacer {
+  width: 4px;
+  height: 20px;
+  background: #0048FF;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.device-search-bar .table-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #303133;
+  line-height: 28px;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 135px;
+}
+
+.device-search-bar .filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.device-search-bar .search-input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 398px;
+  height: 32px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.device-search-bar .search-prefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 32px;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  flex-shrink: 0;
+  color: #606266;
+}
+
+.device-search-bar .search-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.device-search-bar .search-input :deep(.el-input__wrapper) {
+  border-radius: 0 4px 4px 0;
+  height: 32px;
+  box-shadow: 0 0 0 1px #e4e7ed inset;
+  padding: 0 8px;
+}
+
+.device-search-bar .search-input :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #c0c4cc inset;
+}
+
+.device-search-bar .search-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px #0048FF inset;
+}
+
+.device-search-bar .search-input :deep(.el-input__inner) {
+  height: 22px;
+  font-size: 13px;
+  color: #303133;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+}
+
+.device-search-bar .search-input :deep(.el-input__inner::placeholder) {
+  color: #a8abb2;
+  font-size: 13px;
+}
+
+.device-search-bar .filter-select {
+  flex: 1;
+  min-width: 0;
+  max-width: 248px;
+}
+
+.device-search-bar .filter-select :deep(.el-input__wrapper) {
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+  padding: 0 8px;
+  height: 32px;
+}
+
+.device-search-bar .filter-select :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #c0c4cc inset;
+}
+
+.device-search-bar .filter-select :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px #0048FF inset;
+}
+
+.device-search-bar .filter-select :deep(.el-input__inner) {
+  height: 22px;
+  font-size: 14px;
+  color: #303133;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+}
+
+.device-search-bar .filter-select :deep(.el-input__inner::placeholder) {
+  color: #a8abb2;
+  font-size: 14px;
+}
+
+.device-search-bar .search-btn {
+  height: 32px;
+  padding: 0 16px;
+  background: #0048FF;
+  border-color: #0048FF;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+  flex-shrink: 0;
+}
+
+.device-search-bar .search-btn:hover,
+.device-search-bar .search-btn:focus {
+  background: #3370ff;
+  border-color: #3370ff;
+}
+
+.device-search-bar .table-header-spacer {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.device-search-bar .action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.device-search-bar .outline-btn {
+  height: 32px;
+  padding: 0 16px;
+  background: #ecf5ff;
+  border: 1px solid #0048ff;
+  border-radius: 4px;
+  color: #0048ff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+}
+
+.device-search-bar .outline-btn:hover {
+  background: #d9ecff;
+  border-color: #3370ff;
+  color: #3370ff;
 }
 
 /* 详情模式标题栏样式 */
@@ -584,6 +883,10 @@ const getResultClass = (result) => {
 
 .action-btn:hover {
   opacity: 0.8;
+}
+
+.delete-btn {
+  color: #F53F3F;
 }
 
 /* 是否爆款样式 */

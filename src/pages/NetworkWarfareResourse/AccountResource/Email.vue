@@ -1,25 +1,25 @@
 <script setup>
 import { ref } from 'vue'
-import GlobalHeader from './components/GlobalHeader.vue'
-import Sidebar from './components/Sidebar.vue'
-import SummaryCards from './components/SummaryCards.vue'
-import DataTable from './components/DataTable.vue'
+import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
+import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
+import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
+import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 
 // 电子邮箱表格列配置
 const tableColumns = [
   { prop: 'accountType', label: '账号类型', width: 100 },
   { prop: 'sampled', label: '是否采样', width: 80, align: 'center' },
   { prop: 'result', label: '采样结果', width: 80, align: 'center' },
-  { prop: 'platform', label: '平台名称', width: 120 },
+  { prop: 'platform', label: '平台名称', minWidth: 120 },
   { prop: 'accountNo', label: '账号编号', width: 100 },
   { prop: 'version', label: '账号版本号', width: 100 },
-  { prop: 'location', label: '账号定位', width: 100 },
-  { prop: 'nickname', label: '用户昵称', width: 120 },
-  { prop: 'accountId', label: '账号ID', width: 120 },
-  { prop: 'url', label: '链接URL', width: 100 },
+  { prop: 'location', label: '账号定位', minWidth: 100 },
+  { prop: 'nickname', label: '用户昵称', minWidth: 120 },
+  { prop: 'accountId', label: '账号ID', minWidth: 120 },
+  { prop: 'url', label: '链接URL', minWidth: 100 },
   { prop: 'region', label: '注册地区', width: 100 },
   { prop: 'registeredAt', label: '注册时间', width: 120 },
-  { prop: 'integrity', label: '账号信息完善度', width: 130, type: 'progress' },
+  { prop: 'integrity', label: '账号信息完善度', minWidth: 130, type: 'progress' },
   { prop: 'delivery', label: '交付方', width: 100 },
   { prop: 'latestStatus', label: '最新状态', width: 100, type: 'status' },
   { prop: 'updatedAt', label: '更新时间', width: 120 },

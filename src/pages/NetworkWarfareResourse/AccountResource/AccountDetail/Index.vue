@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import AccountDetailSidebar from './components/AccountDetailSidebar.vue'
+import AccountBreadcrumb from './components/AccountBreadcrumb.vue'
 import UserInfoCard from './components/UserInfoCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import AccountFansChart from './components/AccountFansChart.vue'
@@ -37,41 +38,43 @@ const userInfo = ref({
   religion: '佛教',
   registerRegion: '台湾',
   registerTime: '2024-09-09',
-  linkUrl: 'http://127.0.0.1:32767'
+  linkUrl: 'http://127.0.0.1:32767',
+  bindEmail: 'user001@gmail.com',
+  historyPostCount: '51'
 })
 
 // 账号运维信息表格列
 const opsColumns = [
-  { prop: 'loginMethod', label: '登录方式', width: 126 },
-  { prop: 'loginPassword', label: '登录密码', width: 126 },
-  { prop: 'bindPhone', label: '绑定手机号', width: 126 },
-  { prop: 'phoneLocation', label: '手机号归属地', width: 126 },
-  { prop: 'bindEmail', label: '绑定邮箱', width: 126 },
-  { prop: 'networkIP', label: '网络IP', width: 126 },
-  { prop: 'systemTimezone', label: '系统时区', width: 126 },
-  { prop: 'browserLanguage', label: '浏览器语言', width: 126 },
-  { prop: 'userAgent', label: 'User Agent', width: 126 },
-  { prop: 'latestStatus', label: '最新状态', width: 126 },
-  { prop: 'checkDate', label: '检测日期', width: 126 },
-  { prop: 'expiryDate', label: '失效日期', width: 126 },
-  { prop: 'remark', label: '备注', width: 126 }
+  { prop: 'loginMethod', label: '登录方式', minWidth: 126 },
+  { prop: 'loginPassword', label: '登录密码', minWidth: 126 },
+  { prop: 'bindPhone', label: '绑定手机号', minWidth: 126 },
+  { prop: 'phoneLocation', label: '手机号归属地', minWidth: 126 },
+  { prop: 'bindEmail', label: '绑定邮箱', minWidth: 126 },
+  { prop: 'networkIP', label: '网络IP', minWidth: 126 },
+  { prop: 'systemTimezone', label: '系统时区', minWidth: 126 },
+  { prop: 'browserLanguage', label: '浏览器语言', minWidth: 126 },
+  { prop: 'userAgent', label: 'User Agent', minWidth: 126 },
+  { prop: 'latestStatus', label: '最新状态', minWidth: 126 },
+  { prop: 'checkDate', label: '检测日期', minWidth: 126 },
+  { prop: 'expiryDate', label: '失效日期', minWidth: 126 },
+  { prop: 'remark', label: '备注', minWidth: 126 }
 ]
 
 // 发帖行为记录表格列
 const behaviorColumns = [
-  { prop: 'updateTime', label: '更新时间', width: 126, sortable: true },
-  { prop: 'postTime', label: '发帖时间', width: 126, sortable: true },
+  { prop: 'updateTime', label: '更新时间', minWidth: 126, sortable: true },
+  { prop: 'postTime', label: '发帖时间', minWidth: 126, sortable: true },
   { prop: 'isHot', label: '是否爆款', width: 100, type: 'isHot' },
-  { prop: 'postUrl', label: '发帖链接', width: 160 },
-  { prop: 'readCount', label: '贴文阅读量', width: 126, sortable: true },
-  { prop: 'likeCount', label: '贴文点赞量', width: 126, sortable: true },
-  { prop: 'commentCount', label: '贴文评论量', width: 126, sortable: true },
-  { prop: 'shareCount', label: '贴文转发量', width: 126, sortable: true },
-  { prop: 'textContent', label: '附带文案', width: 200, type: 'overflow' },
-  { prop: 'attachmentId', label: '附件编号', width: 180, type: 'attachment' },
-  { prop: 'hasTask', label: '是否派发任务', width: 126 },
+  { prop: 'postUrl', label: '发帖链接', minWidth: 160 },
+  { prop: 'readCount', label: '贴文阅读量', minWidth: 126, sortable: true },
+  { prop: 'likeCount', label: '贴文点赞量', minWidth: 126, sortable: true },
+  { prop: 'commentCount', label: '贴文评论量', minWidth: 126, sortable: true },
+  { prop: 'shareCount', label: '贴文转发量', minWidth: 126, sortable: true },
+  { prop: 'textContent', label: '附带文案', minWidth: 200, type: 'overflow' },
+  { prop: 'attachmentId', label: '附件编号', minWidth: 180, type: 'attachment' },
+  { prop: 'hasTask', label: '是否派发任务', minWidth: 126 },
   { prop: 'location', label: '点位', width: 100 },
-  { prop: 'remark', label: '备注', width: 126 }
+  { prop: 'remark', label: '备注', minWidth: 126 }
 ]
 
 // 助推烘托行为表格列
@@ -236,6 +239,9 @@ const showAppealRecord = computed(() => {
       <account-detail-sidebar />
 
       <main class="page-main">
+        <!-- 面包屑导航 -->
+        <account-breadcrumb />
+
         <!-- 虚拟人设信息 - 用户信息卡片 -->
         <div id="virtual-persona" class="section-anchor">
           <user-info-card title="虚拟人设信息" :user-info="userInfo" />
@@ -294,7 +300,7 @@ const showAppealRecord = computed(() => {
         <!-- 助推烘托行为表格 -->
         <div v-if="showBoostRecord" id="boost-record" class="section-anchor">
           <data-table
-            title="助推烘托行为"
+            title="助推烘托记录"
             detail-mode
             :columns="boostColumns"
             :table-data="boostData"
@@ -317,7 +323,7 @@ const showAppealRecord = computed(() => {
         <!-- 申诉/替换记录表格 -->
         <div v-if="showAppealRecord" id="appeal-record" class="section-anchor">
           <data-table
-            title="账号申诉/替换记录"
+            title="申诉/替换记录"
             detail-mode
             :columns="appealColumns"
             :table-data="appealData"
@@ -332,7 +338,6 @@ const showAppealRecord = computed(() => {
               { label: '2026.01.18', value: '2026.01.18' }
             ]"
             select-placeholder="更新时间"
-            max-table-height
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
           />

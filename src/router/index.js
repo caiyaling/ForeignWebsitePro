@@ -1,9 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import SocialPlatform from '@/pages/NetworkWarfareResourse/SocialPlatform.vue'
-import InstantMessaging from '@/pages/NetworkWarfareResourse/InstantMessaging.vue'
-import BlogForum from '@/pages/NetworkWarfareResourse/BlogForum.vue'
-import Email from '@/pages/NetworkWarfareResourse/Email.vue'
-import AccountDetail from '@/pages/NetworkWarfareResourse/AccountDetail/Index.vue'
+import SocialPlatform from '@/pages/NetworkWarfareResourse/AccountResource/SocialPlatform.vue'
+import InstantMessaging from '@/pages/NetworkWarfareResourse/AccountResource/InstantMessaging.vue'
+import BlogForum from '@/pages/NetworkWarfareResourse/AccountResource/BlogForum.vue'
+import Email from '@/pages/NetworkWarfareResourse/AccountResource/Email.vue'
+import AccountDetail from '@/pages/NetworkWarfareResourse/AccountResource/AccountDetail/Index.vue'
+import SpecialDevice from '@/pages/NetworkWarfareResourse/BaseResource/SpecialDevice.vue'
+import PhoneCard from '@/pages/NetworkWarfareResourse/BaseResource/PhoneCard.vue'
+import NetworkProxy from '@/pages/NetworkWarfareResourse/BaseResource/NetworkProxy.vue'
 
 const routes = [
   {
@@ -45,6 +48,30 @@ const routes = [
     component: AccountDetail,
     meta: {
       title: '账号详情 - 网络资源库'
+    }
+  },
+  {
+    path: '/device',
+    name: 'SpecialDevice',
+    component: SpecialDevice,
+    meta: {
+      title: '专用设备 - 网络资源库'
+    }
+  },
+  {
+    path: '/phone',
+    name: 'PhoneCard',
+    component: PhoneCard,
+    meta: {
+      title: '手机卡号 - 网络资源库'
+    }
+  },
+  {
+    path: '/proxy',
+    name: 'NetworkProxy',
+    component: NetworkProxy,
+    meta: {
+      title: '网络代理 - 网络资源库'
     }
   }
 ]

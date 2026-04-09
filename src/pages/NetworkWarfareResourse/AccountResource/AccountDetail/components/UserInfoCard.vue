@@ -31,7 +31,9 @@ const props = defineProps({
       religion: '',
       registerRegion: '',
       registerTime: '',
-      linkUrl: ''
+      linkUrl: '',
+      bindEmail: '',
+      historyPostCount: ''
     })
   }
 })
@@ -44,11 +46,40 @@ const progressColor = computed(() => {
   return '#e6a23c'
 })
 
+// 判断来源页面类型
+const fromPage = computed(() => {
+  const from = route.query.from || ''
+  return from
+})
+
 // 判断是否为社交平台采集账号
 const isSocialCollection = computed(() => {
-  const from = route.query.from || ''
   const accountType = route.query.accountType || ''
-  return from === '/social' && accountType === '采集'
+  return fromPage.value === '/social' && accountType === '采集'
+})
+
+// 判断是否为博客论坛页面
+const isBlogForum = computed(() => {
+  return fromPage.value === '/blog-forum'
+})
+
+// 判断是否为电子邮箱页面
+const isEmail = computed(() => {
+  return fromPage.value === '/email'
+})
+
+// 是否显示简化版本（社交平台采集账号、博客论坛、电子邮箱）
+const showSimpleVersion = computed(() => {
+  return isSocialCollection.value || isBlogForum.value || isEmail.value
+})
+
+// 获取历史发言数量
+const historyPostCount = computed(() => {
+  const tag = props.userInfo.statusTags?.find(t => t.label?.includes('历史发言'))
+  if (tag) {
+    return tag.label.replace('历史发言数 ', '')
+  }
+  return props.userInfo.historyPostCount || '-'
 })
 </script>
 
@@ -85,8 +116,89 @@ const isSocialCollection = computed(() => {
       </div>
     </div>
 
+    <!-- 用户详细信息 - 博客论坛页面简化版 -->
+    <div v-if="isBlogForum" class="user-detail-info simple">
+      <div class="info-row">
+        <div class="info-item">
+          <span class="info-label">用户昵称：</span>
+          <span class="info-value">{{ userInfo.userName || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">链接URL：</span>
+          <span class="info-value link-url">{{ userInfo.linkUrl || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">注册地区：</span>
+          <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">注册时间：</span>
+          <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">历史发言数量：</span>
+          <span class="info-value">{{ historyPostCount }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">账号信息完善度：</span>
+          <div class="completeness-wrapper">
+            <el-progress
+              :percentage="userInfo.completeness"
+              :stroke-width="6"
+              :show-text="false"
+              :color="progressColor"
+            />
+            <span class="completeness-text">{{ userInfo.completeness }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户详细信息 - 电子邮箱页面简化版 -->
+    <div v-else-if="isEmail" class="user-detail-info simple">
+      <div class="info-row">
+        <div class="info-item">
+          <span class="info-label">绑定邮箱：</span>
+          <span class="info-value">{{ userInfo.bindEmail || userInfo.userId || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">用户昵称：</span>
+          <span class="info-value">{{ userInfo.userName || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">注册地区：</span>
+          <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">注册时间：</span>
+          <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">账号信息完善度：</span>
+          <div class="completeness-wrapper">
+            <el-progress
+              :percentage="userInfo.completeness"
+              :stroke-width="6"
+              :show-text="false"
+              :color="progressColor"
+            />
+            <span class="completeness-text">{{ userInfo.completeness }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 用户详细信息 - 社交平台采集账号简化版 -->
-    <div v-if="isSocialCollection" class="user-detail-info simple">
+    <div v-else-if="isSocialCollection" class="user-detail-info simple">
       <div class="info-row">
         <div class="info-item">
           <span class="info-label">用户昵称：</span>
