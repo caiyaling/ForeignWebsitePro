@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import AccountDetailSidebar from './components/AccountDetailSidebar.vue'
@@ -177,6 +177,55 @@ const appealData = ref([
 const pageSize = ref(10)
 const currentPage = ref(1)
 const total = ref(100)
+
+// 根据来源和账号类型计算可见区块
+const showAccountOps = computed(() => {
+  const from = route.query.from || ''
+  const accountType = route.query.accountType || ''
+
+  // 电子邮箱不显示账号运维信息
+  if (from === '/email') return false
+
+  return true
+})
+
+const showAccountFansChart = computed(() => {
+  const from = route.query.from || ''
+  const accountType = route.query.accountType || ''
+
+  // 只有社交平台-贴靠发声账号显示
+  if (from === '/social' && accountType !== '采集') return true
+  return false
+})
+
+const showPostBehavior = computed(() => {
+  const from = route.query.from || ''
+  const accountType = route.query.accountType || ''
+
+  // 只有社交平台-贴靠发声账号显示
+  if (from === '/social' && accountType !== '采集') return true
+  return false
+})
+
+const showBoostRecord = computed(() => {
+  const from = route.query.from || ''
+  const accountType = route.query.accountType || ''
+
+  // 只有社交平台-贴靠发声账号显示
+  if (from === '/social' && accountType !== '采集') return true
+  return false
+})
+
+const showAppealRecord = computed(() => {
+  const from = route.query.from || ''
+  const accountType = route.query.accountType || ''
+
+  // 社交平台-贴靠发声账号、即时通讯、博客论坛显示
+  if (from === '/social' && accountType !== '采集') return true
+  if (from === '/instant-messaging') return true
+  if (from === '/blog-forum') return true
+  return false
+})
 </script>
 
 <template>
@@ -193,7 +242,7 @@ const total = ref(100)
         </div>
 
         <!-- 账号运维信息表格 -->
-        <div id="account-ops" class="section-anchor">
+        <div v-if="showAccountOps" id="account-ops" class="section-anchor">
           <data-table
             title="账号运维信息"
             detail-mode
@@ -208,12 +257,12 @@ const total = ref(100)
         </div>
 
         <!-- 账号粉丝情况图表 -->
-        <div id="account-fans-chart" class="section-anchor">
+        <div v-if="showAccountFansChart" id="account-fans-chart" class="section-anchor">
           <account-fans-chart title="账号粉丝情况" />
         </div>
 
         <!-- 发帖行为记录表格 -->
-        <div id="post-behavior" class="section-anchor">
+        <div v-if="showPostBehavior" id="post-behavior" class="section-anchor">
           <data-table
             title="发帖行为记录"
             detail-mode
@@ -243,7 +292,7 @@ const total = ref(100)
         </div>
 
         <!-- 助推烘托行为表格 -->
-        <div id="boost-record" class="section-anchor">
+        <div v-if="showBoostRecord" id="boost-record" class="section-anchor">
           <data-table
             title="助推烘托行为"
             detail-mode
@@ -266,7 +315,7 @@ const total = ref(100)
         </div>
 
         <!-- 申诉/替换记录表格 -->
-        <div id="appeal-record" class="section-anchor">
+        <div v-if="showAppealRecord" id="appeal-record" class="section-anchor">
           <data-table
             title="账号申诉/替换记录"
             detail-mode

@@ -138,7 +138,8 @@ const handleDetailClick = (row) => {
     path: '/account-detail',
     query: {
       accountId: row.accountId || row.id,
-      from: router.currentRoute.value.path
+      from: router.currentRoute.value.path,
+      accountType: row.accountType || ''
     }
   })
 }

@@ -1,6 +1,9 @@
 <script setup>
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElProgress, ElTag } from 'element-plus'
+
+const route = useRoute()
 
 const props = defineProps({
   title: {
@@ -40,6 +43,13 @@ const progressColor = computed(() => {
   if (val >= 50) return '#0048FF'
   return '#e6a23c'
 })
+
+// 判断是否为社交平台采集账号
+const isSocialCollection = computed(() => {
+  const from = route.query.from || ''
+  const accountType = route.query.accountType || ''
+  return from === '/social' && accountType === '采集'
+})
 </script>
 
 <template>
@@ -75,8 +85,56 @@ const progressColor = computed(() => {
       </div>
     </div>
 
-    <!-- 用户详细信息 -->
-    <div class="user-detail-info">
+    <!-- 用户详细信息 - 社交平台采集账号简化版 -->
+    <div v-if="isSocialCollection" class="user-detail-info simple">
+      <div class="info-row">
+        <div class="info-item">
+          <span class="info-label">用户昵称：</span>
+          <span class="info-value">{{ userInfo.userName || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">粉丝数量：</span>
+          <span class="info-value">{{ userInfo.statusTags?.find(t => t.label?.includes('粉丝'))?.label?.replace('粉丝 ', '') || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">好友数量：</span>
+          <span class="info-value">{{ userInfo.statusTags?.find(t => t.label?.includes('好友'))?.label?.replace('好友 ', '') || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">群组数量：</span>
+          <span class="info-value">{{ userInfo.statusTags?.find(t => t.label?.includes('群主'))?.label?.replace('群主 ', '') || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">注册地区：</span>
+          <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">注册时间：</span>
+          <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-item">
+          <span class="info-label">账号信息完善度：</span>
+          <div class="completeness-wrapper">
+            <el-progress
+              :percentage="userInfo.completeness"
+              :stroke-width="6"
+              :show-text="false"
+              :color="progressColor"
+            />
+            <span class="completeness-text">{{ userInfo.completeness }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户详细信息 - 完整版 -->
+    <div v-else class="user-detail-info">
       <!-- 第一行 -->
       <div class="info-row">
         <div class="info-item">
@@ -259,6 +317,12 @@ const progressColor = computed(() => {
   flex-direction: column;
   gap: 16px;
   padding-top: 16px;
+
+  &.simple {
+    .info-row {
+      flex-wrap: nowrap;
+    }
+  }
 }
 
 .info-row {

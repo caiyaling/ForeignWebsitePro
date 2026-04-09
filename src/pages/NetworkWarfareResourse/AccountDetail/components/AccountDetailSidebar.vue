@@ -3,15 +3,15 @@
  * @description 账号详情页左侧锚点菜单组件
  * @date 2024-04-08
  */
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
-// 菜单配置
-const menuItems = [
+// 所有可能的菜单
+const allMenuItems = [
   { id: 'virtual-persona', title: '虚拟人设信息' },
   { id: 'account-ops', title: '账号运维信息' },
   { id: 'account-fans-chart', title: '账号粉丝情况' },
@@ -19,6 +19,53 @@ const menuItems = [
   { id: 'boost-record', title: '助推烘托行为' },
   { id: 'appeal-record', title: '申诉/替换记录' }
 ]
+
+// 根据来源和账号类型计算可见菜单
+const menuItems = computed(() => {
+  const from = route.query.from || ''
+  const accountType = route.query.accountType || ''
+
+  // 社交平台
+  if (from === '/social') {
+    // 采集账号：只显示虚拟人设信息、账号运维信息
+    if (accountType === '采集') {
+      return [
+        { id: 'virtual-persona', title: '虚拟人设信息' },
+        { id: 'account-ops', title: '账号运维信息' }
+      ]
+    }
+    // 贴靠发声账号：显示所有菜单
+    return allMenuItems
+  }
+
+  // 即时通讯：显示虚拟人设信息、账号运维信息、申诉/替换记录
+  if (from === '/instant-messaging') {
+    return [
+      { id: 'virtual-persona', title: '虚拟人设信息' },
+      { id: 'account-ops', title: '账号运维信息' },
+      { id: 'appeal-record', title: '申诉/替换记录' }
+    ]
+  }
+
+  // 博客论坛：显示虚拟人设信息、账号运维信息、申诉/替换记录
+  if (from === '/blog-forum') {
+    return [
+      { id: 'virtual-persona', title: '虚拟人设信息' },
+      { id: 'account-ops', title: '账号运维信息' },
+      { id: 'appeal-record', title: '申诉/替换记录' }
+    ]
+  }
+
+  // 电子邮箱：只显示虚拟人设信息
+  if (from === '/email') {
+    return [
+      { id: 'virtual-persona', title: '虚拟人设信息' }
+    ]
+  }
+
+  // 默认显示所有菜单
+  return allMenuItems
+})
 
 // 当前激活菜单
 const activeMenu = ref('virtual-persona')
@@ -45,7 +92,7 @@ const handleScroll = () => {
   if (!container) return
 
   const scrollTop = container.scrollTop
-  const sections = menuItems.map(item => ({
+  const sections = menuItems.value.map(item => ({
     id: item.id,
     element: document.getElementById(item.id)
   })).filter(s => s.element)
