@@ -9,6 +9,7 @@ import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import PhoneCardPanel from './components/PhoneCardPanel.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
+import BatchImportDialog from '@/components/BatchImportDialog.vue'
 
 // 卡片数据
 const cards = [
@@ -35,7 +36,6 @@ const cards = [
 
 // 表格列配置
 const tableColumns = [
-  { prop: 'index', label: '序号', width: 80 },
   { prop: 'assetNo', label: '编号', minWidth: 120 },
   { prop: 'delivery', label: '交付方', minWidth: 100 },
   { prop: 'assetType', label: '资产类别', minWidth: 100 },
@@ -47,7 +47,7 @@ const tableColumns = [
   { prop: 'specParams', label: '规格参数', minWidth: 140 },
   { prop: 'remark', label: '备注', minWidth: 100 },
   { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
-  { prop: 'action', label: '操作', width: 80, type: 'action', actionType: 'delete' }
+  { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 表格数据
@@ -75,9 +75,25 @@ const handleSearch = () => {
   console.log('搜索:', filters.value)
 }
 
+// 批量导入弹框
+const showBatchImportDialog = ref(false)
+
 // 批量导入
 const handleBatchImport = () => {
-  console.log('批量导入')
+  showBatchImportDialog.value = true
+}
+
+// 确认导入
+const handleImportConfirm = (files) => {
+  console.log('导入文件:', files)
+  ElMessage.success('导入成功')
+  showBatchImportDialog.value = false
+}
+
+// 下载模板
+const handleDownloadTemplate = () => {
+  console.log('下载模板')
+  ElMessage.info('正在下载模板...')
 }
 
 // 批量导出
@@ -137,6 +153,15 @@ const handleDelete = (row) => {
         />
       </main>
     </div>
+
+    <!-- 批量导入弹框 -->
+    <batch-import-dialog
+      v-model="showBatchImportDialog"
+      title="批量导入"
+      :single-file="true"
+      @confirm="handleImportConfirm"
+      @download-template="handleDownloadTemplate"
+    />
   </div>
 </template>
 

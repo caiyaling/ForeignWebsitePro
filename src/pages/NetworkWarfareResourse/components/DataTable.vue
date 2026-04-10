@@ -129,6 +129,11 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  // 设备模式 - 是否显示所属项目筛选器
+  showProjectFilter: {
+    type: Boolean,
+    default: true
+  },
   // 设备模式 - 是否显示操作按钮
   showActionButtons: {
     type: Boolean,
@@ -158,10 +163,35 @@ const props = defineProps({
   brandPlaceholder: {
     type: String,
     default: '选择品牌'
+  },
+  // 设备模式 - 第二个下拉筛选器的key
+  brandFilterKey: {
+    type: String,
+    default: 'brand'
+  },
+  // 设备模式 - 是否显示第三个下拉筛选器
+  showThirdFilter: {
+    type: Boolean,
+    default: false
+  },
+  // 设备模式 - 第三个下拉筛选器的placeholder
+  thirdFilterPlaceholder: {
+    type: String,
+    default: '请选择'
+  },
+  // 设备模式 - 第三个下拉筛选器的选项
+  thirdFilterOptions: {
+    type: Array,
+    default: () => []
+  },
+  // 设备模式 - 第三个下拉筛选器的key
+  thirdFilterKey: {
+    type: String,
+    default: 'thirdFilter'
   }
 })
 
-const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'update:selectValue', 'update:selectValue2', 'delete', 'batchImport', 'batchExport'])
+const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'update:selectValue', 'update:selectValue2', 'update:thirdFilter', 'delete', 'batchImport', 'batchExport'])
 
 const handleSearch = () => {
   emit('search')
@@ -311,37 +341,54 @@ const getResultClass = (result) => {
               @update:model-value="val => updateDeviceFilter('keyword', val)"
             />
           </div>
-          <el-select
-            :model-value="filters.project"
-            placeholder="所属项目"
-            clearable
-            class="filter-select"
-            @update:model-value="val => updateDeviceFilter('project', val)"
-          >
-            <el-option
-              v-for="item in projectOptions"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
-          <el-select
-            v-if="showBrandFilter"
-            :model-value="filters.brand"
-            :placeholder="brandPlaceholder"
-            clearable
-            class="filter-select"
-            @update:model-value="val => updateDeviceFilter('brand', val)"
-          >
-            <el-option
-              v-for="item in brandOptions"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
+          <div class="table-header-filters">
+            <el-select
+              v-if="showProjectFilter"
+              :model-value="filters.project"
+              placeholder="所属项目"
+              clearable
+              class="filter-select"
+              @update:model-value="val => updateDeviceFilter('project', val)"
+            >
+              <el-option
+                v-for="item in projectOptions"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
+            <el-select
+              v-if="showBrandFilter"
+              :model-value="filters[brandFilterKey]"
+              :placeholder="brandPlaceholder"
+              clearable
+              class="filter-select"
+              @update:model-value="val => updateDeviceFilter(brandFilterKey, val)"
+            >
+              <el-option
+                v-for="item in brandOptions"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
+            <el-select
+              v-if="showThirdFilter"
+              :model-value="filters[thirdFilterKey]"
+              :placeholder="thirdFilterPlaceholder"
+              clearable
+              class="filter-select"
+              @update:model-value="val => updateDeviceFilter(thirdFilterKey, val)"
+            >
+              <el-option
+                v-for="item in thirdFilterOptions"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
+          </div>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
-          <div class="table-header-spacer"></div>
         </div>
         <div v-if="showActionButtons" class="action-buttons">
           <el-button class="outline-btn" @click="handleBatchImport">{{ importButtonText }}</el-button>
@@ -357,6 +404,7 @@ const getResultClass = (result) => {
         class="data-table"
         :max-height="maxHeight"
       >
+      <!-- 序号列 -->
       <el-table-column type="index" label="序号" width="60" align="center" />
 
       <template v-for="col in columns" :key="col.prop">
@@ -365,6 +413,7 @@ const getResultClass = (result) => {
           v-if="col.type === 'progress'"
           :label="col.label"
           :width="col.width"
+          :min-width="col.minWidth"
         >
           <template #default="{ row }">
             <div class="progress-cell">
@@ -379,11 +428,17 @@ const getResultClass = (result) => {
           v-else-if="col.type === 'status'"
           :label="col.label"
           :width="col.width"
+          :min-width="col.minWidth"
         >
           <template #default="{ row }">
-            <el-tag :type="row[col.prop] === '正常' ? 'success' : 'danger'" size="small">
+            <el-button
+              :type="row[col.prop] === '已使用' ? 'danger' : 'primary'"
+              plain
+              size="small"
+              class="status-btn"
+            >
               {{ row[col.prop] }}
-            </el-tag>
+            </el-button>
           </template>
         </el-table-column>
 
@@ -423,6 +478,7 @@ const getResultClass = (result) => {
           v-else-if="col.type === 'isHot'"
           :label="col.label"
           :width="col.width"
+          :min-width="col.minWidth"
           :sortable="col.sortable"
         >
           <template #default="{ row }">
@@ -437,6 +493,7 @@ const getResultClass = (result) => {
           v-else-if="col.type === 'overflow'"
           :label="col.label"
           :width="col.width"
+          :min-width="col.minWidth"
           :sortable="col.sortable"
         >
           <template #default="{ row }">
@@ -455,6 +512,7 @@ const getResultClass = (result) => {
           v-else-if="col.type === 'attachment'"
           :label="col.label"
           :width="col.width"
+          :min-width="col.minWidth"
           :sortable="col.sortable"
         >
           <template #default="{ row }">
@@ -573,10 +631,18 @@ const getResultClass = (result) => {
   min-width: 0;
 }
 
+.device-search-bar .table-header-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
 .device-search-bar .search-input-wrapper {
   display: flex;
   align-items: center;
-  width: 398px;
+  width: 319px;
   height: 32px;
   border-radius: 4px;
   overflow: hidden;
@@ -587,7 +653,7 @@ const getResultClass = (result) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
+  width: 32px;
   height: 32px;
   background: #f5f7fa;
   border: 1px solid #e4e7ed;
@@ -632,7 +698,6 @@ const getResultClass = (result) => {
 .device-search-bar .filter-select {
   flex: 1;
   min-width: 0;
-  max-width: 248px;
 }
 
 .device-search-bar .filter-select :deep(.el-input__wrapper) {
@@ -664,6 +729,7 @@ const getResultClass = (result) => {
 
 .device-search-bar .search-btn {
   height: 32px;
+  min-width: 60px;
   padding: 0 16px;
   background: #0048FF;
   border-color: #0048FF;
@@ -680,11 +746,6 @@ const getResultClass = (result) => {
   border-color: #3370ff;
 }
 
-.device-search-bar .table-header-spacer {
-  width: 280px;
-  flex-shrink: 0;
-}
-
 .device-search-bar .action-buttons {
   display: flex;
   align-items: center;
@@ -694,6 +755,7 @@ const getResultClass = (result) => {
 
 .device-search-bar .outline-btn {
   height: 32px;
+  min-width: 88px;
   padding: 0 16px;
   background: #ecf5ff;
   border: 1px solid #0048ff;
@@ -789,15 +851,37 @@ const getResultClass = (result) => {
 .table-wrapper {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* 表格样式 */
 .data-table {
   width: 100%;
   border-radius: 4px;
-  overflow: hidden;
   border: 1px solid #EBEEF5;
+}
+
+// Element Plus 表格横向滚动条样式
+:deep(.el-table__body-wrapper),
+:deep(.el-table__header-wrapper) {
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c0c4cc;
+    border-radius: 4px;
+
+    &:hover {
+      background: #909399;
+    }
+  }
 }
 
 :deep(.el-table__header th) {
@@ -952,6 +1036,44 @@ const getResultClass = (result) => {
     content: '、';
     color: #165DFF;
   }
+}
+
+/* 状态按钮样式 */
+.status-btn {
+  height: 32px;
+  padding: 4px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+}
+
+/* 已使用状态 - danger */
+.status-btn.el-button--danger.is-plain {
+  background: #fef0f0;
+  border: 1px solid #f56c6c;
+  color: #f56c6c;
+}
+
+.status-btn.el-button--danger.is-plain:hover,
+.status-btn.el-button--danger.is-plain:focus {
+  background: #fde2e2;
+  border-color: #f78989;
+  color: #f78989;
+}
+
+/* 剩余额度状态 - primary */
+.status-btn.el-button--primary.is-plain {
+  background: #ecf5ff;
+  border: 1px solid #0060ff;
+  color: #0060ff;
+}
+
+.status-btn.el-button--primary.is-plain:hover,
+.status-btn.el-button--primary.is-plain:focus {
+  background: #d9ecff;
+  border-color: #3370ff;
+  color: #3370ff;
 }
 
 /* 分页样式 */

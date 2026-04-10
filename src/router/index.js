@@ -7,6 +7,8 @@ import AccountDetail from '@/pages/NetworkWarfareResourse/AccountResource/Accoun
 import SpecialDevice from '@/pages/NetworkWarfareResourse/BaseResource/SpecialDevice.vue'
 import PhoneCard from '@/pages/NetworkWarfareResourse/BaseResource/PhoneCard.vue'
 import NetworkProxy from '@/pages/NetworkWarfareResourse/BaseResource/NetworkProxy.vue'
+import TelecommResource from '@/pages/NetworkWarfareResourse/BaseResource/TelecommResource.vue'
+import DataImport from '@/pages/NetworkWarfareResourse/DataImport/Index.vue'
 
 const routes = [
   {
@@ -72,6 +74,22 @@ const routes = [
     component: NetworkProxy,
     meta: {
       title: '网络代理 - 网络资源库'
+    }
+  },
+  {
+    path: '/telecom',
+    name: 'TelecommResource',
+    component: TelecommResource,
+    meta: {
+      title: '电信资源 - 网络资源库'
+    }
+  },
+  {
+    path: '/data-import',
+    name: 'DataImport',
+    component: DataImport,
+    meta: {
+      title: '数据导入 - 网络资源库'
     }
   }
 ]

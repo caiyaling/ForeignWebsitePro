@@ -9,6 +9,7 @@ import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
+import BatchImportDialog from '@/components/BatchImportDialog.vue'
 
 // 卡片数据
 const cards = [
@@ -16,7 +17,7 @@ const cards = [
     name: '静态代理',
     total: '12,584',
     type: 'progress',
-    icon: 'https://www.figma.com/api/mcp/asset/ddc4db0d-3037-47cb-a33e-d377913e0851',
+    icon: 'https://www.figma.com/api/mcp/asset/bc76be9e-15a6-466d-a888-e5cb93cd31c8',
     description: '覆盖13个国家/地区',
     progressItems: [
       { label: '总计', total: 2343, used: 12 },
@@ -31,7 +32,7 @@ const cards = [
     name: '动态代理',
     total: '12,584',
     type: 'chart',
-    icon: 'https://www.figma.com/api/mcp/asset/47fa662f-de13-4519-9894-3834aeb29a61',
+    icon: 'https://www.figma.com/api/mcp/asset/654eb0b1-161c-4603-9b39-742a9dee80f2',
     description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
     chart: {
       outerData: [
@@ -52,33 +53,41 @@ const cards = [
 
 // 表格列配置
 const tableColumns = [
-  { prop: 'proxyNo', label: '编号', width: 120 },
-  { prop: 'proxyType', label: '代理类型', width: 100 },
-  { prop: 'proxyIp', label: '代理IP', minWidth: 140 },
-  { prop: 'port', label: '端口', width: 80 },
-  { prop: 'project', label: '所属项目', minWidth: 140 },
-  { prop: 'delivery', label: '交付方', width: 100 },
-  { prop: 'region', label: '所属地区', minWidth: 120 },
-  { prop: 'provider', label: '供应商', width: 100 },
-  { prop: 'bandwidth', label: '带宽', width: 100 },
-  { prop: 'expireAt', label: '到期时间', width: 120 },
-  { prop: 'status', label: '状态', width: 80, type: 'status' },
-  { prop: 'updatedAt', label: '更新时间', width: 120 },
-  { prop: 'action', label: '操作', width: 80, type: 'action', actionType: 'delete' }
+  { prop: 'resourceCode', label: '资源编码', minWidth: 100 },
+  { prop: 'accountType', label: '账号类型', minWidth: 80 },
+  { prop: 'ipAddress', label: 'IP地址', minWidth: 120 },
+  { prop: 'ipType', label: 'IP类型', minWidth: 100 },
+  { prop: 'protocolType', label: '协议类型', minWidth: 80 },
+  { prop: 'exitRegion', label: '出口地区', minWidth: 80 },
+  { prop: 'latestStatus', label: '最新状态', minWidth: 80 },
+  { prop: 'checkDate', label: '检测日期', minWidth: 100 },
+  { prop: 'expiryDate', label: '失效日期', minWidth: 100 },
+  { prop: 'resourceSource', label: '资源来源', minWidth: 100 },
+  { prop: 'resourceSourceType', label: '资源来源类型', minWidth: 120 },
+  { prop: 'delivery', label: '交付方', minWidth: 80 },
+  { prop: 'deliveryDate', label: '交付日期', minWidth: 100 },
+  { prop: 'responsibleUnit', label: '责任单位', minWidth: 100 },
+  { prop: 'responsiblePerson', label: '责任人', minWidth: 80 },
+  { prop: 'remark', label: '备注', minWidth: 80 },
+  { prop: 'updatedAt', label: '更新时间', minWidth: 100 },
+  { prop: 'status', label: '状态', minWidth: 120, type: 'status' },
+  { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 表格数据
 const tableData = ref([
-  { id: 1, proxyNo: 'SP001', proxyType: '静态', proxyIp: '192.168.1.100', port: '8080', project: '项目A', delivery: 'team1', region: '台湾', provider: 'Luminati', bandwidth: '100Mbps', expireAt: '2025.12.31', status: '正常', updatedAt: '2024.03.03' },
-  { id: 2, proxyNo: 'SP002', proxyType: '静态', proxyIp: '192.168.1.101', port: '8080', project: '项目B', delivery: 'team2', region: '香港', provider: 'Smartproxy', bandwidth: '50Mbps', expireAt: '2025.06.30', status: '正常', updatedAt: '2024.03.03' },
-  { id: 3, proxyNo: 'SP003', proxyType: '静态', proxyIp: '192.168.1.102', port: '8080', project: '项目A', delivery: 'team1', region: '美国', provider: 'Oxylabs', bandwidth: '200Mbps', expireAt: '2025.09.15', status: '正常', updatedAt: '2024.03.03' },
-  { id: 4, proxyNo: 'DP001', proxyType: '动态', proxyIp: '10.0.0.100', port: '1080', project: '项目A', delivery: 'team1', region: '美国', provider: 'IPRoyal', bandwidth: '80Mbps', expireAt: '2025.11.30', status: '正常', updatedAt: '2024.03.03' },
-  { id: 5, proxyNo: 'DP002', proxyType: '动态', proxyIp: '10.0.0.101', port: '1080', project: '项目B', delivery: 'team2', region: '日本', provider: 'Proxy-Seller', bandwidth: '60Mbps', expireAt: '2025.07.15', status: '正常', updatedAt: '2024.03.03' }
+  { id: 1, resourceCode: 'IP001', accountType: '采集', ipAddress: '152.131.11.13', ipType: '静态IP代理', protocolType: 'IPv4', exitRegion: '韩国', latestStatus: '存活', checkDate: '2025.01.15', expiryDate: '2025.12.31', resourceSource: '项目交付', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.15', status: '已使用' },
+  { id: 2, resourceCode: 'IP002', accountType: '发声', ipAddress: '192.168.1.101', ipType: '动态IP代理', protocolType: 'IPv4', exitRegion: '香港', latestStatus: '存活', checkDate: '2025.01.14', expiryDate: '2025.06.30', resourceSource: '外部采购', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.14', status: '剩余额度' },
+  { id: 3, resourceCode: 'IP003', accountType: '采集', ipAddress: '192.168.1.102', ipType: '静态IP代理', protocolType: 'IPv6', exitRegion: '美国', latestStatus: '失效', checkDate: '2025.01.13', expiryDate: '2025.09.15', resourceSource: '项目交付', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.13', status: '已使用' },
+  { id: 4, resourceCode: 'IP004', accountType: '发声', ipAddress: '10.0.0.100', ipType: '动态IP代理', protocolType: 'IPv4', exitRegion: '日本', latestStatus: '存活', checkDate: '2025.01.12', expiryDate: '2025.11.30', resourceSource: '外部采购', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.12', status: '剩余额度' },
+  { id: 5, resourceCode: 'IP005', accountType: '采集', ipAddress: '10.0.0.101', ipType: '静态IP代理', protocolType: 'IPv4', exitRegion: '新加坡', latestStatus: '存活', checkDate: '2025.01.11', expiryDate: '2025.07.15', resourceSource: '项目交付', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.11', status: '已使用' }
 ])
 
 const filters = ref({
   keyword: '',
-  project: ''
+  project: '',
+  ipType: '',
+  exitRegion: ''
 })
 
 const pageSize = ref(100)
@@ -88,13 +97,35 @@ const total = ref(568)
 // 所属项目选项
 const projectOptions = ['项目A', '项目B', '项目C']
 
+// IP类型选项
+const ipTypeOptions = ['静态IP代理', '动态IP代理']
+
+// 出口地区选项
+const exitRegionOptions = ['台湾', '香港', '美国', '英国', '法国', '日本', '韩国', '新加坡']
+
 const handleSearch = () => {
   console.log('搜索:', filters.value)
 }
 
+// 批量导入弹框
+const showBatchImportDialog = ref(false)
+
 // 批量导入
 const handleBatchImport = () => {
-  console.log('批量导入')
+  showBatchImportDialog.value = true
+}
+
+// 确认导入
+const handleImportConfirm = (files) => {
+  console.log('导入文件:', files)
+  ElMessage.success('导入成功')
+  showBatchImportDialog.value = false
+}
+
+// 下载模板
+const handleDownloadTemplate = () => {
+  console.log('下载模板')
+  ElMessage.info('正在下载模板...')
 }
 
 // 批量导出
@@ -145,8 +176,15 @@ const handleDelete = (row) => {
           :columns="tableColumns"
           :device-mode="true"
           :project-options="projectOptions"
-          :show-brand-filter="false"
-          search-placeholder="关键词：代理IP，端口，编号"
+          :show-brand-filter="true"
+          :brand-placeholder="'出口地区'"
+          :brand-options="exitRegionOptions"
+          :brand-filter-key="'exitRegion'"
+          :show-third-filter="true"
+          :third-filter-placeholder="'IP类型'"
+          :third-filter-options="ipTypeOptions"
+          :third-filter-key="'ipType'"
+          search-placeholder="关键词：资源编码，IP地址"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @update:page-size="val => pageSize = val"
@@ -157,6 +195,15 @@ const handleDelete = (row) => {
         />
       </main>
     </div>
+
+    <!-- 批量导入弹框 -->
+    <batch-import-dialog
+      v-model="showBatchImportDialog"
+      title="批量导入"
+      :single-file="true"
+      @confirm="handleImportConfirm"
+      @download-template="handleDownloadTemplate"
+    />
   </div>
 </template>
 

@@ -9,6 +9,7 @@ import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
+import BatchImportDialog from '@/components/BatchImportDialog.vue'
 
 // 当前选中的卡片索引
 const activeCardIndex = ref(0)
@@ -61,33 +62,33 @@ const cards = [
 
 // 云手机表格列配置
 const cloudPhoneColumns = [
-  { prop: 'deviceNo', label: '编号', width: 120 },
-  { prop: 'purpose', label: '用途', width: 100 },
+  { prop: 'deviceNo', label: '编号', minWidth: 120 },
+  { prop: 'purpose', label: '用途', minWidth: 100 },
   { prop: 'project', label: '所属项目', minWidth: 140 },
-  { prop: 'delivery', label: '交付方', width: 100 },
+  { prop: 'delivery', label: '交付方', minWidth: 100 },
   { prop: 'model', label: '型号', minWidth: 140 },
-  { prop: 'brand', label: '品牌', width: 100 },
+  { prop: 'brand', label: '品牌', minWidth: 100 },
   { prop: 'config', label: '配置', minWidth: 200 },
-  { prop: 'os', label: '操作系统', width: 100 },
-  { prop: 'quantity', label: '数量', width: 80 },
-  { prop: 'updatedAt', label: '更新时间', width: 120 },
-  { prop: 'action', label: '操作', width: 80, type: 'action', actionType: 'delete' }
+  { prop: 'os', label: '操作系统', minWidth: 100 },
+  { prop: 'quantity', label: '数量', minWidth: 80 },
+  { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
+  { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 实体手机表格列配置
 const physicalPhoneColumns = [
-  { prop: 'deviceNo', label: '编号', width: 120 },
-  { prop: 'purpose', label: '用途', width: 100 },
-  { prop: 'delivery', label: '交付方', width: 100 },
+  { prop: 'deviceNo', label: '编号', minWidth: 120 },
+  { prop: 'purpose', label: '用途', minWidth: 100 },
+  { prop: 'delivery', label: '交付方', minWidth: 100 },
   { prop: 'project', label: '所属项目', minWidth: 140 },
   { prop: 'assetName', label: '资产名称', minWidth: 140 },
-  { prop: 'brand', label: '品牌', width: 100 },
+  { prop: 'brand', label: '品牌', minWidth: 100 },
   { prop: 'spec', label: '型号/规格/版本', minWidth: 160 },
   { prop: 'config', label: '基本配置', minWidth: 200 },
-  { prop: 'unit', label: '单位', width: 80 },
-  { prop: 'quantity', label: '数量', width: 80 },
-  { prop: 'updatedAt', label: '更新时间', width: 120 },
-  { prop: 'action', label: '操作', width: 80, type: 'action', actionType: 'delete' }
+  { prop: 'unit', label: '单位', minWidth: 80 },
+  { prop: 'quantity', label: '数量', minWidth: 80 },
+  { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
+  { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 根据选中卡片动态计算表格标题
@@ -143,9 +144,25 @@ const handleSearch = () => {
   console.log('搜索:', filters.value)
 }
 
+// 批量导入弹框
+const showBatchImportDialog = ref(false)
+
 // 批量导入
 const handleBatchImport = () => {
-  console.log('批量导入')
+  showBatchImportDialog.value = true
+}
+
+// 确认导入
+const handleImportConfirm = (files) => {
+  console.log('导入文件:', files)
+  ElMessage.success('导入成功')
+  showBatchImportDialog.value = false
+}
+
+// 下载模板
+const handleDownloadTemplate = () => {
+  console.log('下载模板')
+  ElMessage.info('正在下载模板...')
 }
 
 // 批量导出
@@ -215,6 +232,15 @@ const handleDelete = (row) => {
         />
       </main>
     </div>
+
+    <!-- 批量导入弹框 -->
+    <batch-import-dialog
+      v-model="showBatchImportDialog"
+      title="批量导入"
+      :single-file="true"
+      @confirm="handleImportConfirm"
+      @download-template="handleDownloadTemplate"
+    />
   </div>
 </template>
 

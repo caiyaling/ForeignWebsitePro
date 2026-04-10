@@ -15,7 +15,8 @@ const menuRoutes = {
   '专用设备': '/device',
   '手机卡号': '/phone',
   '网络代理': '/proxy',
-  '电信资源': '/telecom'
+  '电信资源': '/telecom',
+  '数据导入': '/data-import'
 }
 
 // 菜单配置
@@ -72,10 +73,21 @@ const setActiveMenuByRoute = () => {
       break
     }
   }
+  // 处理一级菜单路由（如数据导入）
+  for (const section of sections) {
+    if (section.children.length === 0 && menuRoutes[section.title] === currentPath) {
+      activeMenu.value = section.title
+      break
+    }
+  }
 }
 
 // 判断某个分组是否包含激活的菜单
 const isSectionActive = (section) => {
+  // 如果是没有子菜单的项，判断是否直接匹配
+  if (section.children.length === 0) {
+    return activeMenu.value === section.title
+  }
   return section.children.includes(activeMenu.value)
 }
 
@@ -86,8 +98,13 @@ const isSectionExpanded = (section) => {
 
 // 切换分组展开/收起
 const toggleSection = (section) => {
+  // 无箭头的菜单项，直接跳转
   if (!section.hasArrow) {
-    // 无箭头的菜单直接返回
+    activeMenu.value = section.title
+    const path = menuRoutes[section.title]
+    if (path) {
+      router.push(path)
+    }
     return
   }
 

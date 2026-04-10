@@ -64,7 +64,7 @@ const opsColumns = [
 const behaviorColumns = [
   { prop: 'updateTime', label: '更新时间', minWidth: 126, sortable: true },
   { prop: 'postTime', label: '发帖时间', minWidth: 126, sortable: true },
-  { prop: 'isHot', label: '是否爆款', width: 100, type: 'isHot' },
+  { prop: 'isHot', label: '是否爆款', minWidth: 100, type: 'isHot' },
   { prop: 'postUrl', label: '发帖链接', minWidth: 160 },
   { prop: 'readCount', label: '贴文阅读量', minWidth: 126, sortable: true },
   { prop: 'likeCount', label: '贴文点赞量', minWidth: 126, sortable: true },
@@ -73,7 +73,7 @@ const behaviorColumns = [
   { prop: 'textContent', label: '附带文案', minWidth: 200, type: 'overflow' },
   { prop: 'attachmentId', label: '附件编号', minWidth: 180, type: 'attachment' },
   { prop: 'hasTask', label: '是否派发任务', minWidth: 126 },
-  { prop: 'location', label: '点位', width: 100 },
+  { prop: 'location', label: '点位', minWidth: 100 },
   { prop: 'remark', label: '备注', minWidth: 126 }
 ]
 

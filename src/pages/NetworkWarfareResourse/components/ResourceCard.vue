@@ -141,7 +141,7 @@ const getProgressPercent = (item) => {
   height: 195px;
   overflow: hidden;
   flex-shrink: 0;
-  background: linear-gradient(147deg, #fff4fd 4.47%, #c9e5ff 85.39%);
+  background: linear-gradient(152.53deg, #fff4fd 4.47%, #c9e5ff 85.39%);
   padding: 16px 0;
   cursor: pointer;
   border: 1px solid #fff;
@@ -173,6 +173,8 @@ const getProgressPercent = (item) => {
 
 // 云手机卡片样式（带环形图表）
 .card-chart-type {
+  background: linear-gradient(146.4deg, #fff4fd 4.47%, #c9e5ff 85.39%);
+
   .card-profile {
     padding: 0 16px;
   }
@@ -240,27 +242,22 @@ const getProgressPercent = (item) => {
     width: 171px;
   }
 
-  // 名称行
-  .card-name {
-    padding-left: 20px;
-    height: 28px;
-  }
-
-  // 数字行
-  .card-total {
-    padding-left: 16px;
-    height: 32px;
-  }
-
   .profile-header {
     display: flex;
-    align-items: flex-start;
-    padding-top: 2px;
+    align-items: center;
+  }
+
+  .card-name {
+    padding-left: 20px;
+    line-height: 28px;
+  }
+
+  .card-total {
+    padding-left: 16px;
   }
 
   .card-description {
     line-height: 28px;
-    padding-left: 0;
   }
 }
 
@@ -409,28 +406,38 @@ const getProgressPercent = (item) => {
   flex: 1;
   flex-direction: column;
   justify-content: center;
-  padding: 0 20px;
-  padding-left: 0;
   overflow: hidden;
   position: relative;
   width: 410px;
+  padding-left: 24px;
 }
 
 // 装饰性分隔线
 .progress-divider {
   position: absolute;
-  right: 5px;
-  top: 56px;
-  width: 5px;
-  height: 38px;
-  background: #b8d4ff;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 88px;
+  background: linear-gradient(180deg, rgba(184, 212, 255, 0) 0%, #b8d4ff 50%, rgba(184, 212, 255, 0) 100%);
   border-radius: 100px;
 }
 
 .progress-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  max-height: 168px;
+  overflow-y: auto;
+  padding-right: 20px;
+
+  // 隐藏滚动条但保持滚动功能
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
 }
 
 .progress-row {
@@ -439,6 +446,7 @@ const getProgressPercent = (item) => {
   gap: 16px;
   flex-shrink: 0;
   line-height: 28px;
+  padding: 0;
 }
 
 .progress-label {
