@@ -21,6 +21,14 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  accountTypeOptions: {
+    type: Array,
+    default: () => []
+  },
+  latestStatusOptions: {
+    type: Array,
+    default: () => ['正常', '异常']
+  },
   showSampledFilter: {
     type: Boolean,
     default: true
@@ -33,8 +41,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:filters', 'search'])
 
-const accountTypeOptions = ['采集', '发声（高）', '发声（中)']
-const latestStatusOptions = ['正常', '异常']
 const isSampledOptions = ['是', '否']
 
 const updateFilter = (key, value) => {
@@ -75,7 +81,7 @@ const handleSearch = () => {
         @update:model-value="val => updateFilter('accountType', val)"
       >
         <el-option
-          v-for="item in accountTypeOptions"
+          v-for="item in props.accountTypeOptions"
           :key="item"
           :label="item"
           :value="item"
@@ -106,7 +112,7 @@ const handleSearch = () => {
         @update:model-value="val => updateFilter('latestStatus', val)"
       >
         <el-option
-          v-for="item in latestStatusOptions"
+          v-for="item in props.latestStatusOptions"
           :key="item"
           :label="item"
           :value="item"

@@ -1,13 +1,67 @@
 ﻿﻿<script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
-import { useTableData } from '@/composables/useTableData'
+import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
 
 const router = useRouter()
+
+// 平台配置映射
+const platformConfig = {
+  'Facebook': { icon: '/figma/mnijidos-mhm8ijf.svg', variant: 'warm' },
+  'Instagram': { icon: '/figma/mnijidos-9h6v96r.svg', variant: 'warm' },
+  'threads': { icon: '/figma/mnijidos-927feh6.svg', variant: 'warm' },
+  'Youtube': { icon: '/figma/mnijidos-hh4aiod.svg', variant: 'cool' },
+  'TiTok': { icon: '/figma/mnijidos-neinw5m.svg', variant: 'cool' },
+  'X': { icon: '/figma/mnijidos-63851so.svg', variant: 'cool' },
+  'Twitter': { icon: '/figma/mnijidos-63851so.svg', variant: 'cool' },
+  'line': { icon: '/figma/mnijidos-9h6v96r.svg', variant: 'warm' }
+}
+
+// 格式化数字（添加千分位）
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0'
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+// 卡片数据
+const cards = ref([])
+
+// 获取卡片数据
+const fetchCardsData = async () => {
+  try {
+    const res = await getAccountTypeStats(1) // 1 = 社交媒体
+    if (res.code === 200 && res.data) {
+      cards.value = res.data.map(item => {
+        const config = platformConfig[item.platformName] || { icon: '', variant: 'warm' }
+        const stats = item.accountTypeStats.map(stat => ({
+          label: stat.accountType,
+          value: formatNumber(stat.count)
+        }))
+        const total = item.accountTypeStats.reduce((sum, stat) => sum + stat.count, 0)
+
+        return {
+          name: item.platformName,
+          total: formatNumber(total),
+          icon: config.icon,
+          variant: config.variant,
+          stats
+        }
+      })
+    }
+  } catch (error) {
+    console.error('获取账号类型统计失败:', error)
+  }
+}
+
+onMounted(() => {
+  fetchCardsData()
+  fetchFilterOptions()
+  fetchTableData()
+})
 
 // 社交平台表格列配置
 const tableColumns = [
@@ -30,114 +84,90 @@ const tableColumns = [
   { prop: 'action', label: '操作', width: 80, type: 'action' }
 ]
 
-const platformOptions = ['Facebook', 'Instagram', 'Twitter', 'threads', 'line', 'Youtube', 'TiTok', 'X']
+// 下拉筛选选项
+const platformOptions = ref([])
+const accountTypeOptions = ref([])
+const latestStatusOptions = ref([])
 
-const cards = [
-  {
-    name: 'Facebook',
-    total: '12,584',
-    icon: '/figma/mnijidos-mhm8ijf.svg',
-    variant: 'warm',
-    stats: [
-      { label: '采集', value: '2343' },
-      { label: '贴靠', value: '2343' },
-      { label: '发声（高）', value: '2343' },
-      { label: '发声（中）', value: '2343' }
-    ]
-  },
-  {
-    name: 'Instagram',
-    total: '12,584',
-    icon: '/figma/mnijidos-9h6v96r.svg',
-    variant: 'warm',
-    stats: [
-      { label: '采集', value: '2343' },
-      { label: '贴靠', value: '2343' }
-    ]
-  },
-  {
-    name: 'threads',
-    total: '12,584',
-    icon: '/figma/mnijidos-927feh6.svg',
-    variant: 'warm',
-    stats: [{ label: '贴靠', value: '2343' }]
-  },
-  {
-    name: 'Youtube',
-    total: '12,584',
-    icon: '/figma/mnijidos-hh4aiod.svg',
-    variant: 'cool',
-    stats: [
-      { label: '采集', value: '2343' },
-      { label: '贴靠', value: '2343' }
-    ]
-  },
-  {
-    name: 'TiTok',
-    total: '12,584',
-    icon: '/figma/mnijidos-neinw5m.svg',
-    variant: 'cool',
-    stats: [
-      { label: '采集', value: '2343' },
-      { label: '贴靠', value: '2343' },
-      { label: '发声（高）', value: '2343' },
-      { label: '发声（中）', value: '2343' }
-    ]
-  },
-  {
-    name: 'X',
-    total: '12,584',
-    icon: '/figma/mnijidos-63851so.svg',
-    variant: 'cool',
-    stats: [
-      { label: '采集', value: '2343' },
-      { label: '贴靠', value: '2343' }
-    ]
-  }
-]
+// 表格数据
+const tableData = ref([])
+const pageSize = ref(100)
+const currentPage = ref(1)
+const total = ref(0)
+const loading = ref(false)
 
-// 使用 useTableData composable 管理表格数据
-// apiUrl 配置后，分页变化时会自动调用接口
-const {
-  tableData,
-  pageSize,
-  currentPage,
-  total,
-  filters,
-  loading,
-  fetchData,
-  handlePageChange,
-  handleSearch
-} = useTableData({
-  // API 接口地址（根据实际项目配置）
-  // apiUrl: '/api/social-platform/accounts',
-  apiUrl: '', // 暂时为空，使用模拟数据
-  defaultFilters: {
-    keyword: '',
-    accountType: '',
-    platform: '',
-    latestStatus: '',
-    isSampled: ''
-  },
-  defaultPageSize: 100
+// 筛选条件
+const filters = ref({
+  keyword: '',
+  accountType: '',
+  platform: '',
+  latestStatus: '',
+  isSampled: ''
 })
 
-// 如果没有配置 apiUrl，使用模拟数据
-if (!tableData.value.length) {
-  tableData.value = [
-    { id: 1, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 50, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-    { id: 2, accountType: '声（高）', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 60, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-    { id: 3, accountType: '声（中）', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 75, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-    { id: 4, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 80, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-    { id: 5, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 90, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' }
-  ]
-  total.value = 9900
+// 获取下拉筛选选项
+const fetchFilterOptions = async () => {
+  try {
+    const [platformsRes, typesRes, statusesRes] = await Promise.all([
+      getPlatforms(),
+      getAccountTypes(),
+      getStatuses()
+    ])
+
+    if (platformsRes.code === 200 && platformsRes.data) {
+      platformOptions.value = platformsRes.data
+    }
+    if (typesRes.code === 200 && typesRes.data) {
+      accountTypeOptions.value = typesRes.data
+    }
+    if (statusesRes.code === 200 && statusesRes.data) {
+      latestStatusOptions.value = statusesRes.data
+    }
+  } catch (error) {
+    console.error('获取筛选选项失败:', error)
+  }
 }
 
-// 处理分页变化事件 - 切换页码或每页条数时会触发 API 调用
-const onPageChange = ({ page, pageSize }) => {
-  console.log('分页变化:', { page, pageSize })
-  handlePageChange({ page, pageSize })
+// 获取表格数据
+const fetchTableData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      resourceType: 1, // 1 = 社交媒体
+      keyword: filters.value.keyword || undefined,
+      accountType: filters.value.accountType || undefined,
+      platformName: filters.value.platform || undefined,
+      latestStatus: filters.value.latestStatus || undefined,
+      isSampled: filters.value.isSampled || undefined,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
+    }
+
+    const res = await getAccountPage(params)
+    if (res.code === 200 && res.data) {
+      tableData.value = res.data.records || []
+      total.value = res.data.total || 0
+      currentPage.value = res.data.current || 1
+      pageSize.value = res.data.size || 100
+    }
+  } catch (error) {
+    console.error('获取表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 处理搜索
+const handleSearch = () => {
+  currentPage.value = 1
+  fetchTableData()
+}
+
+// 处理分页变化
+const onPageChange = ({ page, pageSize: size }) => {
+  currentPage.value = page
+  pageSize.value = size
+  fetchTableData()
 }
 
 // 处理详情点击 - 跳转到账号详情页
@@ -179,6 +209,8 @@ const handleAttachmentClick = (url) => {
           :total="total"
           :columns="tableColumns"
           :platform-options="platformOptions"
+          :account-type-options="accountTypeOptions"
+          :latest-status-options="latestStatusOptions"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

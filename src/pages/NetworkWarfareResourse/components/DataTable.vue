@@ -47,6 +47,14 @@ const props = defineProps({
     type: Array,
     default: () => ['Facebook', 'Instagram', 'Twitter']
   },
+  accountTypeOptions: {
+    type: Array,
+    default: () => []
+  },
+  latestStatusOptions: {
+    type: Array,
+    default: () => ['正常', '异常']
+  },
   showSampledFilter: {
     type: Boolean,
     default: true
@@ -257,6 +265,8 @@ const handleAttachmentClick = (url) => {
         :title="title"
         :filters="filters"
         :platform-options="platformOptions"
+        :account-type-options="accountTypeOptions"
+        :latest-status-options="latestStatusOptions"
         :show-sampled-filter="showSampledFilter"
         :show-status-filter="showStatusFilter"
         @update:filters="val => emit('update:filters', val)"
