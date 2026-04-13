@@ -3,6 +3,7 @@
  * @description 基础资源卡片组件 - 用于专用设备页面
  * @date 2024-04-09
  */
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import DoughnutChart from './DoughnutChart.vue'
 
 const props = defineProps({
@@ -35,6 +36,65 @@ const getProgressPercent = (item) => {
   if (!item.total || item.total === 0) return 0
   return Math.min(100, Math.max(0, (item.used / item.total) * 100))
 }
+
+// 自定义滚动条相关
+const progressListRefs = ref({})
+const scrollbarThumbTop = ref({})
+const showScrollbar = ref({})
+
+// 初始化滚动条状态
+const initScrollbar = (cardIndex) => {
+  const listEl = progressListRefs.value[cardIndex]
+  if (!listEl) return
+
+  const { scrollHeight, clientHeight } = listEl
+  showScrollbar.value[cardIndex] = scrollHeight > clientHeight
+}
+
+// 处理滚动
+const handleScroll = (cardIndex) => {
+  const listEl = progressListRefs.value[cardIndex]
+  if (!listEl) return
+
+  const { scrollTop, scrollHeight, clientHeight } = listEl
+  const maxScrollTop = scrollHeight - clientHeight
+
+  if (maxScrollTop > 0) {
+    // 滚动区域高度 168px，滚动条轨道高度 168px，滑块高度 38px
+    // 滑块可移动范围 = 168 - 38 = 130px
+    const thumbTrackHeight = 130
+    scrollbarThumbTop.value[cardIndex] = (scrollTop / maxScrollTop) * thumbTrackHeight
+  }
+}
+
+// 设置列表元素引用
+const setProgressListRef = (el, cardIndex) => {
+  if (el) {
+    progressListRefs.value[cardIndex] = el
+    nextTick(() => initScrollbar(cardIndex))
+  }
+}
+
+// 监听卡片数据变化
+watch(() => props.cards, () => {
+  nextTick(() => {
+    props.cards.forEach((card, index) => {
+      if (card.type === 'progress') {
+        initScrollbar(index)
+      }
+    })
+  })
+}, { deep: true })
+
+onMounted(() => {
+  nextTick(() => {
+    props.cards.forEach((card, index) => {
+      if (card.type === 'progress') {
+        initScrollbar(index)
+      }
+    })
+  })
+})
 </script>
 
 <template>
@@ -84,9 +144,11 @@ const getProgressPercent = (item) => {
 
         <!-- 右侧：进度条列表类型 -->
         <div v-else-if="card.type === 'progress'" class="card-progress-section">
-          <!-- 装饰性分隔线 -->
-          <div class="progress-divider"></div>
-          <div class="progress-list">
+          <div
+            :ref="(el) => setProgressListRef(el, index)"
+            class="progress-list"
+            @scroll="handleScroll(index)"
+          >
             <div v-for="(item, itemIdx) in card.progressItems" :key="itemIdx" class="progress-row">
               <span class="progress-label">{{ item.label }}</span>
               <div class="progress-bar-wrapper">
@@ -103,6 +165,16 @@ const getProgressPercent = (item) => {
                 <span class="progress-text">个</span>
               </div>
             </div>
+          </div>
+          <!-- 自定义滚动条 -->
+          <div
+            v-if="showScrollbar[index]"
+            class="custom-scrollbar-track"
+          >
+            <div
+              class="custom-scrollbar-thumb"
+              :style="{ top: (scrollbarThumbTop[index] || 0) + 'px' }"
+            ></div>
           </div>
         </div>
 
@@ -138,7 +210,7 @@ const getProgressPercent = (item) => {
 .resource-card {
   display: flex;
   width: 536px;
-  height: 195px;
+  height: 200px;
   overflow: hidden;
   flex-shrink: 0;
   background: linear-gradient(152.53deg, #fff4fd 4.47%, #c9e5ff 85.39%);
@@ -225,9 +297,12 @@ const getProgressPercent = (item) => {
 .card-progress-type {
   width: 685px;
   height: 200px;
+  position: relative;
+
 
   .card-profile {
     width: 275px;
+    flex: 0 0 275px;
     padding: 0 20px;
     gap: 4px;
   }
@@ -403,35 +478,23 @@ const getProgressPercent = (item) => {
 // 进度条列表区域
 .card-progress-section {
   display: flex;
-  flex: 1;
+  flex: 0 0 410px;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   overflow: hidden;
-  position: relative;
   width: 410px;
-  padding-left: 24px;
-}
-
-// 装饰性分隔线
-.progress-divider {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 88px;
-  background: linear-gradient(180deg, rgba(184, 212, 255, 0) 0%, #b8d4ff 50%, rgba(184, 212, 255, 0) 100%);
-  border-radius: 100px;
+  position: relative;
 }
 
 .progress-list {
   display: flex;
   flex-direction: column;
-  max-height: 168px;
+  flex: 1;
   overflow-y: auto;
-  padding-right: 20px;
+  overflow-x: hidden; // 禁用横向滚动
+  padding: 0px 20px 0px 0px;
 
-  // 隐藏滚动条但保持滚动功能
+  // 隐藏原生滚动条
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
 
@@ -440,13 +503,34 @@ const getProgressPercent = (item) => {
   }
 }
 
+// 自定义滚动条轨道
+.custom-scrollbar-track {
+  position: absolute;
+  right: 5px;
+  top: 56px;
+  width: 5px;
+  height: 130px; // 168px - 38px = 130px（滑块可移动范围）
+  background: transparent;
+}
+
+// 自定义滚动条滑块
+.custom-scrollbar-thumb {
+  position: absolute;
+  left: 0;
+  width: 5px;
+  height: 38px;
+  background: #b8d4ff;
+  border-radius: 100px;
+  transition: top 0.1s ease-out;
+}
+
 .progress-row {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-shrink: 0;
   line-height: 28px;
-  padding: 0;
+  padding: 0 20px;
 }
 
 .progress-label {
