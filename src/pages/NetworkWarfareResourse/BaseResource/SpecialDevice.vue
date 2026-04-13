@@ -10,6 +10,7 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
+import { useTableData } from '@/composables/useTableData'
 
 // 当前选中的卡片索引
 const activeCardIndex = ref(0)
@@ -144,6 +145,13 @@ const handleSearch = () => {
   console.log('搜索:', filters.value)
 }
 
+// 处理分页变化事件
+const onPageChange = ({ page, pageSize }) => {
+  console.log('分页变化:', { page, pageSize })
+  // TODO: 根据 activeCardIndex 调用对应的 API
+  // handlePageChange({ page, pageSize })
+}
+
 // 批量导入弹框
 const showBatchImportDialog = ref(false)
 
@@ -224,8 +232,7 @@ const handleDelete = (row) => {
           :brand-options="brandOptions"
           @update:filters="val => filters = val"
           @search="handleSearch"
-          @update:page-size="val => pageSize = val"
-          @update:current-page="val => currentPage = val"
+          @page-change="onPageChange"
           @delete="handleDelete"
           @batch-import="handleBatchImport"
           @batch-export="handleBatchExport"

@@ -132,6 +132,12 @@ const handleSearch = () => {
   console.log('搜索:', filters.value)
 }
 
+// 处理分页变化事件
+const onPageChange = ({ page, pageSize }) => {
+  console.log('分页变化:', { page, pageSize })
+  // TODO: 根据 activeCardIndex 调用对应的 API
+}
+
 // 批量导入弹框
 const showBatchImportDialog = ref(false)
 
@@ -213,8 +219,7 @@ const handleDelete = (row) => {
           search-placeholder="关键词：ID，主叫号码，被叫号码"
           @update:filters="val => filters = val"
           @search="handleSearch"
-          @update:page-size="val => pageSize = val"
-          @update:current-page="val => currentPage = val"
+          @page-change="onPageChange"
           @delete="handleDelete"
           @batch-import="handleBatchImport"
           @batch-export="handleBatchExport"

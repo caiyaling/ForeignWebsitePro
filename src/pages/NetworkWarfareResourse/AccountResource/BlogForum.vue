@@ -1,9 +1,10 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
+import { useTableData } from '@/composables/useTableData'
 
 // 博客论坛表格列配置
 const tableColumns = [
@@ -52,28 +53,41 @@ const cards = [
   }
 ]
 
-const filters = ref({
-  keyword: '',
-  accountType: '',
-  platform: '',
-  latestStatus: '',
-  isSampled: ''
+// 使用 useTableData composable 管理表格数据
+const {
+  tableData,
+  pageSize,
+  currentPage,
+  total,
+  filters,
+  handlePageChange,
+  handleSearch
+} = useTableData({
+  apiUrl: '', // 配置 API 地址后分页变化会自动调用接口
+  defaultFilters: {
+    keyword: '',
+    accountType: '',
+    platform: '',
+    latestStatus: '',
+    isSampled: ''
+  },
+  defaultPageSize: 100
 })
 
-const pageSize = ref(100)
-const currentPage = ref(1)
-const total = ref(9900)
-
-const tableData = ref([
+// 模拟数据（实际项目中删除此部分，使用 API 返回数据）
+tableData.value = [
   { id: 1, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'PPT', accountNo: 'BF001', version: 'v1.0', location: 'A类', nickname: 'user1', accountId: 'PPT12345', url: '-', region: '台湾', registeredAt: '2024.03.01', integrity: 50, delivery: 'team1', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 2, accountType: '发声（高）', isSampled: '是', sampleResult: '-', platform: 'Dcard', accountNo: 'BF002', version: 'v1.0', location: 'A类', nickname: 'user2', accountId: 'DC12345', url: '-', region: '台湾', registeredAt: '2024.03.01', integrity: 60, delivery: 'team1', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 3, accountType: '发声（中）', isSampled: '是', sampleResult: '-', platform: 'Pixnet', accountNo: 'BF003', version: 'v1.0', location: 'A类', nickname: 'user3', accountId: 'PX12345', url: '-', region: '台湾', registeredAt: '2024.03.01', integrity: 75, delivery: 'team1', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 4, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'PPT', accountNo: 'BF004', version: 'v2.0', location: 'B类', nickname: 'user4', accountId: 'PPT67890', url: '-', region: '台湾', registeredAt: '2024.02.15', integrity: 80, delivery: 'team2', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 5, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'Dcard', accountNo: 'BF005', version: 'v1.5', location: 'A类', nickname: 'user5', accountId: 'DC67890', url: '-', region: '台湾', registeredAt: '2024.02.20', integrity: 90, delivery: 'team2', latestStatus: '正常', updatedAt: '2024.03.03' }
-])
+]
+total.value = 9900
 
-const handleSearch = () => {
-  console.log('搜索:', filters.value)
+// 处理分页变化事件
+const onPageChange = ({ page, pageSize }) => {
+  console.log('分页变化:', { page, pageSize })
+  handlePageChange({ page, pageSize })
 }
 </script>
 
@@ -99,8 +113,7 @@ const handleSearch = () => {
           :platform-options="platformOptions"
           @update:filters="val => filters = val"
           @search="handleSearch"
-          @update:page-size="val => pageSize = val"
-          @update:current-page="val => currentPage = val"
+          @page-change="onPageChange"
         />
       </main>
     </div>

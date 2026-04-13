@@ -118,8 +118,12 @@ onMounted(() => {
               <img v-if="card.icon" :src="card.icon" alt="" class="card-icon" />
             </div>
             <div class="card-profile-info">
-              <div class="card-name">{{ card.name }}</div>
-              <div class="card-total">{{ card.total }}</div>
+              <div class="card-header-row">
+                <div class="card-name">{{ card.name }}</div>
+              </div>
+              <div class="card-body-row">
+                <div class="card-total">{{ card.total }}</div>
+              </div>
             </div>
           </div>
           <!-- 描述文字（仅云手机卡片有） -->
@@ -258,12 +262,21 @@ onMounted(() => {
 
   .card-profile-info {
     padding-left: 8px;
+    width: 171px;
   }
 
   // 云手机卡片左侧使用水平布局
   .profile-header {
     display: flex;
     align-items: center;
+  }
+
+  .card-header-row {
+    width: 171px;
+  }
+
+  .card-body-row {
+    width: 171px;
   }
 
   .card-description {
@@ -365,6 +378,20 @@ onMounted(() => {
 .card-profile-info {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.card-body-row {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
 }
 
 .card-name {
@@ -373,14 +400,16 @@ onMounted(() => {
   font-weight: 400;
   line-height: 28px;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+  white-space: nowrap;
 }
 
 .card-total {
   color: #0026ff;
   font-size: 24px;
   font-weight: 700;
-  line-height: 32px;
+  line-height: normal;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
+  white-space: nowrap;
 }
 
 .card-description {

@@ -107,6 +107,12 @@ const handleSearch = () => {
   console.log('搜索:', filters.value)
 }
 
+// 处理分页变化事件
+const onPageChange = ({ page, pageSize }) => {
+  console.log('分页变化:', { page, pageSize })
+  // TODO: 调用 API 获取数据
+}
+
 // 批量导入弹框
 const showBatchImportDialog = ref(false)
 
@@ -187,8 +193,7 @@ const handleDelete = (row) => {
           search-placeholder="关键词：资源编码，IP地址"
           @update:filters="val => filters = val"
           @search="handleSearch"
-          @update:page-size="val => pageSize = val"
-          @update:current-page="val => currentPage = val"
+          @page-change="onPageChange"
           @delete="handleDelete"
           @batch-import="handleBatchImport"
           @batch-export="handleBatchExport"

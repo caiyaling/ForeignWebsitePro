@@ -4,6 +4,7 @@ import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
+import { useTableData } from '@/composables/useTableData'
 
 // 即时通讯表格列配置
 const tableColumns = [
@@ -78,28 +79,41 @@ const cards = [
   }
 ]
 
-const filters = ref({
-  keyword: '',
-  accountType: '',
-  platform: '',
-  latestStatus: '',
-  isSampled: ''
+// 使用 useTableData composable 管理表格数据
+const {
+  tableData,
+  pageSize,
+  currentPage,
+  total,
+  filters,
+  handlePageChange,
+  handleSearch
+} = useTableData({
+  apiUrl: '', // 配置 API 地址后分页变化会自动调用接口
+  defaultFilters: {
+    keyword: '',
+    accountType: '',
+    platform: '',
+    latestStatus: '',
+    isSampled: ''
+  },
+  defaultPageSize: 100
 })
 
-const pageSize = ref(100)
-const currentPage = ref(1)
-const total = ref(9900)
-
-const tableData = ref([
+// 模拟数据
+tableData.value = [
   { id: 1, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'Telegram', accountNo: '-', version: 'h3332', location: 'A类', nickname: '王湖', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '65', groupsCount: '65', integrity: 50, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 2, accountType: '声（高）', isSampled: '是', sampleResult: '-', platform: 'WhatsApp', accountNo: '-', version: 'h3333', location: 'A类', nickname: 'user2', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '128', groupsCount: '32', integrity: 60, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 3, accountType: '声（中）', isSampled: '是', sampleResult: '-', platform: 'Signal', accountNo: '-', version: 'h3334', location: 'A类', nickname: 'user3', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '88', groupsCount: '45', integrity: 75, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 4, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'Line', accountNo: '-', version: 'h3335', location: 'A类', nickname: 'user4', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '256', groupsCount: '18', integrity: 80, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
   { id: 5, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'Skype', accountNo: '-', version: 'h3336', location: 'A类', nickname: 'user5', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '156', groupsCount: '28', integrity: 90, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' }
-])
+]
+total.value = 9900
 
-const handleSearch = () => {
-  console.log('搜索:', filters.value)
+// 处理分页变化事件
+const onPageChange = ({ page, pageSize }) => {
+  console.log('分页变化:', { page, pageSize })
+  handlePageChange({ page, pageSize })
 }
 </script>
 
@@ -124,8 +138,7 @@ const handleSearch = () => {
           :platform-options="platformOptions"
           @update:filters="val => filters = val"
           @search="handleSearch"
-          @update:page-size="val => pageSize = val"
-          @update:current-page="val => currentPage = val"
+          @page-change="onPageChange"
         />
       </main>
     </div>

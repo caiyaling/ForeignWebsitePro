@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElTable, ElTableColumn, ElTag, ElProgress, ElPagination, ElSelect, ElOption, ElDatePicker, ElTooltip, ElInput, ElButton, ElIcon } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import { ElTable, ElTableColumn, ElTag, ElProgress, ElPagination, ElTooltip, ElInput, ElButton, ElIcon } from 'element-plus'
 import SearchBar from './SearchBar.vue'
+import DeviceSearchBar from './DeviceSearchBar.vue'
+import DetailSearchBar from './DetailSearchBar.vue'
 
 const router = useRouter()
 
@@ -197,7 +198,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'update:selectValue', 'update:selectValue2', 'update:thirdFilter', 'delete', 'batchImport', 'batchExport'])
+const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'pageChange', 'update:selectValue', 'update:selectValue2', 'update:thirdFilter', 'delete', 'batchImport', 'batchExport'])
 
 const handleSearch = () => {
   emit('search')
@@ -205,23 +206,14 @@ const handleSearch = () => {
 
 const handlePageSizeChange = (val) => {
   emit('update:pageSize', val)
+  // 触发分页变化事件，方便父组件调用接口
+  emit('pageChange', { page: props.currentPage, pageSize: val })
 }
 
 const handleCurrentPageChange = (val) => {
   emit('update:currentPage', val)
-}
-
-const handleSelectChange = (val) => {
-  emit('update:selectValue', val)
-}
-
-const handleSelectChange2 = (val) => {
-  emit('update:selectValue2', val)
-}
-
-// 设备模式筛选器更新
-const updateDeviceFilter = (key, value) => {
-  emit('update:filters', { ...props.filters, [key]: value })
+  // 触发分页变化事件，方便父组件调用接口
+  emit('pageChange', { page: val, pageSize: props.pageSize })
 }
 
 // 批量导入
@@ -307,56 +299,21 @@ onUnmounted(() => {
 <template>
   <section class="table-panel" ref="tablePanelRef">
     <!-- 详情模式标题栏 -->
-    <div v-if="detailMode" class="detail-header">
-      <div class="header-left">
-        <div class="title-spacer"></div>
-        <span class="table-title">{{ title }}</span>
-      </div>
-      <div class="header-right">
-        <div v-if="showSelectFilter" class="filter-item">
-          <span class="filter-label">{{ selectPlaceholder }}</span>
-          <el-select
-            :model-value="selectValue"
-            placeholder="请选择"
-            size="small"
-            class="filter-select"
-            @update:model-value="handleSelectChange"
-          >
-            <el-option
-              v-for="item in selectOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </div>
-        <div v-if="showSelectFilter2" class="filter-item">
-          <span class="filter-label">{{ selectPlaceholder2 }}</span>
-          <el-select
-            :model-value="selectValue2"
-            placeholder="请选择"
-            size="small"
-            class="filter-select"
-            @update:model-value="handleSelectChange2"
-          >
-            <el-option
-              v-for="item in selectOptions2"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </div>
-        <el-date-picker
-          v-if="showDatePicker"
-          type="daterange"
-          size="small"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          style="width: 280px"
-        />
-      </div>
-    </div>
+    <detail-search-bar
+      v-if="detailMode"
+      :title="title"
+      :show-select-filter="showSelectFilter"
+      :select-options="selectOptions"
+      :select-placeholder="selectPlaceholder"
+      :select-value="selectValue"
+      :show-select-filter2="showSelectFilter2"
+      :select-options2="selectOptions2"
+      :select-placeholder2="selectPlaceholder2"
+      :select-value2="selectValue2"
+      :show-date-picker="showDatePicker"
+      @update:select-value="val => emit('update:selectValue', val)"
+      @update:select-value2="val => emit('update:selectValue2', val)"
+    />
 
     <!-- 列表模式搜索栏 -->
     <div v-if="!detailMode && !hideSearchBar && !deviceMode" class="search-bar-wrapper">
@@ -373,76 +330,28 @@ onUnmounted(() => {
 
     <!-- 设备模式搜索栏 -->
     <div v-if="deviceMode" class="search-bar-wrapper">
-      <div class="device-search-bar">
-        <div class="title-spacer"></div>
-        <span class="table-title">{{ title }}</span>
-        <div class="filters">
-          <div class="search-input-wrapper">
-            <div class="search-prefix">
-              <el-icon :size="14"><Search /></el-icon>
-            </div>
-            <el-input
-              :model-value="filters.keyword"
-              :placeholder="searchPlaceholder"
-              clearable
-              class="search-input"
-              @update:model-value="val => updateDeviceFilter('keyword', val)"
-            />
-          </div>
-          <div class="table-header-filters">
-            <el-select
-              v-if="showProjectFilter"
-              :model-value="filters.project"
-              placeholder="所属项目"
-              clearable
-              class="filter-select"
-              @update:model-value="val => updateDeviceFilter('project', val)"
-            >
-              <el-option
-                v-for="item in projectOptions"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
-            </el-select>
-            <el-select
-              v-if="showBrandFilter"
-              :model-value="filters[brandFilterKey]"
-              :placeholder="brandPlaceholder"
-              clearable
-              class="filter-select"
-              @update:model-value="val => updateDeviceFilter(brandFilterKey, val)"
-            >
-              <el-option
-                v-for="item in brandOptions"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
-            </el-select>
-            <el-select
-              v-if="showThirdFilter"
-              :model-value="filters[thirdFilterKey]"
-              :placeholder="thirdFilterPlaceholder"
-              clearable
-              class="filter-select"
-              @update:model-value="val => updateDeviceFilter(thirdFilterKey, val)"
-            >
-              <el-option
-                v-for="item in thirdFilterOptions"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
-            </el-select>
-          </div>
-          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
-        </div>
-        <div v-if="showActionButtons" class="action-buttons">
-          <el-button class="outline-btn" @click="handleBatchImport">{{ importButtonText }}</el-button>
-          <el-button class="outline-btn" @click="handleBatchExport">{{ exportButtonText }}</el-button>
-        </div>
-      </div>
+      <device-search-bar
+        :title="title"
+        :filters="filters"
+        :search-placeholder="searchPlaceholder"
+        :project-options="projectOptions"
+        :show-project-filter="showProjectFilter"
+        :brand-options="brandOptions"
+        :show-brand-filter="showBrandFilter"
+        :brand-placeholder="brandPlaceholder"
+        :brand-filter-key="brandFilterKey"
+        :show-third-filter="showThirdFilter"
+        :third-filter-placeholder="thirdFilterPlaceholder"
+        :third-filter-options="thirdFilterOptions"
+        :third-filter-key="thirdFilterKey"
+        :show-action-buttons="showActionButtons"
+        :import-button-text="importButtonText"
+        :export-button-text="exportButtonText"
+        @update:filters="val => emit('update:filters', val)"
+        @search="handleSearch"
+        @batch-import="handleBatchImport"
+        @batch-export="handleBatchExport"
+      />
     </div>
 
     <div class="table-wrapper" ref="tableWrapperRef">
@@ -643,257 +552,6 @@ onUnmounted(() => {
 .search-bar-wrapper {
   flex-shrink: 0;
   margin-bottom: 16px;
-}
-
-/* 设备模式搜索栏样式 */
-.device-search-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.title-spacer {
-  width: 4px;
-  height: 20px;
-  background: #0048FF;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.device-search-bar .table-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #303133;
-  line-height: 28px;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
-  white-space: nowrap;
-  flex-shrink: 0;
-  width: 135px;
-}
-
-.device-search-bar .filters {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
-  min-width: 0;
-}
-
-.device-search-bar .table-header-filters {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-
-.device-search-bar .search-input-wrapper {
-  display: flex;
-  align-items: center;
-  width: 319px;
-  height: 32px;
-  border-radius: 4px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.device-search-bar .search-prefix {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: #f5f7fa;
-  border: 1px solid #e4e7ed;
-  border-right: none;
-  border-radius: 4px 0 0 4px;
-  flex-shrink: 0;
-  color: #606266;
-}
-
-.device-search-bar .search-input {
-  flex: 1;
-  min-width: 0;
-}
-
-.device-search-bar .search-input :deep(.el-input__wrapper) {
-  border-radius: 0 4px 4px 0;
-  height: 32px;
-  box-shadow: 0 0 0 1px #e4e7ed inset;
-  padding: 0 8px;
-}
-
-.device-search-bar .search-input :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #c0c4cc inset;
-}
-
-.device-search-bar .search-input :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #0048FF inset;
-}
-
-.device-search-bar .search-input :deep(.el-input__inner) {
-  height: 22px;
-  font-size: 13px;
-  color: #303133;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
-}
-
-.device-search-bar .search-input :deep(.el-input__inner::placeholder) {
-  color: #a8abb2;
-  font-size: 13px;
-}
-
-.device-search-bar .filter-select {
-  flex: 1;
-  min-width: 0;
-}
-
-.device-search-bar .filter-select :deep(.el-input__wrapper) {
-  border-radius: 4px;
-  box-shadow: 0 0 0 1px #dcdfe6 inset;
-  padding: 0 8px;
-  height: 32px;
-}
-
-.device-search-bar .filter-select :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #c0c4cc inset;
-}
-
-.device-search-bar .filter-select :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #0048FF inset;
-}
-
-.device-search-bar .filter-select :deep(.el-input__inner) {
-  height: 22px;
-  font-size: 14px;
-  color: #303133;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
-}
-
-.device-search-bar .filter-select :deep(.el-input__inner::placeholder) {
-  color: #a8abb2;
-  font-size: 14px;
-}
-
-.device-search-bar .search-btn {
-  height: 32px;
-  min-width: 60px;
-  padding: 0 16px;
-  background: #0048FF;
-  border-color: #0048FF;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
-  flex-shrink: 0;
-}
-
-.device-search-bar .search-btn:hover,
-.device-search-bar .search-btn:focus {
-  background: #3370ff;
-  border-color: #3370ff;
-}
-
-.device-search-bar .action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.device-search-bar .outline-btn {
-  height: 32px;
-  min-width: 88px;
-  padding: 0 16px;
-  background: #ecf5ff;
-  border: 1px solid #0048ff;
-  border-radius: 4px;
-  color: #0048ff;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
-}
-
-.device-search-bar .outline-btn:hover {
-  background: #d9ecff;
-  border-color: #3370ff;
-  color: #3370ff;
-}
-
-/* 详情模式标题栏样式 */
-.detail-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  flex-shrink: 0;
-}
-
-.detail-header .header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.detail-header .title-spacer {
-  width: 4px;
-  height: 20px;
-  background: #0048FF;
-  border-radius: 2px;
-}
-
-.detail-header .table-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #303133;
-  line-height: 28px;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
-}
-
-.detail-header .header-right {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.filter-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-label {
-  width: 64px;
-  font-size: 14px;
-  color: #303133;
-  font-family: var(--el-font-family, 'Inter', 'Microsoft YaHei', sans-serif);
-  white-space: nowrap;
-}
-
-.filter-select {
-  width: 324px;
-}
-
-.filter-select :deep(.el-input__wrapper) {
-  border-radius: 4px;
-  box-shadow: 0 0 0 1px #DCDFE6 inset;
-  padding: 0 8px;
-  height: 32px;
-  background: #fff;
-}
-
-.filter-select :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #C0C4CC inset;
-}
-
-.filter-select :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #409EFF inset;
-}
-
-.filter-select :deep(.el-input__inner) {
-  font-size: 14px;
-  color: #303133;
-  font-family: var(--el-font-family, 'Inter', 'Microsoft YaHei', sans-serif);
 }
 
 .table-wrapper {

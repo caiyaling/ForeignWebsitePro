@@ -10,6 +10,7 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import PhoneCardPanel from './components/PhoneCardPanel.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
+import { useTableData } from '@/composables/useTableData'
 
 // 卡片数据
 const cards = [
@@ -50,29 +51,41 @@ const tableColumns = [
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
-// 表格数据
-const tableData = ref([
+// 使用 useTableData composable 管理表格数据
+const {
+  tableData,
+  pageSize,
+  currentPage,
+  total,
+  filters,
+  handlePageChange,
+  handleSearch
+} = useTableData({
+  apiUrl: '', // 配置 API 地址后分页变化会自动调用接口
+  defaultFilters: {
+    keyword: '',
+    project: ''
+  },
+  defaultPageSize: 100
+})
+
+// 模拟数据
+tableData.value = [
   { id: 1, index: 1, assetNo: 'PH-001-23456', delivery: 'team1', assetType: '通讯卡', serialNo: 'SN-20240001', phoneNumber: '+63-912-345-678', project: '项目A', equipment: '云手机-001', brandModel: 'Globe TM', specParams: '4G/无限流量', remark: '菲律宾本地卡', updatedAt: '2024.03.03' },
   { id: 2, index: 2, assetNo: 'HK-002-34567', delivery: 'team2', assetType: '流量卡', serialNo: 'SN-20240002', phoneNumber: '+852-1234-5678', project: '项目B', equipment: '云手机-002', brandModel: 'China Mobile', specParams: '5G/100GB', remark: '香港本地卡', updatedAt: '2024.03.03' },
   { id: 3, index: 3, assetNo: 'US-003-45678', delivery: 'team1', assetType: '通讯卡', serialNo: 'SN-20240003', phoneNumber: '+1-555-123-4567', project: '项目A', equipment: '云手机-003', brandModel: 'AT&T', specParams: '4G/无限通话', remark: '美国本地卡', updatedAt: '2024.03.03' },
   { id: 4, index: 4, assetNo: 'JP-004-56789', delivery: 'team3', assetType: '物联网卡', serialNo: 'SN-20240004', phoneNumber: '-', project: '项目C', equipment: '实体手机-001', brandModel: 'Docomo', specParams: 'NB-IoT', remark: '日本物联网卡', updatedAt: '2024.03.03' },
   { id: 5, index: 5, assetNo: 'KR-005-67890', delivery: 'team2', assetType: '通讯卡', serialNo: 'SN-20240005', phoneNumber: '+82-10-1234-5678', project: '项目B', equipment: '云手机-004', brandModel: 'SK Telecom', specParams: '5G/无限流量', remark: '韩国本地卡', updatedAt: '2024.03.03' }
-])
-
-const filters = ref({
-  keyword: '',
-  project: ''
-})
-
-const pageSize = ref(100)
-const currentPage = ref(1)
-const total = ref(568)
+]
+total.value = 568
 
 // 所属项目选项
 const projectOptions = ['项目A', '项目B', '项目C']
 
-const handleSearch = () => {
-  console.log('搜索:', filters.value)
+// 处理分页变化事件
+const onPageChange = ({ page, pageSize }) => {
+  console.log('分页变化:', { page, pageSize })
+  handlePageChange({ page, pageSize })
 }
 
 // 批量导入弹框
@@ -145,8 +158,7 @@ const handleDelete = (row) => {
           search-placeholder="关键词：资产编号，手机卡序列号，手机号"
           @update:filters="val => filters = val"
           @search="handleSearch"
-          @update:page-size="val => pageSize = val"
-          @update:current-page="val => currentPage = val"
+          @page-change="onPageChange"
           @delete="handleDelete"
           @batch-import="handleBatchImport"
           @batch-export="handleBatchExport"

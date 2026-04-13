@@ -4,6 +4,7 @@ import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
+import { useTableData } from '@/composables/useTableData'
 
 // 社交平台表格列配置
 const tableColumns = [
@@ -92,28 +93,48 @@ const cards = [
   }
 ]
 
-const filters = ref({
-  keyword: '',
-  accountType: '',
-  platform: '',
-  latestStatus: '',
-  isSampled: ''
+// 使用 useTableData composable 管理表格数据
+// apiUrl 配置后，分页变化时会自动调用接口
+const {
+  tableData,
+  pageSize,
+  currentPage,
+  total,
+  filters,
+  loading,
+  fetchData,
+  handlePageChange,
+  handleSearch
+} = useTableData({
+  // API 接口地址（根据实际项目配置）
+  // apiUrl: '/api/social-platform/accounts',
+  apiUrl: '', // 暂时为空，使用模拟数据
+  defaultFilters: {
+    keyword: '',
+    accountType: '',
+    platform: '',
+    latestStatus: '',
+    isSampled: ''
+  },
+  defaultPageSize: 100
 })
 
-const pageSize = ref(100)
-const currentPage = ref(1)
-const total = ref(9900)
+// 如果没有配置 apiUrl，使用模拟数据
+if (!tableData.value.length) {
+  tableData.value = [
+    { id: 1, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 50, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
+    { id: 2, accountType: '声（高）', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 60, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
+    { id: 3, accountType: '声（中）', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 75, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
+    { id: 4, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 80, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
+    { id: 5, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 90, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' }
+  ]
+  total.value = 9900
+}
 
-const tableData = ref([
-  { id: 1, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 50, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 2, accountType: '声（高）', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 60, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 3, accountType: '声（中）', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 75, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 4, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 80, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 5, accountType: '采集', sampled: '是', result: '-', platform: 'Facebook', accountNo: 'CJ01', version: '2', location: 'A类', nickname: 'lad', accountId: '55552533', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 90, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' }
-])
-
-const handleSearch = () => {
-  console.log('搜索:', filters.value)
+// 处理分页变化事件 - 切换页码或每页条数时会触发 API 调用
+const onPageChange = ({ page, pageSize }) => {
+  console.log('分页变化:', { page, pageSize })
+  handlePageChange({ page, pageSize })
 }
 </script>
 
@@ -138,8 +159,7 @@ const handleSearch = () => {
           :platform-options="platformOptions"
           @update:filters="val => filters = val"
           @search="handleSearch"
-          @update:page-size="val => pageSize = val"
-          @update:current-page="val => currentPage = val"
+          @page-change="onPageChange"
         />
       </main>
     </div>
