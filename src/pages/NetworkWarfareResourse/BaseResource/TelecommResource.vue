@@ -188,6 +188,19 @@ const handleDelete = (row) => {
     // 取消删除
   })
 }
+
+// 处理详情点击
+const handleDetail = (row) => {
+  console.log('查看详情:', row)
+  // 电信资源页面暂无详情页，可根据需要添加
+}
+
+// 处理附件点击 - 打开附件预览
+const handleAttachmentClick = (url) => {
+  if (url) {
+    window.open(url, '_blank')
+  }
+}
 </script>
 
 <template>
@@ -221,6 +234,8 @@ const handleDelete = (row) => {
           @search="handleSearch"
           @page-change="onPageChange"
           @delete="handleDelete"
+          @detail="handleDetail"
+          @attachment-click="handleAttachmentClick"
           @batch-import="handleBatchImport"
           @batch-export="handleBatchExport"
         />

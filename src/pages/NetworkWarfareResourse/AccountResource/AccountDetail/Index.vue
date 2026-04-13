@@ -229,6 +229,19 @@ const showAppealRecord = computed(() => {
   if (from === '/blog-forum') return true
   return false
 })
+
+// 处理详情点击
+const handleDetail = (row) => {
+  console.log('查看详情:', row)
+  // 详情页内部不需要跳转
+}
+
+// 处理附件点击 - 打开附件预览
+const handleAttachmentClick = (url) => {
+  if (url) {
+    window.open(url, '_blank')
+  }
+}
 </script>
 
 <template>
@@ -260,6 +273,8 @@ const showAppealRecord = computed(() => {
             :max-height="200"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
+            @detail="handleDetail"
+            @attachment-click="handleAttachmentClick"
           />
         </div>
 
@@ -296,6 +311,8 @@ const showAppealRecord = computed(() => {
             select-placeholder2="是否爆款"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
+            @detail="handleDetail"
+            @attachment-click="handleAttachmentClick"
           />
         </div>
 
@@ -320,6 +337,8 @@ const showAppealRecord = computed(() => {
             select-placeholder="更新时间"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
+            @detail="handleDetail"
+            @attachment-click="handleAttachmentClick"
           />
         </div>
 
@@ -344,6 +363,8 @@ const showAppealRecord = computed(() => {
             select-placeholder="更新时间"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
+            @detail="handleDetail"
+            @attachment-click="handleAttachmentClick"
           />
         </div>
       </main>

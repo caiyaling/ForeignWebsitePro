@@ -4,6 +4,7 @@
  * @date 2024-04-09
  */
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
@@ -11,6 +12,8 @@ import PhoneCardPanel from './components/PhoneCardPanel.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
 import { useTableData } from '@/composables/useTableData'
+
+const router = useRouter()
 
 // 卡片数据
 const cards = [
@@ -130,6 +133,19 @@ const handleDelete = (row) => {
     // 取消删除
   })
 }
+
+// 处理详情点击
+const handleDetail = (row) => {
+  console.log('查看详情:', row)
+  // 手机卡号页面暂无详情页，可根据需要添加
+}
+
+// 处理附件点击 - 打开附件预览
+const handleAttachmentClick = (url) => {
+  if (url) {
+    window.open(url, '_blank')
+  }
+}
 </script>
 
 <template>
@@ -160,6 +176,8 @@ const handleDelete = (row) => {
           @search="handleSearch"
           @page-change="onPageChange"
           @delete="handleDelete"
+          @detail="handleDetail"
+          @attachment-click="handleAttachmentClick"
           @batch-import="handleBatchImport"
           @batch-export="handleBatchExport"
         />

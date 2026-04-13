@@ -1,10 +1,13 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import { useTableData } from '@/composables/useTableData'
+
+const router = useRouter()
 
 // 博客论坛表格列配置
 const tableColumns = [
@@ -89,6 +92,25 @@ const onPageChange = ({ page, pageSize }) => {
   console.log('分页变化:', { page, pageSize })
   handlePageChange({ page, pageSize })
 }
+
+// 处理详情点击 - 跳转到账号详情页
+const handleDetail = (row) => {
+  router.push({
+    path: '/account-detail',
+    query: {
+      accountId: row.accountId || row.id,
+      from: router.currentRoute.value.path,
+      accountType: row.accountType || ''
+    }
+  })
+}
+
+// 处理附件点击 - 打开附件预览
+const handleAttachmentClick = (url) => {
+  if (url) {
+    window.open(url, '_blank')
+  }
+}
 </script>
 
 <template>
@@ -114,6 +136,8 @@ const onPageChange = ({ page, pageSize }) => {
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"
+          @detail="handleDetail"
+          @attachment-click="handleAttachmentClick"
         />
       </main>
     </div>

@@ -4,10 +4,7 @@
  * @date 2024-04-13
  */
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElTable, ElTableColumn, ElTag, ElProgress, ElTooltip, ElButton, ElPagination } from 'element-plus'
-
-const router = useRouter()
 
 // 表格容器引用
 const tableWrapperRef = ref(null)
@@ -52,30 +49,21 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'update:pageSize', 'update:currentPage', 'pageChange'])
+const emit = defineEmits(['delete', 'detail', 'attachment-click', 'update:pageSize', 'update:currentPage', 'pageChange'])
 
-// 打开附件预览
-const openAttachment = (url) => {
-  if (url) {
-    window.open(url, '_blank')
-  }
-}
-
-// 点击详情跳转到账号详情页
+// 点击详情
 const handleDetailClick = (row) => {
-  router.push({
-    path: '/account-detail',
-    query: {
-      accountId: row.accountId || row.id,
-      from: router.currentRoute.value.path,
-      accountType: row.accountType || ''
-    }
-  })
+  emit('detail', row)
 }
 
 // 点击删除
 const handleDeleteClick = (row) => {
   emit('delete', row)
+}
+
+// 点击附件
+const handleAttachmentClick = (url) => {
+  emit('attachment-click', url)
 }
 
 // 获取申诉结果样式类名
@@ -270,12 +258,12 @@ onUnmounted(() => {
                     v-for="(file, index) in row[col.prop]"
                     :key="index"
                     class="attachment-link"
-                    @click="openAttachment(file.url)"
+                    @click="handleAttachmentClick(file.url)"
                   >
                     {{ file.name }}
                   </span>
                 </template>
-                <span v-else class="attachment-link" @click="openAttachment(row[col.prop + 'Url'])">
+                <span v-else class="attachment-link" @click="handleAttachmentClick(row[col.prop + 'Url'])">
                   {{ row[col.prop] }}
                 </span>
               </div>

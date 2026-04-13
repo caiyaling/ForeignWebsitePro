@@ -186,7 +186,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'pageChange', 'update:selectValue', 'update:selectValue2', 'update:thirdFilter', 'delete', 'batchImport', 'batchExport'])
+const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'pageChange', 'update:selectValue', 'update:selectValue2', 'update:thirdFilter', 'delete', 'detail', 'attachment-click', 'batchImport', 'batchExport'])
 
 const handleSearch = () => {
   emit('search')
@@ -219,6 +219,16 @@ const handleBatchExport = () => {
 // 点击删除
 const handleDelete = (row) => {
   emit('delete', row)
+}
+
+// 点击详情
+const handleDetail = (row) => {
+  emit('detail', row)
+}
+
+// 点击附件
+const handleAttachmentClick = (url) => {
+  emit('attachment-click', url)
 }
 </script>
 
@@ -289,6 +299,8 @@ const handleDelete = (row) => {
       :page-size="pageSize"
       :total="total"
       @delete="handleDelete"
+      @detail="handleDetail"
+      @attachment-click="handleAttachmentClick"
       @update:page-size="handlePageSizeChange"
       @update:current-page="handleCurrentPageChange"
       @page-change="handlePageChange"
