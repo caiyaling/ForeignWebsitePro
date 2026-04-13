@@ -17,7 +17,7 @@ const cards = [
     name: '静态代理',
     total: '12,584',
     type: 'progress',
-    icon: 'https://www.figma.com/api/mcp/asset/bc76be9e-15a6-466d-a888-e5cb93cd31c8',
+    icon: '/figma/network-proxy-static.svg',
     description: '覆盖13个国家/地区',
     progressItems: [
       { label: '总计', total: 2343, used: 12 },
@@ -32,7 +32,7 @@ const cards = [
     name: '动态代理',
     total: '12,584',
     type: 'chart',
-    icon: 'https://www.figma.com/api/mcp/asset/654eb0b1-161c-4603-9b39-742a9dee80f2',
+    icon: '/figma/network-proxy-dynamic.svg',
     description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
     chart: {
       outerData: [

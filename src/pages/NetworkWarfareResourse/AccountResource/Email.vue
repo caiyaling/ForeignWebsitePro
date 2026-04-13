@@ -34,12 +34,12 @@ const cards = [
   {
     name: 'Gmail',
     total: '12,584',
-    icon: 'https://www.figma.com/api/mcp/asset/cfdb8933-1f49-4ce6-ba6d-0b3639753726'
+    icon: '/figma/email-gmail.svg'
   },
   {
     name: 'Outlook',
     total: '12,584',
-    icon: 'https://www.figma.com/api/mcp/asset/d45c8a48-aa7a-465a-a9c0-9539b7aaacea'
+    icon: '/figma/email-outlook.svg'
   }
 ]
 

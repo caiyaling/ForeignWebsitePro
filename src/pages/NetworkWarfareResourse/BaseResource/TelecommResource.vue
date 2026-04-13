@@ -20,7 +20,7 @@ const cards = [
     name: '短信',
     total: '100/400万次',
     type: 'chart',
-    icon: 'https://www.figma.com/api/mcp/asset/d49f767f-4c84-4301-b453-837d46911b3b',
+    icon: '/figma/telecomm-sms.svg',
     chart: {
       outerData: [
         { value: 100, name: '已使用', color: '#f77234' },
@@ -40,7 +40,7 @@ const cards = [
     name: '语音',
     total: '100/400万次',
     type: 'chart',
-    icon: 'https://www.figma.com/api/mcp/asset/7be5c36c-a9a1-44a2-812d-900afd07a745',
+    icon: '/figma/telecomm-voice.svg',
     chart: {
       outerData: [
         { value: 100, name: '已使用', color: '#f77234' },

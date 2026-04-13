@@ -36,7 +36,7 @@ const cards = [
   {
     name: 'telegram',
     total: '12,584',
-    icon: 'https://www.figma.com/api/mcp/asset/ab1b941b-1853-48e3-9924-25c8886d4cc4',
+    icon: '/figma/im-telegram.svg',
     variant: 'warm',
     stats: [
       { label: '采集', value: '2343' },
@@ -46,7 +46,7 @@ const cards = [
   {
     name: 'line',
     total: '12,584',
-    icon: 'https://www.figma.com/api/mcp/asset/9fa51384-fcd6-4cb0-9d82-bf539a54655c',
+    icon: '/figma/im-line.svg',
     variant: 'warm',
     stats: [
       { label: '采集', value: '2343' },
@@ -58,21 +58,21 @@ const cards = [
   {
     name: 'Signal',
     total: '12,584',
-    icon: 'https://www.figma.com/api/mcp/asset/ca31815e-91ae-4021-b669-54ab32885561',
+    icon: '/figma/im-signal.svg',
     variant: 'warm',
     stats: [{ label: '贴靠', value: '2343' }]
   },
   {
     name: 'skype',
     total: '12,584',
-    icon: 'https://www.figma.com/api/mcp/asset/74e27650-55d3-44a1-9716-604949b090f2',
+    icon: '/figma/im-skype.svg',
     variant: 'cool',
     stats: [{ label: '贴靠', value: '2343' }]
   },
   {
     name: 'Teams',
     total: '12,584',
-    icon: 'https://www.figma.com/api/mcp/asset/cfd8ba86-e5a2-46fa-977f-c5c7b3d79e2d',
+    icon: '/figma/im-teams.svg',
     variant: 'cool',
     stats: [{ label: '贴靠', value: '2343' }]
   }

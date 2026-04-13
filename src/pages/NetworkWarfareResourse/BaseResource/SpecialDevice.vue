@@ -20,7 +20,7 @@ const cards = [
     name: '云手机',
     total: '12,584',
     type: 'chart',
-    icon: 'https://www.figma.com/api/mcp/asset/5bb30778-ebcb-42d8-8371-250ef30cfdf8',
+    icon: '/figma/device-cloud-phone.svg',
     description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
     chart: {
       // 外环数据
@@ -44,7 +44,7 @@ const cards = [
     name: '实体手机',
     total: '400/500台',
     type: 'stats',
-    icon: 'https://www.figma.com/api/mcp/asset/cbe12d35-b80f-4907-933d-887fb6e8a668',
+    icon: '/figma/device-physical-phone.svg',
     stats: [
       { label: '苹果', value: '2343' },
       { label: '三星', value: '2343' },
