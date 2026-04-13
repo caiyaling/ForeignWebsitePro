@@ -31,12 +31,6 @@ const handleCardClick = (index) => {
   emit('update:activeIndex', index)
 }
 
-// 计算进度条百分比
-const getProgressPercent = (item) => {
-  if (!item.total || item.total === 0) return 0
-  return Math.min(100, Math.max(0, (item.used / item.total) * 100))
-}
-
 // 自定义滚动条相关
 const progressListRefs = ref({})
 const scrollbarThumbTop = ref({})
@@ -116,6 +110,7 @@ onMounted(() => {
           <div class="profile-header">
             <div class="card-icon-wrapper">
               <img v-if="card.icon" :src="card.icon" alt="" class="card-icon" />
+              <div v-else class="card-icon-placeholder">{{ card.name?.charAt(0) || '?' }}</div>
             </div>
             <div class="card-profile-info">
               <div class="card-header-row">
@@ -153,13 +148,9 @@ onMounted(() => {
             class="progress-list"
             @scroll="handleScroll(index)"
           >
+            <!-- 各地区行（接口返回的数据已包含总计行） -->
             <div v-for="(item, itemIdx) in card.progressItems" :key="itemIdx" class="progress-row">
-              <span class="progress-label">{{ item.label }}</span>
-              <div class="progress-bar-wrapper">
-                <div class="progress-bar-bg">
-                  <div class="progress-bar-fill" :style="{ width: getProgressPercent(item) + '%' }"></div>
-                </div>
-              </div>
+              <span class="progress-label">{{ item.label }}：</span>
               <div class="progress-stats">
                 <span class="progress-text">共</span>
                 <span class="progress-total">{{ item.total }}</span>
@@ -308,7 +299,7 @@ onMounted(() => {
 
 // 进度条类型卡片样式（网络代理页面静态代理）
 .card-progress-type {
-  width: 685px;
+  width: 792px;
   height: 200px;
   position: relative;
 
@@ -368,11 +359,29 @@ onMounted(() => {
   flex-shrink: 0;
   border-radius: 1000px;
   overflow: hidden;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card-icon {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+}
+
+.card-icon-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 600;
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
 }
 
 .card-profile-info {
@@ -507,11 +516,11 @@ onMounted(() => {
 // 进度条列表区域
 .card-progress-section {
   display: flex;
-  flex: 0 0 410px;
+  flex: 0 0 517px;
   flex-direction: column;
   justify-content: flex-start;
   overflow: hidden;
-  width: 410px;
+  width: 517px;
   position: relative;
 }
 
@@ -520,8 +529,8 @@ onMounted(() => {
   flex-direction: column;
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden; // 禁用横向滚动
-  padding: 0px 20px 0px 0px;
+  overflow-x: hidden;
+  padding: 0;
 
   // 隐藏原生滚动条
   scrollbar-width: none; /* Firefox */
@@ -556,7 +565,7 @@ onMounted(() => {
 .progress-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   flex-shrink: 0;
   line-height: 28px;
   padding: 0 20px;
@@ -569,26 +578,6 @@ onMounted(() => {
   line-height: 28px;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
   white-space: nowrap;
-  min-width: 40px;
-}
-
-.progress-bar-wrapper {
-  width: 124px;
-  flex-shrink: 0;
-}
-
-.progress-bar-bg {
-  height: 6px;
-  background: #b8d4ff;
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: var(--el-color-primary, #0048ff);
-  border-radius: 50px;
-  transition: width 0.3s ease;
 }
 
 .progress-stats {

@@ -191,6 +191,17 @@ const props = defineProps({
   thirdFilterKey: {
     type: String,
     default: 'thirdFilter'
+  },
+  // 加载状态
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  // 自定义筛选器配置（用于设备模式）
+  // 格式: [{ key: 'accountType', placeholder: '账号类型', options: ['采集', '发声'] }]
+  customFilters: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -293,6 +304,7 @@ const handleAttachmentClick = (url) => {
         :show-action-buttons="showActionButtons"
         :import-button-text="importButtonText"
         :export-button-text="exportButtonText"
+        :custom-filters="customFilters"
         @update:filters="val => emit('update:filters', val)"
         @search="handleSearch"
         @batch-import="handleBatchImport"
@@ -308,6 +320,7 @@ const handleAttachmentClick = (url) => {
       :current-page="currentPage"
       :page-size="pageSize"
       :total="total"
+      :loading="loading"
       @delete="handleDelete"
       @detail="handleDetail"
       @attachment-click="handleAttachmentClick"

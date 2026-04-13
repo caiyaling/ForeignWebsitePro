@@ -3,7 +3,7 @@
  * @description 手机卡号页面
  * @date 2024-04-09
  */
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
@@ -11,84 +11,161 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import PhoneCardPanel from './components/PhoneCardPanel.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
-import { useTableData } from '@/composables/useTableData'
+import {
+  getSimCardLocationStats,
+  getSimCardTypeStats,
+  getSimCardPage,
+  getSimCardProjectList,
+  deleteSimCard,
+  importSimCard,
+  downloadSimCardTemplate,
+  exportSimCard
+} from '@/api/simCard'
 
 const router = useRouter()
 
+// 格式化数字（添加千分位）
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0'
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 // 卡片数据
-const cards = [
+const cards = ref([
   {
     name: '归属地',
-    stats: [
-      { label: '菲律宾', value: '2343' },
-      { label: '香港', value: '2343' },
-      { label: '美国', value: '1234' },
-      { label: '日本', value: '987' },
-      { label: '韩国', value: '654' },
-      { label: '新加坡', value: '321' }
-    ]
+    stats: []
   },
   {
     name: '卡号类型',
-    stats: [
-      { label: '通讯卡', value: '2343' },
-      { label: '流量卡', value: '2343' },
-      { label: '物联网卡', value: '1234' }
-    ]
+    stats: []
   }
-]
+])
+
+// 获取归属地统计数据
+const fetchLocationStats = async () => {
+  try {
+    const res = await getSimCardLocationStats()
+    if (res.code === 200 && res.data) {
+      cards.value[0] = {
+        name: '归属地',
+        stats: res.data.map(item => ({
+          label: item.label,
+          value: formatNumber(item.value)
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('获取归属地统计失败:', error)
+  }
+}
+
+// 获取卡号类型统计数据
+const fetchTypeStats = async () => {
+  try {
+    const res = await getSimCardTypeStats()
+    if (res.code === 200 && res.data) {
+      cards.value[1] = {
+        name: '卡号类型',
+        stats: res.data.map(item => ({
+          label: item.label,
+          value: formatNumber(item.value)
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('获取卡号类型统计失败:', error)
+  }
+}
 
 // 表格列配置
 const tableColumns = [
-  { prop: 'assetNo', label: '编号', minWidth: 120 },
-  { prop: 'delivery', label: '交付方', minWidth: 100 },
-  { prop: 'assetType', label: '资产类别', minWidth: 100 },
-  { prop: 'serialNo', label: '手机卡序列号', minWidth: 140 },
+  { prop: 'cardCode', label: '编号', minWidth: 120 },
+  { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
+  { prop: 'assetCategory', label: '资产类别', minWidth: 100 },
+  { prop: 'cardSerialNumber', label: '手机卡序列号', minWidth: 140 },
   { prop: 'phoneNumber', label: '手机号', minWidth: 120 },
-  { prop: 'project', label: '所属项目', minWidth: 120 },
-  { prop: 'equipment', label: '所属装备', minWidth: 120 },
+  { prop: 'projectCode', label: '所属项目', minWidth: 120 },
+  { prop: 'equipmentCode', label: '所属装备', minWidth: 120 },
   { prop: 'brandModel', label: '品牌型号', minWidth: 120 },
   { prop: 'specParams', label: '规格参数', minWidth: 140 },
   { prop: 'remark', label: '备注', minWidth: 100 },
-  { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
+  { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
-// 使用 useTableData composable 管理表格数据
-const {
-  tableData,
-  pageSize,
-  currentPage,
-  total,
-  filters,
-  handlePageChange,
-  handleSearch
-} = useTableData({
-  apiUrl: '', // 配置 API 地址后分页变化会自动调用接口
-  defaultFilters: {
-    keyword: '',
-    project: ''
-  },
-  defaultPageSize: 100
+// 表格数据
+const tableData = ref([])
+const pageSize = ref(100)
+const currentPage = ref(1)
+const total = ref(0)
+const loading = ref(false)
+
+// 筛选条件
+const filters = ref({
+  keyword: '',
+  project: ''
 })
 
-// 模拟数据
-tableData.value = [
-  { id: 1, index: 1, assetNo: 'PH-001-23456', delivery: 'team1', assetType: '通讯卡', serialNo: 'SN-20240001', phoneNumber: '+63-912-345-678', project: '项目A', equipment: '云手机-001', brandModel: 'Globe TM', specParams: '4G/无限流量', remark: '菲律宾本地卡', updatedAt: '2024.03.03' },
-  { id: 2, index: 2, assetNo: 'HK-002-34567', delivery: 'team2', assetType: '流量卡', serialNo: 'SN-20240002', phoneNumber: '+852-1234-5678', project: '项目B', equipment: '云手机-002', brandModel: 'China Mobile', specParams: '5G/100GB', remark: '香港本地卡', updatedAt: '2024.03.03' },
-  { id: 3, index: 3, assetNo: 'US-003-45678', delivery: 'team1', assetType: '通讯卡', serialNo: 'SN-20240003', phoneNumber: '+1-555-123-4567', project: '项目A', equipment: '云手机-003', brandModel: 'AT&T', specParams: '4G/无限通话', remark: '美国本地卡', updatedAt: '2024.03.03' },
-  { id: 4, index: 4, assetNo: 'JP-004-56789', delivery: 'team3', assetType: '物联网卡', serialNo: 'SN-20240004', phoneNumber: '-', project: '项目C', equipment: '实体手机-001', brandModel: 'Docomo', specParams: 'NB-IoT', remark: '日本物联网卡', updatedAt: '2024.03.03' },
-  { id: 5, index: 5, assetNo: 'KR-005-67890', delivery: 'team2', assetType: '通讯卡', serialNo: 'SN-20240005', phoneNumber: '+82-10-1234-5678', project: '项目B', equipment: '云手机-004', brandModel: 'SK Telecom', specParams: '5G/无限流量', remark: '韩国本地卡', updatedAt: '2024.03.03' }
-]
-total.value = 568
-
 // 所属项目选项
-const projectOptions = ['项目A', '项目B', '项目C']
+const projectOptions = ref([])
+
+// 获取项目列表
+const fetchProjectList = async () => {
+  try {
+    const res = await getSimCardProjectList()
+    if (res.code === 200 && res.data) {
+      projectOptions.value = res.data
+    }
+  } catch (error) {
+    console.error('获取项目列表失败:', error)
+  }
+}
+
+// 获取表格数据
+const fetchTableData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      keyword: filters.value.keyword || undefined,
+      projectCode: filters.value.project || undefined,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
+    }
+
+    const res = await getSimCardPage(params)
+    if (res.code === 200 && res.data) {
+      tableData.value = res.data.records || []
+      total.value = res.data.total || 0
+      currentPage.value = res.data.current || 1
+      pageSize.value = res.data.size || 100
+    }
+  } catch (error) {
+    console.error('获取表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 初始化数据
+onMounted(() => {
+  fetchLocationStats()
+  fetchTypeStats()
+  fetchProjectList()
+  fetchTableData()
+})
 
 // 处理分页变化事件
-const onPageChange = ({ page, pageSize }) => {
-  console.log('分页变化:', { page, pageSize })
-  handlePageChange({ page, pageSize })
+const onPageChange = ({ page, pageSize: size }) => {
+  currentPage.value = page
+  pageSize.value = size
+  fetchTableData()
+}
+
+// 处理搜索
+const handleSearch = () => {
+  currentPage.value = 1
+  fetchTableData()
 }
 
 // 批量导入弹框
@@ -100,21 +177,76 @@ const handleBatchImport = () => {
 }
 
 // 确认导入
-const handleImportConfirm = (files) => {
-  console.log('导入文件:', files)
-  ElMessage.success('导入成功')
-  showBatchImportDialog.value = false
+const handleImportConfirm = async (files) => {
+  if (!files || files.length === 0) {
+    ElMessage.warning('请选择要导入的文件')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', files[0])
+
+  try {
+    const res = await importSimCard(formData)
+    if (res.code === 200) {
+      ElMessage.success('手机卡号台账导入成功')
+      fetchTableData()
+    }
+    showBatchImportDialog.value = false
+  } catch (error) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败')
+  }
 }
 
 // 下载模板
-const handleDownloadTemplate = () => {
-  console.log('下载模板')
-  ElMessage.info('正在下载模板...')
+const handleDownloadTemplate = async () => {
+  try {
+    const blob = await downloadSimCardTemplate()
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '手机卡号台账导入模板.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+    ElMessage.error('下载模板失败')
+  }
 }
 
 // 批量导出
-const handleBatchExport = () => {
-  console.log('批量导出')
+const handleBatchExport = async () => {
+  try {
+    const params = {
+      exportType: 1, // 按当前查询条件导出
+      keyword: filters.value.keyword || undefined,
+      projectCode: filters.value.project || undefined
+    }
+
+    const blob = await exportSimCard(params)
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '手机卡号台账.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败')
+  }
 }
 
 // 删除操作
@@ -123,12 +255,18 @@ const handleDelete = (row) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    const index = tableData.value.findIndex(item => item.id === row.id)
-    if (index > -1) {
-      tableData.value.splice(index, 1)
+  }).then(async () => {
+    try {
+      await deleteSimCard(row.id)
+      const index = tableData.value.findIndex(item => item.id === row.id)
+      if (index > -1) {
+        tableData.value.splice(index, 1)
+      }
+      ElMessage.success('删除成功')
+    } catch (error) {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
     }
-    ElMessage.success('删除成功')
   }).catch(() => {
     // 取消删除
   })
@@ -171,6 +309,7 @@ const handleAttachmentClick = (url) => {
           :device-mode="true"
           :project-options="projectOptions"
           :show-brand-filter="false"
+          :loading="loading"
           search-placeholder="关键词：资产编号，手机卡序列号，手机号"
           @update:filters="val => filters = val"
           @search="handleSearch"

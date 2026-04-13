@@ -3,33 +3,49 @@
  * @description 电信资源页面
  * @date 2024-04-10
  */
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
+import {
+  getSmsStatistics,
+  getSmsPage,
+  deleteSms,
+  exportSms,
+  importSms,
+  downloadSmsTemplate
+} from '@/api/sms'
+import {
+  getVoiceStatistics,
+  getVoicePage,
+  deleteVoice,
+  exportVoice,
+  importVoice,
+  downloadVoiceTemplate
+} from '@/api/voice'
 
 // 当前选中的卡片索引
 const activeCardIndex = ref(0)
 
+// 格式化数字（添加千分位）
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0'
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 // 卡片数据
-const cards = [
+const cards = ref([
   {
     name: '短信',
-    total: '100/400万次',
+    total: '加载中...',
     type: 'chart',
     icon: '/figma/telecomm-sms.svg',
     chart: {
-      outerData: [
-        { value: 100, name: '已使用', color: '#f77234' },
-        { value: 300, name: '剩余额度', color: '#165dff' }
-      ],
-      innerData: [
-        { value: 100, name: '已使用', color: '#f77234' },
-        { value: 300, name: '剩余额度', color: '#165dff' }
-      ],
+      outerData: [],
+      innerData: [],
       legends: [
         { label: '已使用', color: '#f77234' },
         { label: '剩余额度', color: '#165dff' }
@@ -38,25 +54,89 @@ const cards = [
   },
   {
     name: '语音',
-    total: '100/400万次',
+    total: '加载中...',
     type: 'chart',
     icon: '/figma/telecomm-voice.svg',
     chart: {
-      outerData: [
-        { value: 100, name: '已使用', color: '#f77234' },
-        { value: 300, name: '剩余额度', color: '#165dff' }
-      ],
-      innerData: [
-        { value: 100, name: '已使用', color: '#f77234' },
-        { value: 300, name: '剩余额度', color: '#165dff' }
-      ],
+      outerData: [],
+      innerData: [],
       legends: [
         { label: '已使用', color: '#f77234' },
         { label: '剩余额度', color: '#165dff' }
       ]
     }
   }
-]
+])
+
+// 获取短信统计数据
+const fetchSmsStatistics = async () => {
+  try {
+    const res = await getSmsStatistics()
+    if (res.code === 200 && res.data) {
+      const used = res.data.find(item => item.label === '已使用')?.value || 0
+      const remaining = res.data.find(item => item.label === '剩余额度')?.value || 0
+      const total = used + remaining
+
+      cards.value[0] = {
+        name: '短信',
+        total: `${formatNumber(used)}/${formatNumber(total)}万次`,
+        type: 'chart',
+        icon: '/figma/telecomm-sms.svg',
+        chart: {
+          outerData: [
+            { value: used, name: '已使用', color: '#f77234' },
+            { value: remaining, name: '剩余额度', color: '#165dff' }
+          ],
+          innerData: [
+            { value: used, name: '已使用', color: '#f77234' },
+            { value: remaining, name: '剩余额度', color: '#165dff' }
+          ],
+          legends: [
+            { label: '已使用', color: '#f77234' },
+            { label: '剩余额度', color: '#165dff' }
+          ]
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取短信统计失败:', error)
+  }
+}
+
+// 获取语音统计数据
+const fetchVoiceStatistics = async () => {
+  try {
+    const res = await getVoiceStatistics()
+    if (res.code === 200 && res.data) {
+      const used = res.data.find(item => item.label === '已使用')?.value || 0
+      const remaining = res.data.find(item => item.label === '剩余额度')?.value || 0
+      const total = used + remaining
+
+      cards.value[1] = {
+        name: '语音',
+        total: `${formatNumber(used)}/${formatNumber(total)}万次`,
+        type: 'chart',
+        icon: '/figma/telecomm-voice.svg',
+        chart: {
+          outerData: [
+            { value: used, name: '已使用', color: '#f77234' },
+            { value: remaining, name: '剩余额度', color: '#165dff' }
+          ],
+          innerData: [
+            { value: used, name: '已使用', color: '#f77234' },
+            { value: remaining, name: '剩余额度', color: '#165dff' }
+          ],
+          legends: [
+            { label: '已使用', color: '#f77234' },
+            { label: '剩余额度', color: '#165dff' }
+          ]
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取语音统计失败:', error)
+  }
+}
 
 // 短信表格列配置
 const smsColumns = [
@@ -65,10 +145,9 @@ const smsColumns = [
   { prop: 'sendType', label: '发送类型', minWidth: 100 },
   { prop: 'sendResult', label: '发送结果', minWidth: 100 },
   { prop: 'deliveryTime', label: '送达时间', minWidth: 120 },
-  { prop: 'originalPhone', label: '原始接收号码', minWidth: 140 },
-  { prop: 'content', label: '短信内容', minWidth: 200 },
-  { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
-  { prop: 'status', label: '状态', minWidth: 100, type: 'status' },
+  { prop: 'receiveNumber', label: '接收号码', minWidth: 140 },
+  { prop: 'smsContent', label: '短信内容', minWidth: 200 },
+  { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
@@ -76,13 +155,12 @@ const smsColumns = [
 const voiceColumns = [
   { prop: 'taskId', label: '任务ID', minWidth: 120 },
   { prop: 'type', label: '类型', minWidth: 100 },
-  { prop: 'sendType', label: '发送类型', minWidth: 100 },
-  { prop: 'sendResult', label: '发送结果', minWidth: 100 },
-  { prop: 'deliveryTime', label: '送达时间', minWidth: 120 },
-  { prop: 'originalPhone', label: '原始接收号码', minWidth: 140 },
-  { prop: 'content', label: '通话备注', minWidth: 200 },
-  { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
-  { prop: 'status', label: '状态', minWidth: 100, type: 'status' },
+  { prop: 'callerNumber', label: '主叫号码', minWidth: 120 },
+  { prop: 'calledNumber', label: '被叫号码', minWidth: 120 },
+  { prop: 'startTime', label: '开始时间', minWidth: 120 },
+  { prop: 'duration', label: '通话时长(秒)', minWidth: 120 },
+  { prop: 'callStatus', label: '通话状态', minWidth: 100 },
+  { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
@@ -97,45 +175,140 @@ const tableColumns = computed(() => {
 })
 
 // 短信表格数据
-const smsData = ref([
-  { id: 1, index: 1, taskId: 'SMS001', type: '验证码', sendType: '单发', sendResult: '成功', deliveryTime: '2024.03.03 10:30', originalPhone: '+86-138****1234', content: '您的验证码是123456，有效期5分钟', updatedAt: '2024.03.03', status: '已使用' },
-  { id: 2, index: 2, taskId: 'SMS002', type: '通知', sendType: '群发', sendResult: '成功', deliveryTime: '2024.03.03 11:20', originalPhone: '+86-139****5678', content: '您的订单已发货，请注意查收', updatedAt: '2024.03.03', status: '剩余额度' },
-  { id: 3, index: 3, taskId: 'SMS003', type: '营销', sendType: '群发', sendResult: '部分成功', deliveryTime: '2024.03.03 14:15', originalPhone: '+86-137****9012', content: '限时优惠活动，点击查看详情', updatedAt: '2024.03.03', status: '已使用' },
-  { id: 4, index: 4, taskId: 'SMS004', type: '验证码', sendType: '单发', sendResult: '成功', deliveryTime: '2024.03.03 15:45', originalPhone: '+1-555-123-4567', content: 'Your verification code is 789012', updatedAt: '2024.03.03', status: '剩余额度' },
-  { id: 5, index: 5, taskId: 'SMS005', type: '通知', sendType: '单发', sendResult: '失败', deliveryTime: '-', originalPhone: '+81-90-1234-5678', content: '重要通知：系统维护公告', updatedAt: '2024.03.03', status: '已使用' }
-])
+const smsData = ref([])
+const smsTotal = ref(0)
+const smsCurrentPage = ref(1)
+const smsPageSize = ref(100)
 
 // 语音表格数据
-const voiceData = ref([
-  { id: 1, index: 1, taskId: 'VCE001', type: '通知', sendType: '自动', sendResult: '接通', deliveryTime: '2024.03.03 09:30', originalPhone: '+86-138****1234', duration: '2分30秒', updatedAt: '2024.03.03', status: '已使用' },
-  { id: 2, index: 2, taskId: 'VCE002', type: '验证', sendType: '自动', sendResult: '接通', deliveryTime: '2024.03.03 10:15', originalPhone: '+86-139****5678', duration: '1分15秒', updatedAt: '2024.03.03', status: '剩余额度' },
-  { id: 3, index: 3, taskId: 'VCE003', type: '营销', sendType: '手动', sendResult: '未接通', deliveryTime: '-', originalPhone: '+1-555-123-4567', duration: '-', updatedAt: '2024.03.03', status: '已使用' },
-  { id: 4, index: 4, taskId: 'VCE004', type: '通知', sendType: '自动', sendResult: '接通', deliveryTime: '2024.03.03 14:20', originalPhone: '+81-90-1234-5678', duration: '3分45秒', updatedAt: '2024.03.03', status: '剩余额度' },
-  { id: 5, index: 5, taskId: 'VCE005', type: '验证', sendType: '自动', sendResult: '接通', deliveryTime: '2024.03.03 16:00', originalPhone: '+82-10-1234-5678', duration: '45秒', updatedAt: '2024.03.03', status: '已使用' }
-])
+const voiceData = ref([])
+const voiceTotal = ref(0)
+const voiceCurrentPage = ref(1)
+const voicePageSize = ref(100)
+
+// 加载状态
+const loading = ref(false)
 
 // 根据选中卡片动态计算表格数据
 const tableData = computed(() => {
   return activeCardIndex.value === 0 ? smsData.value : voiceData.value
 })
 
-const filters = ref({
-  keyword: '',
-  project: ''
+const pageSize = computed({
+  get: () => activeCardIndex.value === 0 ? smsPageSize.value : voicePageSize.value,
+  set: (val) => {
+    if (activeCardIndex.value === 0) {
+      smsPageSize.value = val
+    } else {
+      voicePageSize.value = val
+    }
+  }
 })
 
-const pageSize = ref(100)
-const currentPage = ref(1)
-const total = ref(568)
+const currentPage = computed({
+  get: () => activeCardIndex.value === 0 ? smsCurrentPage.value : voiceCurrentPage.value,
+  set: (val) => {
+    if (activeCardIndex.value === 0) {
+      smsCurrentPage.value = val
+    } else {
+      voiceCurrentPage.value = val
+    }
+  }
+})
+
+const total = computed(() => {
+  return activeCardIndex.value === 0 ? smsTotal.value : voiceTotal.value
+})
+
+const filters = ref({
+  keyword: ''
+})
+
+// 获取短信表格数据
+const fetchSmsData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      keyword: filters.value.keyword || undefined,
+      pageNum: smsCurrentPage.value,
+      pageSize: smsPageSize.value
+    }
+
+    const res = await getSmsPage(params)
+    if (res.code === 200 && res.data) {
+      smsData.value = res.data.records || []
+      smsTotal.value = res.data.total || 0
+      smsCurrentPage.value = res.data.current || 1
+      smsPageSize.value = res.data.size || 100
+    }
+  } catch (error) {
+    console.error('获取短信表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 获取语音表格数据
+const fetchVoiceData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      keyword: filters.value.keyword || undefined,
+      pageNum: voiceCurrentPage.value,
+      pageSize: voicePageSize.value
+    }
+
+    const res = await getVoicePage(params)
+    if (res.code === 200 && res.data) {
+      voiceData.value = res.data.records || []
+      voiceTotal.value = res.data.total || 0
+      voiceCurrentPage.value = res.data.current || 1
+      voicePageSize.value = res.data.size || 100
+    }
+  } catch (error) {
+    console.error('获取语音表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 初始化数据
+onMounted(() => {
+  fetchSmsStatistics()
+  fetchVoiceStatistics()
+  fetchSmsData()
+})
+
+// 监听卡片切换，加载对应数据
+watch(activeCardIndex, (newIndex) => {
+  if (newIndex === 0 && smsData.value.length === 0) {
+    fetchSmsData()
+  } else if (newIndex === 1 && voiceData.value.length === 0) {
+    fetchVoiceData()
+  }
+})
 
 const handleSearch = () => {
-  console.log('搜索:', filters.value)
+  if (activeCardIndex.value === 0) {
+    smsCurrentPage.value = 1
+    fetchSmsData()
+  } else {
+    voiceCurrentPage.value = 1
+    fetchVoiceData()
+  }
 }
 
 // 处理分页变化事件
-const onPageChange = ({ page, pageSize }) => {
-  console.log('分页变化:', { page, pageSize })
-  // TODO: 根据 activeCardIndex 调用对应的 API
+const onPageChange = ({ page, pageSize: size }) => {
+  if (activeCardIndex.value === 0) {
+    smsCurrentPage.value = page
+    smsPageSize.value = size
+    fetchSmsData()
+  } else {
+    voiceCurrentPage.value = page
+    voicePageSize.value = size
+    fetchVoiceData()
+  }
 }
 
 // 批量导入弹框
@@ -147,21 +320,93 @@ const handleBatchImport = () => {
 }
 
 // 确认导入
-const handleImportConfirm = (files) => {
-  console.log('导入文件:', files)
-  ElMessage.success('导入成功')
-  showBatchImportDialog.value = false
+const handleImportConfirm = async (files) => {
+  if (!files || files.length === 0) {
+    ElMessage.warning('请选择要导入的文件')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', files[0])
+
+  try {
+    if (activeCardIndex.value === 0) {
+      const res = await importSms(formData)
+      if (res.code === 200) {
+        ElMessage.success('短信台账导入成功')
+        fetchSmsData()
+      }
+    } else {
+      const res = await importVoice(formData)
+      if (res.code === 200) {
+        ElMessage.success('语音台账导入成功')
+        fetchVoiceData()
+      }
+    }
+    showBatchImportDialog.value = false
+  } catch (error) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败')
+  }
 }
 
 // 下载模板
-const handleDownloadTemplate = () => {
-  console.log('下载模板')
-  ElMessage.info('正在下载模板...')
+const handleDownloadTemplate = async () => {
+  try {
+    let blob
+    if (activeCardIndex.value === 0) {
+      blob = await downloadSmsTemplate()
+    } else {
+      blob = await downloadVoiceTemplate()
+    }
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = activeCardIndex.value === 0 ? '短信台账导入模板.xlsx' : '语音台账导入模板.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+    ElMessage.error('下载模板失败')
+  }
 }
 
 // 批量导出
-const handleBatchExport = () => {
-  console.log('批量导出')
+const handleBatchExport = async () => {
+  try {
+    let blob
+    const params = {
+      exportType: 1, // 按当前查询条件导出
+      keyword: filters.value.keyword || undefined
+    }
+
+    if (activeCardIndex.value === 0) {
+      blob = await exportSms(params)
+    } else {
+      blob = await exportVoice(params)
+    }
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = activeCardIndex.value === 0 ? '短信台账.xlsx' : '语音台账.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败')
+  }
 }
 
 // 删除操作
@@ -170,20 +415,26 @@ const handleDelete = (row) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    // 根据当前选中的卡片删除对应数据
-    if (activeCardIndex.value === 0) {
-      const index = smsData.value.findIndex(item => item.id === row.id)
-      if (index > -1) {
-        smsData.value.splice(index, 1)
+  }).then(async () => {
+    try {
+      if (activeCardIndex.value === 0) {
+        await deleteSms(row.id)
+        const index = smsData.value.findIndex(item => item.id === row.id)
+        if (index > -1) {
+          smsData.value.splice(index, 1)
+        }
+      } else {
+        await deleteVoice(row.id)
+        const index = voiceData.value.findIndex(item => item.id === row.id)
+        if (index > -1) {
+          voiceData.value.splice(index, 1)
+        }
       }
-    } else {
-      const index = voiceData.value.findIndex(item => item.id === row.id)
-      if (index > -1) {
-        voiceData.value.splice(index, 1)
-      }
+      ElMessage.success('删除成功')
+    } catch (error) {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
     }
-    ElMessage.success('删除成功')
   }).catch(() => {
     // 取消删除
   })
@@ -229,6 +480,7 @@ const handleAttachmentClick = (url) => {
           :device-mode="true"
           :show-project-filter="false"
           :show-brand-filter="false"
+          :loading="loading"
           search-placeholder="关键词：ID，主叫号码，被叫号码"
           @update:filters="val => filters = val"
           @search="handleSearch"

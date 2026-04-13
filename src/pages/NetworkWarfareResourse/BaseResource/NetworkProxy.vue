@@ -3,7 +3,7 @@
  * @description 网络代理页面
  * @date 2024-04-09
  */
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
@@ -11,109 +11,243 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
+import {
+  getStaticProxyStats,
+  getDynamicProxyStats,
+  getNetworkProxyPage,
+  getNetworkProxyAccountTypeList,
+  getNetworkProxyIpTypeList,
+  deleteNetworkProxy,
+  importNetworkProxy,
+  downloadNetworkProxyTemplate,
+  exportNetworkProxy
+} from '@/api/networkProxy'
 
 const router = useRouter()
 
+// 格式化数字（添加千分位）
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0'
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 // 卡片数据
-const cards = [
+const cards = ref([
   {
     name: '静态代理',
-    total: '12,584',
+    total: '0',
     type: 'progress',
     icon: '/figma/network-proxy-static.svg',
-    description: '覆盖13个国家/地区',
-    progressItems: [
-      { label: '总计', total: 2343, used: 12 },
-      { label: '台湾', total: 2343, used: 12 },
-      { label: '香港', total: 2343, used: 12 },
-      { label: '美国', total: 2343, used: 12 },
-      { label: '英国', total: 2343, used: 12 },
-      { label: '法国', total: 2343, used: 12 }
-    ]
+    description: '加载中...',
+    progressItems: []
   },
   {
     name: '动态代理',
-    total: '12,584',
+    total: '0',
     type: 'chart',
     icon: '/figma/network-proxy-dynamic.svg',
-    description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
+    description: '加载中...',
     chart: {
-      outerData: [
-        { value: 8543, name: '已使用', color: '#f77234' },
-        { value: 4041, name: '待分配', color: '#165dff' }
-      ],
-      innerData: [
-        { value: 8543, name: '已使用', color: '#f77234' },
-        { value: 4041, name: '待分配', color: '#165dff' }
-      ],
+      outerData: [],
+      innerData: [],
       legends: [
         { label: '已使用', color: '#f77234' },
         { label: '待分配', color: '#165dff' }
       ]
     }
   }
-]
+])
+
+// 获取静态代理统计数据
+const fetchStaticProxyStats = async () => {
+  try {
+    const res = await getStaticProxyStats()
+    if (res.code === 200 && res.data) {
+      const data = res.data
+      // 计算总计
+      const totalCount = data.reduce((sum, item) => sum + (item.total || 0), 0)
+      const totalUsed = data.reduce((sum, item) => sum + (item.use || 0), 0)
+
+      // 构建 progressItems，第一项为总计
+      const progressItems = [
+        ...data.map(item => ({
+          label: item.label,
+          total: item.total || 0,
+          used: item.use || 0
+        }))
+      ]
+
+      cards.value[0] = {
+        name: '静态代理',
+        total: formatNumber(totalCount),
+        type: 'progress',
+        icon: '/figma/network-proxy-static.svg',
+        description: `覆盖${data.length}个国家/地区`,
+        progressItems
+      }
+    }
+  } catch (error) {
+    console.error('获取静态代理统计失败:', error)
+  }
+}
+
+// 获取动态代理统计数据
+const fetchDynamicProxyStats = async () => {
+  try {
+    const res = await getDynamicProxyStats()
+    if (res.code === 200 && res.data) {
+      const data = res.data[0] // 取第一条数据作为总体统计
+      if (data) {
+        const total = data.total || 0
+        const used = data.use || 0
+        const unused = total - used
+
+        cards.value[1] = {
+          name: '动态代理',
+          total: formatNumber(total),
+          type: 'chart',
+          icon: '/figma/network-proxy-dynamic.svg',
+          description: 'IP出口覆盖多个国家/地区',
+          chart: {
+            outerData: [
+              { value: used, name: '已使用', color: '#f77234' },
+              { value: unused, name: '待分配', color: '#165dff' }
+            ],
+            innerData: [
+              { value: used, name: '已使用', color: '#f77234' },
+              { value: unused, name: '待分配', color: '#165dff' }
+            ],
+            legends: [
+              { label: '已使用', color: '#f77234' },
+              { label: '待分配', color: '#165dff' }
+            ]
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取动态代理统计失败:', error)
+  }
+}
 
 // 表格列配置
 const tableColumns = [
-  { prop: 'resourceCode', label: '资源编码', minWidth: 100 },
+  { prop: 'proxyCode', label: '资源编码', minWidth: 100 },
   { prop: 'accountType', label: '账号类型', minWidth: 80 },
   { prop: 'ipAddress', label: 'IP地址', minWidth: 120 },
   { prop: 'ipType', label: 'IP类型', minWidth: 100 },
   { prop: 'protocolType', label: '协议类型', minWidth: 80 },
   { prop: 'exitRegion', label: '出口地区', minWidth: 80 },
   { prop: 'latestStatus', label: '最新状态', minWidth: 80 },
-  { prop: 'checkDate', label: '检测日期', minWidth: 100 },
-  { prop: 'expiryDate', label: '失效日期', minWidth: 100 },
+  { prop: 'checkTime', label: '检测日期', minWidth: 100 },
+  { prop: 'expireTime', label: '失效日期', minWidth: 100 },
   { prop: 'resourceSource', label: '资源来源', minWidth: 100 },
   { prop: 'resourceSourceType', label: '资源来源类型', minWidth: 120 },
-  { prop: 'delivery', label: '交付方', minWidth: 80 },
-  { prop: 'deliveryDate', label: '交付日期', minWidth: 100 },
-  { prop: 'responsibleUnit', label: '责任单位', minWidth: 100 },
-  { prop: 'responsiblePerson', label: '责任人', minWidth: 80 },
+  { prop: 'deliveryParty', label: '交付方', minWidth: 80 },
+  { prop: 'deliveryTime', label: '交付日期', minWidth: 100 },
+  { prop: 'responsibilityUnit', label: '责任单位', minWidth: 100 },
+  { prop: 'responsibilityPerson', label: '责任人', minWidth: 80 },
   { prop: 'remark', label: '备注', minWidth: 80 },
-  { prop: 'updatedAt', label: '更新时间', minWidth: 100 },
+  { prop: 'updateTime', label: '更新时间', minWidth: 100 },
   { prop: 'status', label: '状态', minWidth: 120, type: 'status' },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 表格数据
-const tableData = ref([
-  { id: 1, resourceCode: 'IP001', accountType: '采集', ipAddress: '152.131.11.13', ipType: '静态IP代理', protocolType: 'IPv4', exitRegion: '韩国', latestStatus: '存活', checkDate: '2025.01.15', expiryDate: '2025.12.31', resourceSource: '项目交付', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.15', status: '已使用' },
-  { id: 2, resourceCode: 'IP002', accountType: '发声', ipAddress: '192.168.1.101', ipType: '动态IP代理', protocolType: 'IPv4', exitRegion: '香港', latestStatus: '存活', checkDate: '2025.01.14', expiryDate: '2025.06.30', resourceSource: '外部采购', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.14', status: '剩余额度' },
-  { id: 3, resourceCode: 'IP003', accountType: '采集', ipAddress: '192.168.1.102', ipType: '静态IP代理', protocolType: 'IPv6', exitRegion: '美国', latestStatus: '失效', checkDate: '2025.01.13', expiryDate: '2025.09.15', resourceSource: '项目交付', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.13', status: '已使用' },
-  { id: 4, resourceCode: 'IP004', accountType: '发声', ipAddress: '10.0.0.100', ipType: '动态IP代理', protocolType: 'IPv4', exitRegion: '日本', latestStatus: '存活', checkDate: '2025.01.12', expiryDate: '2025.11.30', resourceSource: '外部采购', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.12', status: '剩余额度' },
-  { id: 5, resourceCode: 'IP005', accountType: '采集', ipAddress: '10.0.0.101', ipType: '静态IP代理', protocolType: 'IPv4', exitRegion: '新加坡', latestStatus: '存活', checkDate: '2025.01.11', expiryDate: '2025.07.15', resourceSource: '项目交付', resourceSourceType: '-', delivery: '-', deliveryDate: '-', responsibleUnit: '-', responsiblePerson: '-', remark: '-', updatedAt: '2025.01.11', status: '已使用' }
-])
-
-const filters = ref({
-  keyword: '',
-  project: '',
-  ipType: '',
-  exitRegion: ''
-})
-
+const tableData = ref([])
 const pageSize = ref(100)
 const currentPage = ref(1)
-const total = ref(568)
+const total = ref(0)
+const loading = ref(false)
 
-// 所属项目选项
-const projectOptions = ['项目A', '项目B', '项目C']
+// 筛选条件
+const filters = ref({
+  keyword: '',
+  accountType: '',
+  ipType: '',
+  latestStatus: ''
+})
+
+// 账号类型选项
+const accountTypeOptions = ref([])
 
 // IP类型选项
-const ipTypeOptions = ['静态IP代理', '动态IP代理']
+const ipTypeOptions = ref([])
 
-// 出口地区选项
-const exitRegionOptions = ['台湾', '香港', '美国', '英国', '法国', '日本', '韩国', '新加坡']
+// 最新状态选项（固定值）
+const latestStatusOptions = ['已使用', '待分配']
 
+// 获取账号类型列表
+const fetchAccountTypeList = async () => {
+  try {
+    const res = await getNetworkProxyAccountTypeList()
+    if (res.code === 200 && res.data) {
+      accountTypeOptions.value = res.data
+    }
+  } catch (error) {
+    console.error('获取账号类型列表失败:', error)
+  }
+}
+
+// 获取IP类型列表
+const fetchIpTypeList = async () => {
+  try {
+    const res = await getNetworkProxyIpTypeList()
+    if (res.code === 200 && res.data) {
+      ipTypeOptions.value = res.data
+    }
+  } catch (error) {
+    console.error('获取IP类型列表失败:', error)
+  }
+}
+
+// 获取表格数据
+const fetchTableData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      keyword: filters.value.keyword || undefined,
+      accountType: filters.value.accountType || undefined,
+      ipType: filters.value.ipType || undefined,
+      latestStatus: filters.value.latestStatus || undefined,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
+    }
+
+    const res = await getNetworkProxyPage(params)
+    if (res.code === 200 && res.data) {
+      tableData.value = res.data.records || []
+      total.value = res.data.total || 0
+      currentPage.value = res.data.current || 1
+      pageSize.value = res.data.size || 100
+    }
+  } catch (error) {
+    console.error('获取表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 初始化数据
+onMounted(() => {
+  fetchStaticProxyStats()
+  fetchDynamicProxyStats()
+  fetchAccountTypeList()
+  fetchIpTypeList()
+  fetchTableData()
+})
+
+// 处理搜索
 const handleSearch = () => {
-  console.log('搜索:', filters.value)
+  currentPage.value = 1
+  fetchTableData()
 }
 
 // 处理分页变化事件
-const onPageChange = ({ page, pageSize }) => {
-  console.log('分页变化:', { page, pageSize })
-  // TODO: 调用 API 获取数据
+const onPageChange = ({ page, pageSize: size }) => {
+  currentPage.value = page
+  pageSize.value = size
+  fetchTableData()
 }
 
 // 批量导入弹框
@@ -125,21 +259,78 @@ const handleBatchImport = () => {
 }
 
 // 确认导入
-const handleImportConfirm = (files) => {
-  console.log('导入文件:', files)
-  ElMessage.success('导入成功')
-  showBatchImportDialog.value = false
+const handleImportConfirm = async (files) => {
+  if (!files || files.length === 0) {
+    ElMessage.warning('请选择要导入的文件')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', files[0])
+
+  try {
+    const res = await importNetworkProxy(formData)
+    if (res.code === 200) {
+      ElMessage.success('网络代理台账导入成功')
+      fetchTableData()
+    }
+    showBatchImportDialog.value = false
+  } catch (error) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败')
+  }
 }
 
 // 下载模板
-const handleDownloadTemplate = () => {
-  console.log('下载模板')
-  ElMessage.info('正在下载模板...')
+const handleDownloadTemplate = async () => {
+  try {
+    const blob = await downloadNetworkProxyTemplate()
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '网络代理台账导入模板.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+    ElMessage.error('下载模板失败')
+  }
 }
 
 // 批量导出
-const handleBatchExport = () => {
-  console.log('批量导出')
+const handleBatchExport = async () => {
+  try {
+    const params = {
+      exportType: 1, // 按当前查询条件导出
+      keyword: filters.value.keyword || undefined,
+      accountType: filters.value.accountType || undefined,
+      ipType: filters.value.ipType || undefined,
+      latestStatus: filters.value.latestStatus || undefined
+    }
+
+    const blob = await exportNetworkProxy(params)
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '网络代理台账.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败')
+  }
 }
 
 // 删除操作
@@ -148,12 +339,18 @@ const handleDelete = (row) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    const index = tableData.value.findIndex(item => item.id === row.id)
-    if (index > -1) {
-      tableData.value.splice(index, 1)
+  }).then(async () => {
+    try {
+      await deleteNetworkProxy(row.id)
+      const index = tableData.value.findIndex(item => item.id === row.id)
+      if (index > -1) {
+        tableData.value.splice(index, 1)
+      }
+      ElMessage.success('删除成功')
+    } catch (error) {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
     }
-    ElMessage.success('删除成功')
   }).catch(() => {
     // 取消删除
   })
@@ -197,16 +394,13 @@ const handleAttachmentClick = (url) => {
           :total="total"
           :columns="tableColumns"
           :device-mode="true"
-          :project-options="projectOptions"
-          :show-brand-filter="true"
-          :brand-placeholder="'出口地区'"
-          :brand-options="exitRegionOptions"
-          :brand-filter-key="'exitRegion'"
-          :show-third-filter="true"
-          :third-filter-placeholder="'IP类型'"
-          :third-filter-options="ipTypeOptions"
-          :third-filter-key="'ipType'"
-          search-placeholder="关键词：资源编码，IP地址"
+          :loading="loading"
+          :custom-filters="[
+            { key: 'accountType', placeholder: '账号类型', options: accountTypeOptions },
+            { key: 'ipType', placeholder: 'IP类型', options: ipTypeOptions },
+            { key: 'latestStatus', placeholder: '最新状态', options: latestStatusOptions }
+          ]"
+          search-placeholder="关键词：编号，IP地址"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

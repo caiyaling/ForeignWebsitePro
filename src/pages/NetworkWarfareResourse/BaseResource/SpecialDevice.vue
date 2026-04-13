@@ -3,38 +3,58 @@
  * @description 专用设备页面
  * @date 2024-04-09
  */
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
-import { useTableData } from '@/composables/useTableData'
+import {
+  getCloudPhoneUsageStats,
+  getPhysicalPhoneUsageStats,
+  getCloudPhoneBrandList,
+  getCloudPhoneProjectList,
+  getPhysicalPhoneBrandList,
+  getPhysicalPhoneProjectList,
+  getCloudPhonePage,
+  getPhysicalPhonePage,
+  deleteCloudPhone,
+  deletePhysicalPhone,
+  importCloudPhone,
+  downloadCloudPhoneTemplate,
+  exportCloudPhone,
+  importPhysicalPhone,
+  downloadPhysicalPhoneTemplate,
+  exportPhysicalPhone
+} from '@/api/device'
 
 // 当前选中的卡片索引
 const activeCardIndex = ref(0)
 
+// 格式化数字（添加千分位）
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0'
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 // 卡片数据
-const cards = [
+const cards = ref([
   {
     name: '云手机',
-    total: '12,584',
+    total: '0',
     type: 'chart',
     icon: '/figma/device-cloud-phone.svg',
     description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
     chart: {
-      // 外环数据
       outerData: [
-        { value: 8543, name: '已使用', color: '#f77234' },
-        { value: 4041, name: '待分配', color: '#165dff' }
+        { value: 0, name: '已使用', color: '#f77234' },
+        { value: 0, name: '待分配', color: '#165dff' }
       ],
-      // 内环数据
       innerData: [
-        { value: 8543, name: '已使用', color: '#f77234' },
-        { value: 4041, name: '待分配', color: '#165dff' }
+        { value: 0, name: '已使用', color: '#f77234' },
+        { value: 0, name: '待分配', color: '#165dff' }
       ],
-      // 图例
       legends: [
         { label: '已使用', color: '#f77234' },
         { label: '待分配', color: '#165dff' }
@@ -43,52 +63,116 @@ const cards = [
   },
   {
     name: '实体手机',
-    total: '400/500台',
+    total: '0/0台',
     type: 'stats',
     icon: '/figma/device-physical-phone.svg',
-    stats: [
-      { label: '苹果', value: '2343' },
-      { label: '三星', value: '2343' },
-      { label: '谷歌', value: '2343' },
-      { label: '红米', value: '2343' },
-      { label: 'Vivo', value: '2343' },
-      { label: 'Oppo', value: '2343' },
-      { label: '华为', value: '1234' },
-      { label: '小米', value: '987' },
-      { label: '一加', value: '654' },
-      { label: '荣耀', value: '321' }
-    ]
+    stats: []
   }
-]
+])
+
+// 获取云手机卡片数据
+const fetchCloudPhoneStats = async () => {
+  try {
+    const res = await getCloudPhoneUsageStats()
+    if (res.code === 200 && res.data) {
+      const { usedQuantity = 0, availableQuantity = 0 } = res.data
+      const total = usedQuantity + availableQuantity
+
+      // 更新卡片数据
+      cards.value[0] = {
+        name: '云手机',
+        total: formatNumber(total),
+        type: 'chart',
+        icon: '/figma/device-cloud-phone.svg',
+        description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
+        chart: {
+          outerData: [
+            { value: usedQuantity, name: '已使用', color: '#f77234' },
+            { value: availableQuantity, name: '待分配', color: '#165dff' }
+          ],
+          innerData: [
+            { value: usedQuantity, name: '已使用', color: '#f77234' },
+            { value: availableQuantity, name: '待分配', color: '#165dff' }
+          ],
+          legends: [
+            { label: '已使用', color: '#f77234' },
+            { label: '待分配', color: '#165dff' }
+          ]
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取云手机统计数据失败:', error)
+  }
+}
+
+// 获取实体手机卡片数据
+const fetchPhysicalPhoneStats = async () => {
+  try {
+    const res = await getPhysicalPhoneUsageStats()
+    if (res.code === 200 && res.data) {
+      const { brandStatisticsList = [] } = res.data
+
+      // 计算总数
+      const totalUsed = brandStatisticsList.reduce((sum, item) => sum + (item.usedQuantity || 0), 0)
+      const totalAvailable = brandStatisticsList.reduce((sum, item) => sum + (item.availableQuantity || 0), 0)
+
+      // 构建品牌统计列表
+      const stats = brandStatisticsList.map(item => ({
+        label: item.brand || '未知',
+        value: formatNumber((item.usedQuantity || 0) + (item.availableQuantity || 0))
+      }))
+
+      // 更新卡片数据
+      cards.value[1] = {
+        name: '实体手机',
+        total: `${formatNumber(totalUsed)}/${formatNumber(totalUsed + totalAvailable)}台`,
+        type: 'stats',
+        icon: '/figma/device-physical-phone.svg',
+        stats
+      }
+    }
+  } catch (error) {
+    console.error('获取实体手机统计数据失败:', error)
+  }
+}
+
+// 初始化数据
+onMounted(() => {
+  fetchCloudPhoneStats()
+  fetchPhysicalPhoneStats()
+  fetchFilterOptions()
+  fetchTableData()
+})
 
 // 云手机表格列配置
 const cloudPhoneColumns = [
-  { prop: 'deviceNo', label: '编号', minWidth: 120 },
-  { prop: 'purpose', label: '用途', minWidth: 100 },
-  { prop: 'project', label: '所属项目', minWidth: 140 },
-  { prop: 'delivery', label: '交付方', minWidth: 100 },
+  { prop: 'phoneCode', label: '编号', minWidth: 120 },
+  { prop: 'usagePurpose', label: '用途', minWidth: 100 },
+  { prop: 'projectCode', label: '所属项目', minWidth: 140 },
+  { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
   { prop: 'model', label: '型号', minWidth: 140 },
   { prop: 'brand', label: '品牌', minWidth: 100 },
-  { prop: 'config', label: '配置', minWidth: 200 },
-  { prop: 'os', label: '操作系统', minWidth: 100 },
+  { prop: 'configuration', label: '配置', minWidth: 200 },
+  { prop: 'operatingSystem', label: '操作系统', minWidth: 100 },
   { prop: 'quantity', label: '数量', minWidth: 80 },
-  { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
+  { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 实体手机表格列配置
 const physicalPhoneColumns = [
-  { prop: 'deviceNo', label: '编号', minWidth: 120 },
-  { prop: 'purpose', label: '用途', minWidth: 100 },
-  { prop: 'delivery', label: '交付方', minWidth: 100 },
-  { prop: 'project', label: '所属项目', minWidth: 140 },
-  { prop: 'assetName', label: '资产名称', minWidth: 140 },
+  { prop: 'phoneCode', label: '编号', minWidth: 120 },
+  { prop: 'usagePurpose', label: '用途', minWidth: 100 },
+  { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
+  { prop: 'projectCode', label: '所属项目', minWidth: 140 },
+  { prop: 'model', label: '资产名称', minWidth: 140 },
   { prop: 'brand', label: '品牌', minWidth: 100 },
-  { prop: 'spec', label: '型号/规格/版本', minWidth: 160 },
-  { prop: 'config', label: '基本配置', minWidth: 200 },
+  { prop: 'serialNumber', label: '序列号', minWidth: 160 },
+  { prop: 'configuration', label: '基本配置', minWidth: 200 },
   { prop: 'unit', label: '单位', minWidth: 80 },
   { prop: 'quantity', label: '数量', minWidth: 80 },
-  { prop: 'updatedAt', label: '更新时间', minWidth: 120 },
+  { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
@@ -103,22 +187,10 @@ const tableColumns = computed(() => {
 })
 
 // 云手机表格数据
-const cloudPhoneData = ref([
-  { id: 1, index: 1, deviceNo: 'CP001', purpose: '采集', project: '项目A', delivery: 'team1', model: 'iPhone 15 Pro', brand: '苹果', config: '256GB / 8GB RAM / A17 Pro', os: 'iOS 17', quantity: 50, updatedAt: '2024.03.03' },
-  { id: 2, index: 2, deviceNo: 'CP002', purpose: '发声', project: '项目B', delivery: 'team2', model: 'Galaxy S24', brand: '三星', config: '256GB / 12GB RAM / 骁龙8 Gen3', os: 'Android 14', quantity: 30, updatedAt: '2024.03.03' },
-  { id: 3, index: 3, deviceNo: 'CP003', purpose: '采集', project: '项目A', delivery: 'team1', model: 'Pixel 8', brand: '谷歌', config: '128GB / 8GB RAM / Tensor G3', os: 'Android 14', quantity: 25, updatedAt: '2024.03.03' },
-  { id: 4, index: 4, deviceNo: 'CP004', purpose: '发声', project: '项目C', delivery: 'team3', model: 'Redmi Note 13', brand: '红米', config: '128GB / 6GB RAM / 天玑6080', os: 'Android 13', quantity: 40, updatedAt: '2024.03.03' },
-  { id: 5, index: 5, deviceNo: 'CP005', purpose: '采集', project: '项目B', delivery: 'team2', model: 'X100', brand: 'Vivo', config: '256GB / 12GB RAM / 天玑9300', os: 'Android 14', quantity: 35, updatedAt: '2024.03.03' }
-])
+const cloudPhoneData = ref([])
 
 // 实体手机表格数据
-const physicalPhoneData = ref([
-  { id: 1, index: 1, deviceNo: 'PP001', purpose: '采集', delivery: 'team1', project: '项目A', assetName: 'iPhone 15 Pro', brand: '苹果', spec: 'A17 Pro / 256GB', config: '256GB / 8GB RAM', unit: '台', quantity: 50, updatedAt: '2024.03.03' },
-  { id: 2, index: 2, deviceNo: 'PP002', purpose: '发声', delivery: 'team2', project: '项目B', assetName: 'Galaxy S24', brand: '三星', spec: '骁龙8 Gen3 / 256GB', config: '256GB / 12GB RAM', unit: '台', quantity: 30, updatedAt: '2024.03.03' },
-  { id: 3, index: 3, deviceNo: 'PP003', purpose: '采集', delivery: 'team1', project: '项目A', assetName: 'Pixel 8', brand: '谷歌', spec: 'Tensor G3 / 128GB', config: '128GB / 8GB RAM', unit: '台', quantity: 25, updatedAt: '2024.03.03' },
-  { id: 4, index: 4, deviceNo: 'PP004', purpose: '发声', delivery: 'team3', project: '项目C', assetName: 'Redmi Note 13', brand: '红米', spec: '天玑6080 / 128GB', config: '128GB / 6GB RAM', unit: '台', quantity: 40, updatedAt: '2024.03.03' },
-  { id: 5, index: 5, deviceNo: 'PP005', purpose: '采集', delivery: 'team2', project: '项目B', assetName: 'X100', brand: 'Vivo', spec: '天玑9300 / 256GB', config: '256GB / 12GB RAM', unit: '台', quantity: 35, updatedAt: '2024.03.03' }
-])
+const physicalPhoneData = ref([])
 
 // 根据选中卡片动态计算表格数据
 const tableData = computed(() => {
@@ -133,23 +205,110 @@ const filters = ref({
 
 const pageSize = ref(100)
 const currentPage = ref(1)
-const total = ref(568)
+const total = ref(0)
+const loading = ref(false)
 
 // 所属项目选项
-const projectOptions = ['项目A', '项目B', '项目C']
+const projectOptions = ref([])
 
 // 品牌选项
-const brandOptions = ['苹果', '三星', '谷歌', '红米', 'Vivo', 'Oppo']
+const brandOptions = ref([])
+
+// 获取下拉筛选选项
+const fetchFilterOptions = async () => {
+  try {
+    if (activeCardIndex.value === 0) {
+      // 云手机筛选选项
+      const [projectRes, brandRes] = await Promise.all([
+        getCloudPhoneProjectList(),
+        getCloudPhoneBrandList()
+      ])
+      if (projectRes.code === 200 && projectRes.data) {
+        projectOptions.value = projectRes.data
+      }
+      if (brandRes.code === 200 && brandRes.data) {
+        brandOptions.value = brandRes.data
+      }
+    } else {
+      // 实体手机筛选选项
+      const [projectRes, brandRes] = await Promise.all([
+        getPhysicalPhoneProjectList(),
+        getPhysicalPhoneBrandList()
+      ])
+      if (projectRes.code === 200 && projectRes.data) {
+        projectOptions.value = projectRes.data
+      }
+      if (brandRes.code === 200 && brandRes.data) {
+        brandOptions.value = brandRes.data
+      }
+    }
+  } catch (error) {
+    console.error('获取筛选选项失败:', error)
+  }
+}
+
+// 获取表格数据
+const fetchTableData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      keyword: filters.value.keyword || undefined,
+      projectCode: filters.value.project || undefined,
+      brand: filters.value.brand || undefined,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
+    }
+
+    if (activeCardIndex.value === 0) {
+      // 云手机表格数据
+      const res = await getCloudPhonePage(params)
+      if (res.code === 200 && res.data) {
+        cloudPhoneData.value = res.data.records || []
+        total.value = res.data.total || 0
+        currentPage.value = res.data.current || 1
+        pageSize.value = res.data.size || 100
+      }
+    } else {
+      // 实体手机表格数据
+      const res = await getPhysicalPhonePage(params)
+      if (res.code === 200 && res.data) {
+        physicalPhoneData.value = res.data.records || []
+        total.value = res.data.total || 0
+        currentPage.value = res.data.current || 1
+        pageSize.value = res.data.size || 100
+      }
+    }
+  } catch (error) {
+    console.error('获取表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听卡片切换，重新加载数据
+watch(activeCardIndex, () => {
+  // 重置筛选条件
+  filters.value = {
+    keyword: '',
+    project: '',
+    brand: ''
+  }
+  currentPage.value = 1
+  // 重新获取数据
+  fetchFilterOptions()
+  fetchTableData()
+})
 
 const handleSearch = () => {
-  console.log('搜索:', filters.value)
+  currentPage.value = 1
+  fetchTableData()
 }
 
 // 处理分页变化事件
-const onPageChange = ({ page, pageSize }) => {
-  console.log('分页变化:', { page, pageSize })
-  // TODO: 根据 activeCardIndex 调用对应的 API
-  // handlePageChange({ page, pageSize })
+const onPageChange = ({ page, pageSize: size }) => {
+  currentPage.value = page
+  pageSize.value = size
+  fetchTableData()
 }
 
 // 批量导入弹框
@@ -161,21 +320,95 @@ const handleBatchImport = () => {
 }
 
 // 确认导入
-const handleImportConfirm = (files) => {
-  console.log('导入文件:', files)
-  ElMessage.success('导入成功')
-  showBatchImportDialog.value = false
+const handleImportConfirm = async (files) => {
+  if (!files || files.length === 0) {
+    ElMessage.warning('请选择要导入的文件')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', files[0])
+
+  try {
+    if (activeCardIndex.value === 0) {
+      const res = await importCloudPhone(formData)
+      if (res.code === 200) {
+        ElMessage.success('云手机台账导入成功')
+        fetchTableData()
+      }
+    } else {
+      const res = await importPhysicalPhone(formData)
+      if (res.code === 200) {
+        ElMessage.success('实体手机台账导入成功')
+        fetchTableData()
+      }
+    }
+    showBatchImportDialog.value = false
+  } catch (error) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败')
+  }
 }
 
 // 下载模板
-const handleDownloadTemplate = () => {
-  console.log('下载模板')
-  ElMessage.info('正在下载模板...')
+const handleDownloadTemplate = async () => {
+  try {
+    let blob
+    if (activeCardIndex.value === 0) {
+      blob = await downloadCloudPhoneTemplate()
+    } else {
+      blob = await downloadPhysicalPhoneTemplate()
+    }
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = activeCardIndex.value === 0 ? '云手机台账导入模板.xlsx' : '实体手机台账导入模板.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+    ElMessage.error('下载模板失败')
+  }
 }
 
 // 批量导出
-const handleBatchExport = () => {
-  console.log('批量导出')
+const handleBatchExport = async () => {
+  try {
+    let blob
+    const params = {
+      exportType: 1, // 按当前查询条件导出
+      keyword: filters.value.keyword || undefined,
+      projectCode: filters.value.project || undefined,
+      brand: filters.value.brand || undefined
+    }
+
+    if (activeCardIndex.value === 0) {
+      blob = await exportCloudPhone(params)
+    } else {
+      blob = await exportPhysicalPhone(params)
+    }
+
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = activeCardIndex.value === 0 ? '云手机台账.xlsx' : '实体手机台账.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败')
+  }
 }
 
 // 删除操作
@@ -184,20 +417,28 @@ const handleDelete = (row) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    // 根据当前选中的卡片删除对应数据
-    if (activeCardIndex.value === 0) {
-      const index = cloudPhoneData.value.findIndex(item => item.id === row.id)
-      if (index > -1) {
-        cloudPhoneData.value.splice(index, 1)
+  }).then(async () => {
+    try {
+      if (activeCardIndex.value === 0) {
+        // 删除云手机台账
+        await deleteCloudPhone(row.id)
+        const index = cloudPhoneData.value.findIndex(item => item.id === row.id)
+        if (index > -1) {
+          cloudPhoneData.value.splice(index, 1)
+        }
+      } else {
+        // 删除实体手机台账
+        await deletePhysicalPhone(row.id)
+        const index = physicalPhoneData.value.findIndex(item => item.id === row.id)
+        if (index > -1) {
+          physicalPhoneData.value.splice(index, 1)
+        }
       }
-    } else {
-      const index = physicalPhoneData.value.findIndex(item => item.id === row.id)
-      if (index > -1) {
-        physicalPhoneData.value.splice(index, 1)
-      }
+      ElMessage.success('删除成功')
+    } catch (error) {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
     }
-    ElMessage.success('删除成功')
   }).catch(() => {
     // 取消删除
   })
@@ -243,6 +484,7 @@ const handleAttachmentClick = (url) => {
           :device-mode="true"
           :project-options="projectOptions"
           :brand-options="brandOptions"
+          :loading="loading"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

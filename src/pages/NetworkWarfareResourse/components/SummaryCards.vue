@@ -23,7 +23,8 @@ defineProps({
       >
         <div class="card-profile">
           <div class="card-icon-wrapper">
-            <img :src="card.icon" alt="" class="card-icon" />
+            <img v-if="card.icon" :src="card.icon" alt="" class="card-icon" />
+            <div v-else class="card-icon-placeholder">{{ card.name?.charAt(0) || '?' }}</div>
           </div>
           <div class="card-profile-text">
             <div class="card-name">{{ card.name }}</div>
@@ -119,12 +120,29 @@ defineProps({
   flex-shrink: 0;
   border-radius: 1000px;
   overflow: hidden;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card-icon {
-  position: absolute;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+}
+
+.card-icon-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 600;
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
 }
 
 .card-profile-text {

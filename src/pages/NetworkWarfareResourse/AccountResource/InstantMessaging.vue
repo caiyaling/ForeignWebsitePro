@@ -1,122 +1,175 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import { useTableData } from '@/composables/useTableData'
+import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
 
 const router = useRouter()
+
+// 平台配置映射
+const platformConfig = {
+  'Telegram': { icon: '/figma/im-telegram.svg', variant: 'warm' },
+  'WhatsApp': { icon: '/figma/im-whatsapp.svg', variant: 'warm' },
+  'Signal': { icon: '/figma/im-signal.svg', variant: 'warm' },
+  'Line': { icon: '/figma/im-line.svg', variant: 'warm' },
+  'Skype': { icon: '/figma/im-skype.svg', variant: 'cool' },
+  'Teams': { icon: '/figma/im-teams.svg', variant: 'cool' }
+}
+
+// 格式化数字（添加千分位）
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0'
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+// 卡片数据
+const cards = ref([])
+
+// 获取卡片数据
+const fetchCardsData = async () => {
+  try {
+    const res = await getAccountTypeStats(2) // 2 = 即时通讯
+    if (res.code === 200 && res.data) {
+      cards.value = res.data.map(item => {
+        const config = platformConfig[item.platformName] || { icon: '', variant: 'warm' }
+        const stats = item.accountTypeStats.map(stat => ({
+          label: stat.accountType,
+          value: formatNumber(stat.count)
+        }))
+        const total = item.accountTypeStats.reduce((sum, stat) => sum + stat.count, 0)
+
+        return {
+          name: item.platformName,
+          total: formatNumber(total),
+          icon: config.icon,
+          variant: config.variant,
+          stats
+        }
+      })
+    }
+  } catch (error) {
+    console.error('获取账号类型统计失败:', error)
+  }
+}
+
+onMounted(() => {
+  fetchCardsData()
+  fetchFilterOptions()
+  fetchTableData()
+})
 
 // 即时通讯表格列配置
 const tableColumns = [
   { prop: 'accountType', label: '账号类型', width: 100 },
   { prop: 'isSampled', label: '是否抽检', width: 80, align: 'center' },
   { prop: 'sampleResult', label: '抽检结果', width: 80, align: 'center' },
-  { prop: 'platform', label: '平台名称', width: 120 },
-  { prop: 'accountNo', label: '账号编号', width: 100 },
-  { prop: 'version', label: '账号版本号', width: 100 },
-  { prop: 'location', label: '账号定位', width: 100 },
-  { prop: 'nickname', label: '用户昵称', width: 120 },
+  { prop: 'platformName', label: '平台名称', width: 120 },
+  { prop: 'accountCode', label: '账号编号', width: 100 },
+  { prop: 'accountVersion', label: '账号版本号', width: 100 },
+  { prop: 'accountPositioning', label: '账号定位', width: 100 },
+  { prop: 'userNickname', label: '用户昵称', width: 120 },
   { prop: 'accountId', label: '账号ID', width: 120 },
-  { prop: 'url', label: '链接URL', width: 100 },
-  { prop: 'region', label: '注册地区', width: 100 },
-  { prop: 'registeredAt', label: '注册时间', width: 120 },
+  { prop: 'linkUrl', label: '链接URL', width: 100 },
+  { prop: 'registerRegion', label: '注册地区', width: 100 },
+  { prop: 'registerTime', label: '注册时间', width: 120 },
   { prop: 'fansCount', label: '粉丝数量', width: 100 },
   { prop: 'friendsCount', label: '好友数量', width: 100 },
-  { prop: 'groupsCount', label: '群组数量', width: 100 },
-  { prop: 'integrity', label: '账号信息完善度', width: 130, type: 'progress' },
-  { prop: 'delivery', label: '交付方', width: 100 },
+  { prop: 'groupCount', label: '群组数量', width: 100 },
+  { prop: 'accountInfoCompleteness', label: '账号完善度', width: 130, type: 'progress' },
+  { prop: 'deliveryParty', label: '交付方', width: 100 },
   { prop: 'latestStatus', label: '最新状态', width: 100, type: 'status' },
-  { prop: 'updatedAt', label: '更新时间', width: 120 },
-  { prop: 'action', label: '操作', width: 120, type: 'action' }
+  { prop: 'statisticsEndDate', label: '统计结束时间', width: 120 },
+  { prop: 'action', label: '操作', width: 80, type: 'action' }
 ]
 
-const platformOptions = ['Telegram', 'WhatsApp', 'Signal', 'Line', 'Skype', 'Teams']
+// 下拉筛选选项
+const platformOptions = ref([])
+const accountTypeOptions = ref([])
+const latestStatusOptions = ref([])
 
-// 即时通讯卡片数据
-const cards = [
-  {
-    name: 'telegram',
-    total: '12,584',
-    icon: '/figma/im-telegram.svg',
-    variant: 'warm',
-    stats: [
-      { label: '采集', value: '2343' },
-      { label: '贴靠', value: '2343' }
-    ]
-  },
-  {
-    name: 'line',
-    total: '12,584',
-    icon: '/figma/im-line.svg',
-    variant: 'warm',
-    stats: [
-      { label: '采集', value: '2343' },
-      { label: '贴靠', value: '2343' },
-      { label: '发声（高）', value: '2343' },
-      { label: '发声（中）', value: '2343' }
-    ]
-  },
-  {
-    name: 'Signal',
-    total: '12,584',
-    icon: '/figma/im-signal.svg',
-    variant: 'warm',
-    stats: [{ label: '贴靠', value: '2343' }]
-  },
-  {
-    name: 'skype',
-    total: '12,584',
-    icon: '/figma/im-skype.svg',
-    variant: 'cool',
-    stats: [{ label: '贴靠', value: '2343' }]
-  },
-  {
-    name: 'Teams',
-    total: '12,584',
-    icon: '/figma/im-teams.svg',
-    variant: 'cool',
-    stats: [{ label: '贴靠', value: '2343' }]
-  }
-]
+// 表格数据
+const tableData = ref([])
+const pageSize = ref(100)
+const currentPage = ref(1)
+const total = ref(0)
+const loading = ref(false)
 
-// 使用 useTableData composable 管理表格数据
-const {
-  tableData,
-  pageSize,
-  currentPage,
-  total,
-  filters,
-  handlePageChange,
-  handleSearch
-} = useTableData({
-  apiUrl: '', // 配置 API 地址后分页变化会自动调用接口
-  defaultFilters: {
-    keyword: '',
-    accountType: '',
-    platform: '',
-    latestStatus: '',
-    isSampled: ''
-  },
-  defaultPageSize: 100
+// 筛选条件
+const filters = ref({
+  keyword: '',
+  accountType: '',
+  platform: '',
+  latestStatus: '',
+  isSampled: ''
 })
 
-// 模拟数据
-tableData.value = [
-  { id: 1, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'Telegram', accountNo: '-', version: 'h3332', location: 'A类', nickname: '王湖', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '65', groupsCount: '65', integrity: 50, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 2, accountType: '声（高）', isSampled: '是', sampleResult: '-', platform: 'WhatsApp', accountNo: '-', version: 'h3333', location: 'A类', nickname: 'user2', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '128', groupsCount: '32', integrity: 60, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 3, accountType: '声（中）', isSampled: '是', sampleResult: '-', platform: 'Signal', accountNo: '-', version: 'h3334', location: 'A类', nickname: 'user3', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '88', groupsCount: '45', integrity: 75, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 4, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'Line', accountNo: '-', version: 'h3335', location: 'A类', nickname: 'user4', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '256', groupsCount: '18', integrity: 80, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 5, accountType: '采集', isSampled: '是', sampleResult: '-', platform: 'Skype', accountNo: '-', version: 'h3336', location: 'A类', nickname: 'user5', accountId: '-', url: '-', region: '美国', registeredAt: '2024.03.01', fansCount: '-', friendsCount: '156', groupsCount: '28', integrity: 90, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' }
-]
-total.value = 9900
+// 获取下拉筛选选项
+const fetchFilterOptions = async () => {
+  try {
+    const [platformsRes, typesRes, statusesRes] = await Promise.all([
+      getPlatforms(),
+      getAccountTypes(),
+      getStatuses()
+    ])
 
-// 处理分页变化事件
-const onPageChange = ({ page, pageSize }) => {
-  console.log('分页变化:', { page, pageSize })
-  handlePageChange({ page, pageSize })
+    if (platformsRes.code === 200 && platformsRes.data) {
+      platformOptions.value = platformsRes.data
+    }
+    if (typesRes.code === 200 && typesRes.data) {
+      accountTypeOptions.value = typesRes.data
+    }
+    if (statusesRes.code === 200 && statusesRes.data) {
+      latestStatusOptions.value = statusesRes.data
+    }
+  } catch (error) {
+    console.error('获取筛选选项失败:', error)
+  }
+}
+
+// 获取表格数据
+const fetchTableData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      resourceType: 2, // 2 = 即时通讯
+      keyword: filters.value.keyword || undefined,
+      accountType: filters.value.accountType || undefined,
+      platformName: filters.value.platform || undefined,
+      latestStatus: filters.value.latestStatus || undefined,
+      isSampled: filters.value.isSampled || undefined,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
+    }
+
+    const res = await getAccountPage(params)
+    if (res.code === 200 && res.data) {
+      tableData.value = res.data.records || []
+      total.value = res.data.total || 0
+      currentPage.value = res.data.current || 1
+      pageSize.value = res.data.size || 100
+    }
+  } catch (error) {
+    console.error('获取表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 处理搜索
+const handleSearch = () => {
+  currentPage.value = 1
+  fetchTableData()
+}
+
+// 处理分页变化
+const onPageChange = ({ page, pageSize: size }) => {
+  currentPage.value = page
+  pageSize.value = size
+  fetchTableData()
 }
 
 // 处理详情点击 - 跳转到账号详情页
@@ -158,6 +211,8 @@ const handleAttachmentClick = (url) => {
           :total="total"
           :columns="tableColumns"
           :platform-options="platformOptions"
+          :account-type-options="accountTypeOptions"
+          :latest-status-options="latestStatusOptions"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

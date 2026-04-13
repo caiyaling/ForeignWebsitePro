@@ -46,6 +46,11 @@ const props = defineProps({
   pageSizes: {
     type: Array,
     default: () => [10, 20, 50, 100]
+  },
+  // 加载状态
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -139,6 +144,8 @@ onUnmounted(() => {
         stripe
         class="data-table"
         :height="tableHeight"
+        v-loading="loading"
+        element-loading-text="加载中..."
       >
         <!-- 序号列 -->
         <el-table-column type="index" label="序号" width="60" align="center" />

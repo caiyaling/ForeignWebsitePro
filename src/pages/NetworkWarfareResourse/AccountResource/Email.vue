@@ -1,87 +1,171 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
-import { useTableData } from '@/composables/useTableData'
+import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
 
 const router = useRouter()
+
+// 平台配置映射
+const platformConfig = {
+  'Gmail': { icon: '/figma/email-gmail.svg', variant: 'warm' },
+  'Outlook': { icon: '/figma/email-outlook.svg', variant: 'warm' },
+  'Yahoo Mail': { icon: '/figma/email-yahoo.svg', variant: 'cool' },
+  'Hotmail': { icon: '/figma/email-hotmail.svg', variant: 'cool' },
+  'ProtonMail': { icon: '/figma/email-proton.svg', variant: 'warm' },
+  'iCloud': { icon: '/figma/email-icloud.svg', variant: 'cool' }
+}
+
+// 格式化数字（添加千分位）
+const formatNumber = (num) => {
+  if (!num && num !== 0) return '0'
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+// 卡片数据
+const cards = ref([])
+
+// 获取卡片数据
+const fetchCardsData = async () => {
+  try {
+    const res = await getAccountTypeStats(4) // 4 = 邮箱
+    if (res.code === 200 && res.data) {
+      cards.value = res.data.map(item => {
+        const config = platformConfig[item.platformName] || { icon: '', variant: 'warm' }
+        const stats = item.accountTypeStats.map(stat => ({
+          label: stat.accountType,
+          value: formatNumber(stat.count)
+        }))
+        const total = item.accountTypeStats.reduce((sum, stat) => sum + stat.count, 0)
+
+        return {
+          name: item.platformName,
+          total: formatNumber(total),
+          icon: config.icon,
+          variant: config.variant,
+          stats
+        }
+      })
+    }
+  } catch (error) {
+    console.error('获取账号类型统计失败:', error)
+  }
+}
+
+onMounted(() => {
+  fetchCardsData()
+  fetchFilterOptions()
+  fetchTableData()
+})
 
 // 电子邮箱表格列配置
 const tableColumns = [
   { prop: 'accountType', label: '账号类型', width: 100 },
-  { prop: 'sampled', label: '是否采样', width: 80, align: 'center' },
-  { prop: 'result', label: '采样结果', width: 80, align: 'center' },
-  { prop: 'platform', label: '平台名称', width: 120 },
-  { prop: 'accountNo', label: '账号编号', width: 100 },
-  { prop: 'version', label: '账号版本号', width: 100 },
-  { prop: 'location', label: '账号定位', width: 100 },
-  { prop: 'nickname', label: '用户昵称', width: 120 },
+  { prop: 'isSampled', label: '是否抽检', width: 80, align: 'center' },
+  { prop: 'sampleResult', label: '抽检结果', width: 80, align: 'center' },
+  { prop: 'platformName', label: '平台名称', width: 120 },
+  { prop: 'accountCode', label: '账号编号', width: 100 },
+  { prop: 'accountVersion', label: '账号版本号', width: 100 },
+  { prop: 'accountPositioning', label: '账号定位', width: 100 },
+  { prop: 'userNickname', label: '用户昵称', width: 120 },
   { prop: 'accountId', label: '账号ID', width: 120 },
-  { prop: 'url', label: '链接URL', width: 100 },
-  { prop: 'region', label: '注册地区', width: 100 },
-  { prop: 'registeredAt', label: '注册时间', width: 120 },
-  { prop: 'integrity', label: '账号信息完善度', width: 130, type: 'progress' },
-  { prop: 'delivery', label: '交付方', width: 100 },
+  { prop: 'linkUrl', label: '链接URL', width: 100 },
+  { prop: 'registerRegion', label: '注册地区', width: 100 },
+  { prop: 'registerTime', label: '注册时间', width: 120 },
+  { prop: 'accountInfoCompleteness', label: '账号完善度', width: 130, type: 'progress' },
+  { prop: 'deliveryParty', label: '交付方', width: 100 },
   { prop: 'latestStatus', label: '最新状态', width: 100, type: 'status' },
-  { prop: 'updatedAt', label: '更新时间', width: 120 },
+  { prop: 'statisticsEndDate', label: '统计结束时间', width: 120 },
   { prop: 'action', label: '操作', width: 80, type: 'action' }
 ]
 
-// 电子邮箱平台选项
-const platformOptions = ['Gmail', 'Outlook', 'Yahoo Mail', 'Hotmail', 'ProtonMail', 'iCloud']
+// 下拉筛选选项
+const platformOptions = ref([])
+const accountTypeOptions = ref([])
+const latestStatusOptions = ref([])
 
-// 电子邮箱卡片数据
-const cards = [
-  {
-    name: 'Gmail',
-    total: '12,584',
-    icon: '/figma/email-gmail.svg'
-  },
-  {
-    name: 'Outlook',
-    total: '12,584',
-    icon: '/figma/email-outlook.svg'
-  }
-]
+// 表格数据
+const tableData = ref([])
+const pageSize = ref(100)
+const currentPage = ref(1)
+const total = ref(0)
+const loading = ref(false)
 
-// 使用 useTableData composable 管理表格数据
-const {
-  tableData,
-  pageSize,
-  currentPage,
-  total,
-  filters,
-  handlePageChange,
-  handleSearch
-} = useTableData({
-  apiUrl: '', // 配置 API 地址后分页变化会自动调用接口
-  defaultFilters: {
-    keyword: '',
-    accountType: '',
-    platform: '',
-    latestStatus: '',
-    isSampled: ''
-  },
-  defaultPageSize: 100
+// 筛选条件
+const filters = ref({
+  keyword: '',
+  accountType: '',
+  platform: '',
+  latestStatus: '',
+  isSampled: ''
 })
 
-// 模拟数据
-tableData.value = [
-  { id: 1, accountType: '采集', sampled: '是', result: '-', platform: 'Gmail', accountNo: 'EM01', version: '2', location: 'A类', nickname: 'user001', accountId: 'user001@gmail.com', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 50, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 2, accountType: '声（高）', sampled: '是', result: '-', platform: 'Gmail', accountNo: 'EM02', version: '2', location: 'A类', nickname: 'user002', accountId: 'user002@gmail.com', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 60, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 3, accountType: '声（中）', sampled: '是', result: '-', platform: 'Outlook', accountNo: 'EM03', version: '2', location: 'A类', nickname: 'user003', accountId: 'user003@outlook.com', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 75, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 4, accountType: '采集', sampled: '是', result: '-', platform: 'Outlook', accountNo: 'EM04', version: '2', location: 'A类', nickname: 'user004', accountId: 'user004@outlook.com', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 80, delivery: 'lin', latestStatus: '正常', updatedAt: '2024.03.03' },
-  { id: 5, accountType: '采集', sampled: '是', result: '-', platform: 'Gmail', accountNo: 'EM05', version: '2', location: 'A类', nickname: 'user005', accountId: 'user005@gmail.com', url: '-', region: '美国', registeredAt: '2024.03.03', integrity: 90, delivery: 'lin', latestStatus: '异常', updatedAt: '2024.03.03' }
-]
-total.value = 21546
+// 获取下拉筛选选项
+const fetchFilterOptions = async () => {
+  try {
+    const [platformsRes, typesRes, statusesRes] = await Promise.all([
+      getPlatforms(),
+      getAccountTypes(),
+      getStatuses()
+    ])
 
-// 处理分页变化事件
-const onPageChange = ({ page, pageSize }) => {
-  console.log('分页变化:', { page, pageSize })
-  handlePageChange({ page, pageSize })
+    if (platformsRes.code === 200 && platformsRes.data) {
+      platformOptions.value = platformsRes.data
+    }
+    if (typesRes.code === 200 && typesRes.data) {
+      accountTypeOptions.value = typesRes.data
+    }
+    if (statusesRes.code === 200 && statusesRes.data) {
+      latestStatusOptions.value = statusesRes.data
+    }
+  } catch (error) {
+    console.error('获取筛选选项失败:', error)
+  }
+}
+
+// 获取表格数据
+const fetchTableData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      resourceType: 4, // 4 = 邮箱
+      keyword: filters.value.keyword || undefined,
+      accountType: filters.value.accountType || undefined,
+      platformName: filters.value.platform || undefined,
+      latestStatus: filters.value.latestStatus || undefined,
+      isSampled: filters.value.isSampled || undefined,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
+    }
+
+    const res = await getAccountPage(params)
+    if (res.code === 200 && res.data) {
+      tableData.value = res.data.records || []
+      total.value = res.data.total || 0
+      currentPage.value = res.data.current || 1
+      pageSize.value = res.data.size || 100
+    }
+  } catch (error) {
+    console.error('获取表格数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 处理搜索
+const handleSearch = () => {
+  currentPage.value = 1
+  fetchTableData()
+}
+
+// 处理分页变化
+const onPageChange = ({ page, pageSize: size }) => {
+  currentPage.value = page
+  pageSize.value = size
+  fetchTableData()
 }
 
 // 处理详情点击 - 跳转到账号详情页
@@ -124,6 +208,8 @@ const handleAttachmentClick = (url) => {
           :total="total"
           :columns="tableColumns"
           :platform-options="platformOptions"
+          :account-type-options="accountTypeOptions"
+          :latest-status-options="latestStatusOptions"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

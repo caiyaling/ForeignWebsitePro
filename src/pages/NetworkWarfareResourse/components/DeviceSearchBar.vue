@@ -90,6 +90,12 @@ const props = defineProps({
   exportButtonText: {
     type: String,
     default: '批量导出'
+  },
+  // 自定义筛选器配置（优先级高于默认筛选器）
+  // 格式: [{ key: 'accountType', placeholder: '账号类型', options: ['采集', '发声'] }]
+  customFilters: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -140,56 +146,79 @@ const handleBatchExport = () => {
 
       <!-- 下拉筛选器 -->
       <div class="filter-selects">
-        <!-- 所属项目 -->
-        <el-select
-          v-if="showProjectFilter"
-          :model-value="filters.project"
-          placeholder="所属项目"
-          clearable
-          class="filter-select"
-          @update:model-value="val => updateFilter('project', val)"
-        >
-          <el-option
-            v-for="item in projectOptions"
-            :key="item"
-            :label="item"
-            :value="item"
-          />
-        </el-select>
+        <!-- 自定义筛选器（优先使用） -->
+        <template v-if="customFilters.length > 0">
+          <el-select
+            v-for="filter in customFilters"
+            :key="filter.key"
+            :model-value="filters[filter.key]"
+            :placeholder="filter.placeholder"
+            clearable
+            class="filter-select"
+            @update:model-value="val => updateFilter(filter.key, val)"
+          >
+            <el-option
+              v-for="item in filter.options"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
+        </template>
 
-        <!-- 品牌/第二筛选器 -->
-        <el-select
-          v-if="showBrandFilter"
-          :model-value="filters[brandFilterKey]"
-          :placeholder="brandPlaceholder"
-          clearable
-          class="filter-select"
-          @update:model-value="val => updateFilter(brandFilterKey, val)"
-        >
-          <el-option
-            v-for="item in brandOptions"
-            :key="item"
-            :label="item"
-            :value="item"
-          />
-        </el-select>
+        <!-- 默认筛选器 -->
+        <template v-else>
+          <!-- 所属项目 -->
+          <el-select
+            v-if="showProjectFilter"
+            :model-value="filters.project"
+            placeholder="所属项目"
+            clearable
+            class="filter-select"
+            @update:model-value="val => updateFilter('project', val)"
+          >
+            <el-option
+              v-for="item in projectOptions"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
 
-        <!-- 第三筛选器 -->
-        <el-select
-          v-if="showThirdFilter"
-          :model-value="filters[thirdFilterKey]"
-          :placeholder="thirdFilterPlaceholder"
-          clearable
-          class="filter-select"
-          @update:model-value="val => updateFilter(thirdFilterKey, val)"
-        >
-          <el-option
-            v-for="item in thirdFilterOptions"
-            :key="item"
-            :label="item"
-            :value="item"
-          />
-        </el-select>
+          <!-- 品牌/第二筛选器 -->
+          <el-select
+            v-if="showBrandFilter"
+            :model-value="filters[brandFilterKey]"
+            :placeholder="brandPlaceholder"
+            clearable
+            class="filter-select"
+            @update:model-value="val => updateFilter(brandFilterKey, val)"
+          >
+            <el-option
+              v-for="item in brandOptions"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
+
+          <!-- 第三筛选器 -->
+          <el-select
+            v-if="showThirdFilter"
+            :model-value="filters[thirdFilterKey]"
+            :placeholder="thirdFilterPlaceholder"
+            clearable
+            class="filter-select"
+            @update:model-value="val => updateFilter(thirdFilterKey, val)"
+          >
+            <el-option
+              v-for="item in thirdFilterOptions"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
+        </template>
       </div>
 
       <!-- 搜索按钮 -->
