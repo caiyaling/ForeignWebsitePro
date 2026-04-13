@@ -257,6 +257,7 @@ const showAppealRecord = computed(() => {
             :page-size="pageSize"
             :current-page="currentPage"
             :total="total"
+            :max-height="200"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
           />
@@ -277,6 +278,7 @@ const showAppealRecord = computed(() => {
             :page-size="pageSize"
             :current-page="currentPage"
             :total="total"
+            :max-height="300"
             show-select-filter
             :select-options="[
               { label: '全部', value: '' },
@@ -307,6 +309,7 @@ const showAppealRecord = computed(() => {
             :page-size="pageSize"
             :current-page="currentPage"
             :total="total"
+            :max-height="300"
             show-select-filter
             :select-options="[
               { label: '全部', value: '' },
@@ -330,6 +333,7 @@ const showAppealRecord = computed(() => {
             :page-size="pageSize"
             :current-page="currentPage"
             :total="total"
+            :max-height="300"
             show-select-filter
             :select-options="[
               { label: '全部', value: '' },

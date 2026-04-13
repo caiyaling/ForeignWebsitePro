@@ -1,10 +1,16 @@
 <script setup>
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElTable, ElTableColumn, ElTag, ElProgress, ElPagination, ElSelect, ElOption, ElDatePicker, ElTooltip, ElInput, ElButton, ElIcon } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import SearchBar from './SearchBar.vue'
 
 const router = useRouter()
+
+// 表格容器引用
+const tableWrapperRef = ref(null)
+// 表格高度（动态计算）
+const tableHeight = ref(null)
 
 // 打开附件预览
 const openAttachment = (url) => {
@@ -104,10 +110,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  // 表格最大高度（用于滚动，默认400px）
+  // 表格最大高度（用于滚动，传null或0表示自适应容器高度）
   maxHeight: {
     type: Number,
-    default: 400
+    default: null
   },
   // 是否隐藏默认搜索栏
   hideSearchBar: {
@@ -254,6 +260,48 @@ const getResultClass = (result) => {
   }
   return classMap[result] || ''
 }
+
+// ResizeObserver 实例
+let resizeObserver = null
+
+// 更新表格高度
+const updateTableHeight = () => {
+  if (!tableWrapperRef.value) return
+
+  // 如果传入了固定的 maxHeight，使用固定值
+  if (props.maxHeight && props.maxHeight > 0) {
+    tableHeight.value = props.maxHeight
+    return
+  }
+
+  // 否则动态计算高度
+  const wrapperHeight = tableWrapperRef.value.clientHeight
+  if (wrapperHeight > 0) {
+    tableHeight.value = wrapperHeight
+  }
+}
+
+// 组件挂载后初始化 ResizeObserver
+onMounted(() => {
+  nextTick(() => {
+    updateTableHeight()
+
+    if (tableWrapperRef.value) {
+      resizeObserver = new ResizeObserver(() => {
+        updateTableHeight()
+      })
+      resizeObserver.observe(tableWrapperRef.value)
+    }
+  })
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+})
 </script>
 
 <template>
@@ -397,12 +445,12 @@ const getResultClass = (result) => {
       </div>
     </div>
 
-    <div class="table-wrapper">
+    <div class="table-wrapper" ref="tableWrapperRef">
       <el-table
         :data="tableData"
         stripe
         class="data-table"
-        :max-height="maxHeight"
+        :height="tableHeight"
       >
       <!-- 序号列 -->
       <el-table-column type="index" label="序号" width="60" align="center" />
@@ -851,8 +899,7 @@ const getResultClass = (result) => {
 .table-wrapper {
   flex: 1;
   min-height: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 
 /* 表格样式 */
