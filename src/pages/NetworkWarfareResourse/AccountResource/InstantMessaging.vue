@@ -177,7 +177,7 @@ const handleDetail = (row) => {
   router.push({
     path: '/account-detail',
     query: {
-      accountId: row.accountId || row.id,
+      accountCode: row.accountCode,
       from: router.currentRoute.value.path,
       accountType: row.accountType || ''
     }
