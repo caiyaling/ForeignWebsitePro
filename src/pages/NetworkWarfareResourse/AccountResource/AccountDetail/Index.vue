@@ -65,38 +65,38 @@ const opsColumns = [
 
 // 发帖行为记录表格列
 const behaviorColumns = [
-  { prop: 'updateTime', label: '更新时间', minWidth: 126, sortable: true },
-  { prop: 'postTime', label: '发帖时间', minWidth: 126, sortable: true },
-  { prop: 'isHot', label: '是否爆款', minWidth: 100, type: 'isHot' },
-  { prop: 'postUrl', label: '发帖链接', minWidth: 160 },
-  { prop: 'readCount', label: '贴文阅读量', minWidth: 126, sortable: true },
-  { prop: 'likeCount', label: '贴文点赞量', minWidth: 126, sortable: true },
-  { prop: 'commentCount', label: '贴文评论量', minWidth: 126, sortable: true },
-  { prop: 'shareCount', label: '贴文转发量', minWidth: 126, sortable: true },
-  { prop: 'textContent', label: '附带文案', minWidth: 200, type: 'overflow' },
-  { prop: 'attachmentId', label: '附件编号', minWidth: 180, type: 'attachment' },
-  { prop: 'hasTask', label: '是否派发任务', minWidth: 126 },
-  { prop: 'location', label: '点位', minWidth: 100 },
+  { prop: 'statisticsEndDate', label: '更新时间', minWidth: 140, sortable: true },
+  { prop: 'postTime', label: '发帖时间', minWidth: 140, sortable: true },
+  { prop: 'isHotPost', label: '是否爆款', minWidth: 100, type: 'isHot' },
+  { prop: 'postLink', label: '发帖链接', minWidth: 160 },
+  { prop: 'postReadCount', label: '贴文阅读量', minWidth: 126, sortable: true },
+  { prop: 'postLikeCount', label: '贴文点赞量', minWidth: 126, sortable: true },
+  { prop: 'postCommentCount', label: '贴文评论量', minWidth: 126, sortable: true },
+  { prop: 'postForwardCount', label: '贴文转发量', minWidth: 126, sortable: true },
+  { prop: 'attachedText', label: '附带文案', minWidth: 200, type: 'overflow' },
+  { prop: 'attachmentCode', label: '附件编号', minWidth: 120 },
+  { prop: 'isTaskDispatch', label: '是否派发任务', minWidth: 126 },
+  { prop: 'pointPosition', label: '点位', minWidth: 100 },
   { prop: 'remark', label: '备注', minWidth: 126 }
 ]
 
 // 助推烘托行为表格列
 const boostColumns = [
-  { prop: 'updateTime', label: '更新时间', minWidth: 160, sortable: true },
-  { prop: 'viewCount', label: '浏览量', minWidth: 120, sortable: true },
+  { prop: 'statisticsEndDate', label: '更新时间', minWidth: 140, sortable: true },
+  { prop: 'browseCount', label: '浏览量', minWidth: 120, sortable: true },
   { prop: 'likeCount', label: '点赞量', minWidth: 120, sortable: true },
   { prop: 'commentCount', label: '评论量', minWidth: 120, sortable: true },
-  { prop: 'shareCount', label: '转发量', minWidth: 120, sortable: true }
+  { prop: 'forwardCount', label: '转发量', minWidth: 120, sortable: true }
 ]
 
 
 // 申诉/替换记录表格列
 const appealColumns = [
-  { prop: 'bannedTime', label: '账号被封时间', minWidth: 160 },
-  { prop: 'appealTime', label: '申诉时间', minWidth: 160 },
-  { prop: 'likeCount', label: '点赞量', minWidth: 120, sortable: true },
-  { prop: 'commentCount', label: '评论量', minWidth: 120, sortable: true },
-  { prop: 'shareCount', label: '转发量', minWidth: 120, sortable: true }
+  { prop: 'accountBannedTime', label: '账号被封时间', minWidth: 160 },
+  { prop: 'accountRecoveryTime', label: '账号恢复时间', minWidth: 160 },
+  { prop: 'accountReplaceTime', label: '账号替换时间', minWidth: 160 },
+  { prop: 'replacedAccountId', label: '替换后账号ID', minWidth: 140 },
+  { prop: 'banReason', label: '账号封禁原因', minWidth: 140 }
 ]
 
 // 表格数据
@@ -113,14 +113,13 @@ const total = ref(0)
 
 // 筛选条件
 const postBehaviorFilter = ref({
-  updateTime: '',
-  isHot: ''
+  startTime: '',
+  endTime: '',
+  isHotPost: ''
 })
 const boostFilter = ref({
-  updateTime: ''
-})
-const appealFilter = ref({
-  bannedTime: ''
+  startTime: '',
+  endTime: ''
 })
 
 // 加载状态
@@ -228,11 +227,14 @@ const fetchPostBehavior = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    if (postBehaviorFilter.value.updateTime) {
-      params.updateTime = postBehaviorFilter.value.updateTime
+    if (postBehaviorFilter.value.startTime) {
+      params.startTime = postBehaviorFilter.value.startTime
     }
-    if (postBehaviorFilter.value.isHot) {
-      params.isHot = postBehaviorFilter.value.isHot
+    if (postBehaviorFilter.value.endTime) {
+      params.endTime = postBehaviorFilter.value.endTime
+    }
+    if (postBehaviorFilter.value.isHotPost) {
+      params.isHotPost = postBehaviorFilter.value.isHotPost
     }
     const res = await getPostBehaviorPage(params)
     if (res.code === 200 && res.data) {
@@ -256,8 +258,11 @@ const fetchBoostData = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    if (boostFilter.value.updateTime) {
-      params.updateTime = boostFilter.value.updateTime
+    if (boostFilter.value.startTime) {
+      params.startTime = boostFilter.value.startTime
+    }
+    if (boostFilter.value.endTime) {
+      params.endTime = boostFilter.value.endTime
     }
     const res = await getBoostBehaviorPage(params)
     if (res.code === 200 && res.data) {
@@ -279,9 +284,6 @@ const fetchAppealData = async () => {
       accountCode: accountCode.value,
       pageNum: currentPage.value,
       pageSize: pageSize.value
-    }
-    if (appealFilter.value.bannedTime) {
-      params.bannedTime = appealFilter.value.bannedTime
     }
     const res = await getAppealPage(params)
     if (res.code === 200 && res.data) {
