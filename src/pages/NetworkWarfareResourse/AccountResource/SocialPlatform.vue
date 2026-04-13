@@ -13,9 +13,9 @@ const router = useRouter()
 const platformConfig = {
   'Facebook': { icon: '/figma/mnijidos-mhm8ijf.svg', variant: 'warm' },
   'Instagram': { icon: '/figma/mnijidos-9h6v96r.svg', variant: 'warm' },
-  'threads': { icon: '/figma/mnijidos-927feh6.svg', variant: 'warm' },
-  'Youtube': { icon: '/figma/mnijidos-hh4aiod.svg', variant: 'cool' },
-  'TiTok': { icon: '/figma/mnijidos-neinw5m.svg', variant: 'cool' },
+  'Threads': { icon: '/figma/mnijidos-927feh6.svg', variant: 'warm' },
+  'YouTube': { icon: '/figma/mnijidos-hh4aiod.svg', variant: 'cool' },
+  'TikTok': { icon: '/figma/mnijidos-neinw5m.svg', variant: 'cool' },
   'X': { icon: '/figma/mnijidos-63851so.svg', variant: 'cool' },
   'Twitter': { icon: '/figma/mnijidos-63851so.svg', variant: 'cool' },
   'line': { icon: '/figma/mnijidos-9h6v96r.svg', variant: 'warm' }

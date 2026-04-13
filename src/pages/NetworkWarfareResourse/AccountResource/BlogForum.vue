@@ -11,6 +11,7 @@ const router = useRouter()
 
 // 平台配置映射
 const platformConfig = {
+  'PTT': { icon: '/figma/blog-ptt.svg', variant: 'warm' },
   'PPT': { icon: '/figma/blog-ppt.svg', variant: 'warm' },
   'Dcard': { icon: '/figma/blog-dcard.svg', variant: 'warm' },
   'Pixnet': { icon: '/figma/blog-pixnet.svg', variant: 'warm' }
