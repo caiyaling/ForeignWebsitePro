@@ -3,7 +3,7 @@
  * @description 详情页面搜索栏组件
  * @date 2024-04-13
  */
-import { ElSelect, ElOption, ElDatePicker } from 'element-plus'
+import { ElSelect, ElOption } from 'element-plus'
 
 const props = defineProps({
   // 表格标题
@@ -28,6 +28,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  selectLabel: {
+    type: String,
+    default: ''
+  },
   // 第二个下拉筛选器配置
   showSelectFilter2: {
     type: Boolean,
@@ -45,10 +49,9 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  // 日期选择器
-  showDatePicker: {
-    type: Boolean,
-    default: false
+  selectLabel2: {
+    type: String,
+    default: ''
   }
 })
 
@@ -72,13 +75,17 @@ const handleSelectChange2 = (val) => {
       <span class="table-title">{{ title }}</span>
     </div>
     <div class="header-right">
-      <div v-if="showSelectFilter" class="filter-item">
-        <span class="filter-label">{{ selectPlaceholder }}</span>
+      <!-- 第一个筛选器 -->
+      <div v-if="showSelectFilter" class="form-item">
+        <div class="form-label">
+          <span class="label-text">{{ selectLabel || selectPlaceholder }}</span>
+        </div>
         <el-select
           :model-value="selectValue"
-          placeholder="请选择"
+          :placeholder="selectPlaceholder"
           size="small"
           class="filter-select"
+          clearable
           @update:model-value="handleSelectChange"
         >
           <el-option
@@ -89,13 +96,17 @@ const handleSelectChange2 = (val) => {
           />
         </el-select>
       </div>
-      <div v-if="showSelectFilter2" class="filter-item">
-        <span class="filter-label">{{ selectPlaceholder2 }}</span>
+      <!-- 第二个筛选器 -->
+      <div v-if="showSelectFilter2" class="form-item">
+        <div class="form-label">
+          <span class="label-text">{{ selectLabel2 || selectPlaceholder2 }}</span>
+        </div>
         <el-select
           :model-value="selectValue2"
-          placeholder="请选择"
+          :placeholder="selectPlaceholder2"
           size="small"
           class="filter-select"
+          clearable
           @update:model-value="handleSelectChange2"
         >
           <el-option
@@ -106,14 +117,6 @@ const handleSelectChange2 = (val) => {
           />
         </el-select>
       </div>
-      <el-date-picker
-        v-if="showDatePicker"
-        type="daterange"
-        size="small"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-        style="width: 280px"
-      />
     </div>
   </div>
 </template>
@@ -151,17 +154,25 @@ const handleSelectChange2 = (val) => {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 12px;
 }
 
-.filter-item {
+.form-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.filter-label {
+.form-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   width: 64px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.label-text {
   font-size: 14px;
   color: #303133;
   font-family: var(--el-font-family, 'Inter', 'Microsoft YaHei', sans-serif);
@@ -185,12 +196,17 @@ const handleSelectChange2 = (val) => {
 }
 
 .filter-select :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #409EFF inset;
+  box-shadow: 0 0 0 1px #0048FF inset;
 }
 
 .filter-select :deep(.el-input__inner) {
   font-size: 14px;
   color: #303133;
   font-family: var(--el-font-family, 'Inter', 'Microsoft YaHei', sans-serif);
+}
+
+.filter-select :deep(.el-input__inner::placeholder) {
+  color: #A8ABB2;
+  font-size: 14px;
 }
 </style>

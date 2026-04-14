@@ -22,19 +22,25 @@ const route = useRoute()
 // 获取 accountCode
 const accountCode = computed(() => route.query.accountCode || route.query.accountId || '')
 
-// 用户信息
+// 用户信息 - 直接使用接口字段名
 const userInfo = ref({
-  avatar: '',
-  userId: '',
-  userIdTag: '',
-  statusTags: [],
-  userName: '',
-  completeness: 0,
+  platformName: '',
+  accountId: '',
+  tags: '',
+  fansCount: null,
+  friendsCount: null,
+  groupCount: null,
+  groupAvgCount: null,
+  historyPostCount: null,
+  validFansRatio: '',
+  groupValidUserRatio: '',
+  userNickname: '',
+  accountInfoCompleteness: '',
   gender: '',
-  ethnicity: '',
+  nation: '',
   school: '',
   education: '',
-  location: '',
+  region: '',
   maritalStatus: '',
   industry: '',
   occupation: '',
@@ -43,8 +49,7 @@ const userInfo = ref({
   registerRegion: '',
   registerTime: '',
   linkUrl: '',
-  bindEmail: '',
-  historyPostCount: ''
+  bindEmail: ''
 })
 
 // 账号运维信息表格列
@@ -105,26 +110,30 @@ const opsData = ref([])
 const behaviorData = ref([])
 const boostData = ref([])
 const appealData = ref([])
-const fansData = ref([])
+const fansData = ref(null)
 
 // 更新时间选项
 const updateTimeOptions = ref([])
 
-// 分页
-const pageSize = ref(10)
-const currentPage = ref(1)
-const total = ref(0)
+// 分页 - 每个表格独立分页
+const opsPagination = ref({ pageSize: 10, currentPage: 1, total: 0 })
+const postBehaviorPagination = ref({ pageSize: 10, currentPage: 1, total: 0 })
+const boostPagination = ref({ pageSize: 10, currentPage: 1, total: 0 })
+const appealPagination = ref({ pageSize: 10, currentPage: 1, total: 0 })
 
 // 筛选条件
 const postBehaviorFilter = ref({
-  startTime: '',
-  endTime: '',
+  updateTime: '',
   isHotPost: ''
 })
+const postBehaviorSelectValue = ref('')
+const postBehaviorSelectValue2 = ref('')
+
 const boostFilter = ref({
-  startTime: '',
-  endTime: ''
+  updateTime: ''
 })
+const boostSelectValue = ref('')
+
 const fansDateRange = ref([])
 
 // 加载状态
@@ -144,40 +153,8 @@ const fetchAccountDetail = async () => {
   try {
     const res = await getAccountDetail(accountCode.value)
     if (res.code === 200 && res.data) {
-      const data = res.data
-      // 构建状态标签
-      const statusTags = []
-      if (data.fansCount) statusTags.push({ label: `粉丝 ${data.fansCount}`, type: 'success' })
-      if (data.friendCount) statusTags.push({ label: `好友 ${data.friendCount}`, type: 'danger' })
-      if (data.groupOwnerCount) statusTags.push({ label: `群主 ${data.groupOwnerCount}`, type: 'primary' })
-      if (data.groupAvgMemberCount) statusTags.push({ label: `群平均人数 ${data.groupAvgMemberCount}`, type: 'warning' })
-      if (data.historyPostCount) statusTags.push({ label: `历史发言数 ${data.historyPostCount}`, type: 'success' })
-      if (data.validFansRatio) statusTags.push({ label: `有效粉丝占比 ${data.validFansRatio}`, type: 'danger' })
-      if (data.groupOwnerValidUserRatio) statusTags.push({ label: `群主有效用户占比 ${data.groupOwnerValidUserRatio}`, type: 'primary' })
-
-      userInfo.value = {
-        avatar: data.avatar || '',
-        userId: data.accountId || accountCode.value,
-        userIdTag: data.accountPositioning || '',
-        statusTags,
-        userName: data.userNickname || data.accountCode || '',
-        completeness: data.accountInfoCompleteness || 0,
-        gender: data.gender || '',
-        ethnicity: data.ethnicity || '',
-        school: data.school || '',
-        education: data.education || '',
-        location: data.location || '',
-        maritalStatus: data.maritalStatus || '',
-        industry: data.industry || '',
-        occupation: data.occupation || '',
-        hobbies: data.hobbies || '',
-        religion: data.religion || '',
-        registerRegion: data.registerRegion || '',
-        registerTime: data.registerTime || '',
-        linkUrl: data.linkUrl || '',
-        bindEmail: data.bindEmail || '',
-        historyPostCount: data.historyPostCount || ''
-      }
+      // 直接使用接口返回的数据，不做映射
+      userInfo.value = res.data
     }
   } catch (error) {
     console.error('获取账号详情失败:', error)
@@ -208,20 +185,48 @@ const fetchOpsData = async () => {
 
 // 获取粉丝数据
 const fetchFansData = async () => {
-  if (!accountCode.value) return
+  if (!accountCode.value) {
+    console.log('fetchFansData: accountCode 为空，跳过请求')
+    return
+  }
   loading.value.fans = true
   try {
     const params = { accountCode: accountCode.value }
     if (fansDateRange.value && fansDateRange.value.length === 2) {
-      params.startDate = fansDateRange.value[0]
-      params.endDate = fansDateRange.value[1]
+      params.startTime = fansDateRange.value[0]
+      params.endTime = fansDateRange.value[1]
     }
+    console.log('fetchFansData: 请求参数', params)
     const res = await getFansCountList(params)
-    if (res.code === 200 && res.data) {
-      fansData.value = res.data || []
+    console.log('粉丝数据接口完整响应:', res)
+    console.log('粉丝数据 res.code:', res?.code)
+    console.log('粉丝数据 res.data:', res?.data)
+
+    if (res && res.code === 200) {
+      if (res.data) {
+        console.log('粉丝数据 res.data:', JSON.stringify(res.data))
+        // API 可能返回 xaxis 或 xAxis，需要兼容处理
+        const xAxisData = res.data.xAxis || res.data.xaxis || []
+        const seriesData = res.data.series || []
+        console.log('处理后 xAxis:', xAxisData)
+        console.log('处理后 series:', seriesData)
+        // 统一转换为 xAxis 格式
+        fansData.value = {
+          xAxis: xAxisData,
+          series: seriesData
+        }
+      } else {
+        console.log('粉丝数据 res.data 为空')
+        fansData.value = null
+      }
+    } else {
+      console.log('粉丝数据接口返回非200或无数据, code:', res?.code, 'message:', res?.message)
+      fansData.value = null
     }
   } catch (error) {
     console.error('获取粉丝数据失败:', error)
+    console.error('错误详情:', error?.response?.data || error?.message)
+    fansData.value = null
   } finally {
     loading.value.fans = false
   }
@@ -234,14 +239,11 @@ const fetchPostBehavior = async () => {
   try {
     const params = {
       accountCode: accountCode.value,
-      pageNum: currentPage.value,
-      pageSize: pageSize.value
+      pageNum: postBehaviorPagination.value.currentPage,
+      pageSize: postBehaviorPagination.value.pageSize
     }
-    if (postBehaviorFilter.value.startTime) {
-      params.startTime = postBehaviorFilter.value.startTime
-    }
-    if (postBehaviorFilter.value.endTime) {
-      params.endTime = postBehaviorFilter.value.endTime
+    if (postBehaviorFilter.value.updateTime) {
+      params.updateTime = postBehaviorFilter.value.updateTime
     }
     if (postBehaviorFilter.value.isHotPost) {
       params.isHotPost = postBehaviorFilter.value.isHotPost
@@ -249,7 +251,7 @@ const fetchPostBehavior = async () => {
     const res = await getPostBehaviorPage(params)
     if (res.code === 200 && res.data) {
       behaviorData.value = res.data.records || []
-      total.value = res.data.total || 0
+      postBehaviorPagination.value.total = res.data.total || 0
     }
   } catch (error) {
     console.error('获取发帖行为记录失败:', error)
@@ -265,18 +267,16 @@ const fetchBoostData = async () => {
   try {
     const params = {
       accountCode: accountCode.value,
-      pageNum: currentPage.value,
-      pageSize: pageSize.value
+      pageNum: boostPagination.value.currentPage,
+      pageSize: boostPagination.value.pageSize
     }
-    if (boostFilter.value.startTime) {
-      params.startTime = boostFilter.value.startTime
-    }
-    if (boostFilter.value.endTime) {
-      params.endTime = boostFilter.value.endTime
+    if (boostFilter.value.updateTime) {
+      params.updateTime = boostFilter.value.updateTime
     }
     const res = await getBoostBehaviorPage(params)
     if (res.code === 200 && res.data) {
       boostData.value = res.data.records || []
+      boostPagination.value.total = res.data.total || 0
     }
   } catch (error) {
     console.error('获取助推烘托记录失败:', error)
@@ -292,12 +292,13 @@ const fetchAppealData = async () => {
   try {
     const params = {
       accountCode: accountCode.value,
-      pageNum: currentPage.value,
-      pageSize: pageSize.value
+      pageNum: appealPagination.value.currentPage,
+      pageSize: appealPagination.value.pageSize
     }
     const res = await getAppealPage(params)
     if (res.code === 200 && res.data) {
       appealData.value = res.data.records || []
+      appealPagination.value.total = res.data.total || 0
     }
   } catch (error) {
     console.error('获取申诉/替换记录失败:', error)
@@ -327,6 +328,8 @@ const fetchUpdateTimeList = async () => {
 
 // 初始化数据
 onMounted(() => {
+  console.log('AccountDetail onMounted - route.query:', route.query)
+  console.log('AccountDetail onMounted - accountCode:', accountCode.value)
   fetchAccountDetail()
   fetchOpsData()
   fetchFansData()
@@ -334,6 +337,34 @@ onMounted(() => {
   fetchBoostData()
   fetchAppealData()
   fetchUpdateTimeList()
+})
+
+// 账号粉丝图表数据 - 直接使用接口返回的 ECharts 格式数据
+const fansChartData = computed(() => {
+  console.log('fansChartData 计算 - fansData:', fansData.value)
+  // 如果没有数据，返回空结构
+  if (!fansData.value || !fansData.value.xAxis?.length || !fansData.value.series?.length) {
+    console.log('fansChartData: 返回空数据')
+    return { xAxis: [], series: [] }
+  }
+
+  // 接口直接返回 { xAxis: [], series: [] } 格式，添加颜色
+  const colorMap = {
+    '当前粉丝数': '#165DFF',
+    '新增粉丝数': '#14C9C9',
+    '累计新增粉丝数': '#F7BA1E'
+  }
+
+  const result = {
+    xAxis: fansData.value.xAxis,
+    series: (fansData.value.series || []).map(item => ({
+      name: item.name,
+      data: item.data,
+      color: colorMap[item.name] || '#165DFF'
+    }))
+  }
+  console.log('fansChartData: 返回有效数据', result)
+  return result
 })
 
 // 根据来源和账号类型计算可见区块
@@ -351,8 +382,15 @@ const showAccountFansChart = computed(() => {
   const from = route.query.from || ''
   const accountType = route.query.accountType || ''
 
-  // 只有社交平台-贴靠发声账号显示
-  if (from === '/social' && accountType !== '采集') return true
+  console.log('showAccountFansChart 计算:', {
+    from,
+    accountType,
+    condition: from === '/social',
+    result: from === '/social'
+  })
+
+  // 社交平台显示粉丝图表（暂时移除 accountType 条件用于调试）
+  if (from === '/social') return true
   return false
 })
 
@@ -387,25 +425,50 @@ const showAppealRecord = computed(() => {
 
 // 发帖行为记录筛选条件变化 - 更新时间
 const handlePostBehaviorFilterChange = (val) => {
-  postBehaviorFilter.value.startTime = val
-  postBehaviorFilter.value.endTime = val
-  currentPage.value = 1
+  const value = val || ''
+  postBehaviorSelectValue.value = value
+  postBehaviorFilter.value.updateTime = value
+  postBehaviorPagination.value.currentPage = 1
   fetchPostBehavior()
 }
 
 // 发帖行为记录筛选条件变化 - 是否爆款
 const handlePostBehaviorFilter2Change = (val) => {
-  postBehaviorFilter.value.isHotPost = val
-  currentPage.value = 1
+  const value = val || ''
+  postBehaviorSelectValue2.value = value
+  postBehaviorFilter.value.isHotPost = value
+  postBehaviorPagination.value.currentPage = 1
   fetchPostBehavior()
 }
 
 // 助推烘托记录筛选条件变化
 const handleBoostFilterChange = (val) => {
-  boostFilter.value.startTime = val
-  boostFilter.value.endTime = val
-  currentPage.value = 1
+  const value = val || ''
+  boostSelectValue.value = value
+  boostFilter.value.updateTime = value
+  boostPagination.value.currentPage = 1
   fetchBoostData()
+}
+
+// 发帖行为记录分页变化
+const handlePostBehaviorPageChange = ({ page, pageSize }) => {
+  postBehaviorPagination.value.currentPage = page
+  postBehaviorPagination.value.pageSize = pageSize
+  fetchPostBehavior()
+}
+
+// 助推烘托记录分页变化
+const handleBoostPageChange = ({ page, pageSize }) => {
+  boostPagination.value.currentPage = page
+  boostPagination.value.pageSize = pageSize
+  fetchBoostData()
+}
+
+// 申诉/替换记录分页变化
+const handleAppealPageChange = ({ page, pageSize }) => {
+  appealPagination.value.currentPage = page
+  appealPagination.value.pageSize = pageSize
+  fetchAppealData()
 }
 
 // 账号粉丝情况日期范围变化
@@ -451,12 +514,10 @@ const handleAttachmentClick = (url) => {
             detail-mode
             :columns="opsColumns"
             :table-data="opsData"
-            :page-size="pageSize"
-            :current-page="currentPage"
-            :total="total"
+            :page-size="opsPagination.pageSize"
+            :current-page="opsPagination.currentPage"
+            :total="opsPagination.total"
             :max-height="200"
-            @update:page-size="val => pageSize = val"
-            @update:current-page="val => currentPage = val"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
           />
@@ -464,7 +525,11 @@ const handleAttachmentClick = (url) => {
 
         <!-- 账号粉丝情况图表 -->
         <div v-if="showAccountFansChart" id="account-fans-chart" class="section-anchor">
-          <account-fans-chart title="账号粉丝情况" @date-change="handleFansDateChange" />
+          <account-fans-chart
+            title="账号粉丝情况"
+            :chart-data="fansChartData"
+            @date-change="handleFansDateChange"
+          />
         </div>
 
         <!-- 发帖行为记录表格 -->
@@ -474,22 +539,25 @@ const handleAttachmentClick = (url) => {
             detail-mode
             :columns="behaviorColumns"
             :table-data="behaviorData"
-            :page-size="pageSize"
-            :current-page="currentPage"
-            :total="total"
-            :max-height="300"
+            :page-size="postBehaviorPagination.pageSize"
+            :current-page="postBehaviorPagination.currentPage"
+            :total="postBehaviorPagination.total"
+            :max-height="500"
             show-select-filter
             :select-options="updateTimeOptions"
-            select-placeholder="更新时间"
+            select-placeholder="请选择"
+            select-label="更新时间"
+            :select-value="postBehaviorSelectValue"
             show-select-filter2
             :select-options2="[
               { label: '全部', value: '' },
-              { label: '是', value: 'yes' },
-              { label: '否', value: 'no' }
+              { label: '是', value: '1' },
+              { label: '否', value: '0' }
             ]"
-            select-placeholder2="是否爆款"
-            @update:page-size="val => pageSize = val"
-            @update:current-page="val => currentPage = val"
+            select-placeholder2="请选择"
+            select-label2="是否爆款"
+            :select-value2="postBehaviorSelectValue2"
+            @page-change="handlePostBehaviorPageChange"
             @update:select-value="handlePostBehaviorFilterChange"
             @update:select-value2="handlePostBehaviorFilter2Change"
             @detail="handleDetail"
@@ -504,15 +572,16 @@ const handleAttachmentClick = (url) => {
             detail-mode
             :columns="boostColumns"
             :table-data="boostData"
-            :page-size="pageSize"
-            :current-page="currentPage"
-            :total="total"
-            :max-height="300"
+            :page-size="boostPagination.pageSize"
+            :current-page="boostPagination.currentPage"
+            :total="boostPagination.total"
+            :max-height="500"
             show-select-filter
             :select-options="updateTimeOptions"
-            select-placeholder="更新时间"
-            @update:page-size="val => pageSize = val"
-            @update:current-page="val => currentPage = val"
+            select-placeholder="请选择"
+            select-label="更新时间"
+            :select-value="boostSelectValue"
+            @page-change="handleBoostPageChange"
             @update:select-value="handleBoostFilterChange"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
@@ -526,12 +595,11 @@ const handleAttachmentClick = (url) => {
             detail-mode
             :columns="appealColumns"
             :table-data="appealData"
-            :page-size="pageSize"
-            :current-page="currentPage"
-            :total="total"
-            :max-height="300"
-            @update:page-size="val => pageSize = val"
-            @update:current-page="val => currentPage = val"
+            :page-size="appealPagination.pageSize"
+            :current-page="appealPagination.currentPage"
+            :total="appealPagination.total"
+            :max-height="500"
+            @page-change="handleAppealPageChange"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
           />

@@ -85,6 +85,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  selectLabel: {
+    type: String,
+    default: ''
+  },
   // 第二个下拉筛选器配置
   showSelectFilter2: {
     type: Boolean,
@@ -102,10 +106,9 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  // 日期选择器
-  showDatePicker: {
-    type: Boolean,
-    default: false
+  selectLabel2: {
+    type: String,
+    default: ''
   },
   // 表格最大高度（用于滚动，传null或0表示自适应容器高度）
   maxHeight: {
@@ -261,13 +264,14 @@ const handleAttachmentClick = (url) => {
       :select-options="selectOptions"
       :select-placeholder="selectPlaceholder"
       :select-value="selectValue"
+      :select-label="selectLabel"
       :show-select-filter2="showSelectFilter2"
       :select-options2="selectOptions2"
       :select-placeholder2="selectPlaceholder2"
       :select-value2="selectValue2"
-      :show-date-picker="showDatePicker"
-      @update:select-value="val => emit('update:selectValue', val)"
-      @update:select-value2="val => emit('update:selectValue2', val)"
+      :select-label2="selectLabel2"
+      @update:selectValue="val => emit('update:selectValue', val)"
+      @update:selectValue2="val => emit('update:selectValue2', val)"
     />
 
     <!-- 列表模式搜索栏 -->

@@ -81,7 +81,9 @@ export function getAccountOperationPage(params) {
  * 查询账号粉丝数量列表
  * @param {Object} params - 查询参数
  * @param {string} params.accountCode - 账号编号
- * @returns {Promise}
+ * @param {string} params.startTime - 开始时间
+ * @param {string} params.endTime - 结束时间
+ * @returns {Promise} 返回粉丝数据列表
  */
 export function getFansCountList(params) {
   return request.get('/account-behavior-record/fans/count/list', { params })
@@ -91,8 +93,8 @@ export function getFansCountList(params) {
  * 分页查询发帖行为
  * @param {Object} params - 查询参数
  * @param {string} params.accountCode - 账号编号
- * @param {string} params.updateTime - 更新时间
- * @param {string} params.isHot - 是否爆款
+ * @param {string} params.updateTime - 更新时间（完全匹配统计结束时间，格式：yyyy-MM-dd）
+ * @param {string} params.isHotPost - 是否爆款
  * @param {number} params.pageNum - 页码
  * @param {number} params.pageSize - 每页大小
  * @returns {Promise}
@@ -105,7 +107,8 @@ export function getPostBehaviorPage(params) {
  * 分页查询助推烘托行为
  * @param {Object} params - 查询参数
  * @param {string} params.accountCode - 账号编号
- * @param {string} params.updateTime - 更新时间
+ * @param {string} params.startTime - 开始时间
+ * @param {string} params.endTime - 结束时间
  * @param {number} params.pageNum - 页码
  * @param {number} params.pageSize - 每页大小
  * @returns {Promise}

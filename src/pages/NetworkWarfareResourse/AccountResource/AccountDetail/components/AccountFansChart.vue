@@ -5,7 +5,7 @@
  * @date 2026-04-08
  */
 import { ref, computed, watch } from 'vue'
-import { ElDatePicker } from 'element-plus'
+import { ElDatePicker, ElEmpty } from 'element-plus'
 import LineChart from '@/components/LineChart.vue'
 
 const props = defineProps({
@@ -28,50 +28,84 @@ const emit = defineEmits(['date-change'])
 // 日期范围
 const dateRange = ref([])
 
+// 图表组件引用
+const lineChartRef = ref(null)
+
 // 监听日期范围变化
 watch(dateRange, (newVal) => {
   emit('date-change', newVal)
 })
 
-// 默认图表数据（用于演示）
-const defaultChartData = computed(() => {
-  // 生成日期数据 - 按设计稿日期
-  const dates = [
-    '2025-09-01', '2025-09-07', '2025-09-15', '2025-10-01', '2025-10-17',
-    '2025-10-15', '2025-10-15', '2025-10-15', '2025-10-15', '2025-10-15', '2025-10-15'
-  ]
-
-  // 生成模拟数据 - 对应设计稿中的数据
-  const currentFansData = [200, 350, 480, 620, 750, 820, 880, 920, 950, 980, 990]
-  const newFansData = [0, 150, 130, 140, 130, 70, 60, 40, 30, 30, 10]
-  const totalNewFansData = [0, 150, 280, 420, 550, 620, 680, 720, 750, 780, 790]
-
-  return {
-    xAxis: dates,
-    series: [
-      {
-        name: '当前粉丝数',
-        data: currentFansData,
-        color: '#165DFF'
-      },
-      {
-        name: '账号新增粉丝数',
-        data: newFansData,
-        color: '#14C9C9'
-      },
-      {
-        name: '账号累计新增粉丝数',
-        data: totalNewFansData,
-        color: '#F7BA1E'
-      }
-    ]
-  }
+// 是否有数据
+const hasData = computed(() => {
+  const xAxis = props.chartData?.xAxis
+  const series = props.chartData?.series
+  const result = (xAxis && xAxis.length > 0) && (series && series.length > 0)
+  console.log('AccountFansChart hasData:', result, {
+    xAxisLength: xAxis?.length,
+    seriesLength: series?.length,
+    chartData: JSON.stringify(props.chartData)
+  })
+  return result
 })
 
 // 实际使用的图表数据
 const actualChartData = computed(() => {
-  return props.chartData.xAxis?.length > 0 ? props.chartData : defaultChartData.value
+  if (hasData.value) {
+    console.log('AccountFansChart actualChartData: 使用有效数据')
+    return props.chartData
+  }
+  console.log('AccountFansChart actualChartData: 返回空数据')
+  return { xAxis: [], series: [] }
 })
+
+// 图例配置 - 名称与 API 返回一致
+const legendConfig = {
+  '当前粉丝数': { color: '#165DFF', label: '当前粉丝数' },
+  '新增粉丝数': { color: '#14C9C9', label: '账号新增粉丝数' },
+  '累计新增粉丝数': { color: '#F7BA1E', label: '账号累计新增粉丝数' }
+}
+
+// 图例选中状态 - 使用 series 名称作为 key
+const legendSelected = ref({})
+
+// 初始化图例选中状态
+watch(() => props.chartData.series, (series) => {
+  if (series && series.length > 0) {
+    const newSelected = {}
+    series.forEach(item => {
+      // 默认全部选中
+      if (legendSelected.value[item.name] === undefined) {
+        newSelected[item.name] = true
+      } else {
+        newSelected[item.name] = legendSelected.value[item.name]
+      }
+    })
+    legendSelected.value = newSelected
+  }
+}, { immediate: true })
+
+// 获取图例项列表
+const legendItems = computed(() => {
+  if (!hasData.value || !props.chartData.series) return []
+  return props.chartData.series.map(item => ({
+    name: legendConfig[item.name]?.label || item.name,
+    originalName: item.name,
+    color: item.color || legendConfig[item.name]?.color || '#165DFF',
+    selected: legendSelected.value[item.name] !== false
+  }))
+})
+
+// 点击图例项
+const handleLegendClick = (item) => {
+  // 切换选中状态
+  legendSelected.value[item.originalName] = !legendSelected.value[item.originalName]
+
+  // 调用 LineChart 的切换系列方法
+  if (lineChartRef.value) {
+    lineChartRef.value.toggleSeries(item.originalName)
+  }
+}
 
 // Y 轴格式化函数 - 按照设计稿格式显示（带两位小数）
 const yAxisFormatter = (value) => {
@@ -108,22 +142,21 @@ const yAxisFormatter = (value) => {
 
     <!-- 图表区域 -->
     <div class="chart-container">
-      <div class="chart-inner">
+      <!-- 有数据时显示图表 -->
+      <div v-if="hasData" class="chart-inner">
         <!-- 图例 -->
         <div class="chart-legend">
           <span class="unit-label">个</span>
           <div class="legend-items">
-            <div class="legend-item">
-              <span class="legend-line legend-line-blue"></span>
-              <span class="legend-text">当前粉丝数</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-line legend-line-cyan"></span>
-              <span class="legend-text">账号新增粉丝数</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-line legend-line-gold"></span>
-              <span class="legend-text">账号累计新增粉丝数</span>
+            <div
+              v-for="(item, index) in legendItems"
+              :key="index"
+              class="legend-item"
+              :class="{ 'legend-item-disabled': !item.selected }"
+              @click="handleLegendClick(item)"
+            >
+              <span class="legend-line" :style="{ background: item.selected ? item.color : '#C9CDD4' }"></span>
+              <span class="legend-text">{{ item.name }}</span>
             </div>
           </div>
         </div>
@@ -131,16 +164,21 @@ const yAxisFormatter = (value) => {
         <!-- 折线图 -->
         <div class="chart-wrapper">
           <line-chart
+            ref="lineChartRef"
             :chart-data="actualChartData"
             :show-legend="false"
             unit="个"
             height="280px"
             :line-width="3"
-            :y-axis-max="1000"
             :y-axis-split-number="5"
             :y-axis-formatter="yAxisFormatter"
           />
         </div>
+      </div>
+
+      <!-- 暂无数据占位 -->
+      <div v-else class="empty-state">
+        <el-empty description="暂无数据" />
       </div>
     </div>
   </section>
@@ -282,6 +320,17 @@ const yAxisFormatter = (value) => {
   display: flex;
   align-items: center;
   gap: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.legend-item:hover {
+  opacity: 0.8;
+}
+
+.legend-item-disabled .legend-text {
+  color: #C9CDD4;
+  text-decoration: line-through;
 }
 
 .legend-line {
@@ -314,5 +363,17 @@ const yAxisFormatter = (value) => {
 .chart-wrapper {
   flex: 1;
   min-height: 0;
+}
+
+/* 暂无数据占位样式 - 与表格空状态一致 */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 360px;
+}
+
+.empty-state :deep(.el-empty__description) {
+  margin-top: 0;
 }
 </style>

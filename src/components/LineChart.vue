@@ -75,7 +75,7 @@ const chartRef = ref(null)
 let chartInstance = null
 
 // 获取图例配置
-const getLegendConfig = () => {
+const getLegendConfig = (series) => {
   const positions = {
     'top-left': { left: 'left', top: 'top' },
     'top-right': { right: 'right', top: 'top' },
@@ -92,17 +92,30 @@ const getLegendConfig = () => {
       fontSize: 12,
       fontFamily: 'Inter, Microsoft YaHei, sans-serif'
     },
-    icon: 'rect'
+    icon: 'rect',
+    // 即使不显示图例，也需要配置 data 以支持 legendToggleSelect
+    data: series ? series.map(s => s.name) : []
   }
 }
 
 // 初始化图表
 const initChart = () => {
-  if (!chartRef.value) return
-
-  chartInstance = echarts.init(chartRef.value)
+  if (!chartRef.value) {
+    console.log('LineChart: chartRef 不存在')
+    return
+  }
 
   const { xAxis, series } = props.chartData
+  console.log('LineChart initChart - 数据:', { xAxis, series })
+
+  // 如果没有数据，不初始化图表
+  if (!xAxis?.length || !series?.length) {
+    console.log('LineChart: 数据为空，跳过初始化')
+    return
+  }
+
+  chartInstance = echarts.init(chartRef.value)
+  console.log('LineChart: ECharts 实例创建成功')
 
   // 系列配置
   const seriesConfig = series.map(item => ({
@@ -253,7 +266,7 @@ const initChart = () => {
       top: props.showLegend ? 40 : 20,
       bottom: 40
     },
-    legend: getLegendConfig(),
+    legend: getLegendConfig(seriesConfig),
     tooltip: tooltipConfig,
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
@@ -265,25 +278,50 @@ const initChart = () => {
 
 // 更新图表数据
 const updateChart = () => {
-  if (!chartInstance) return
+  console.log('LineChart updateChart - chartInstance:', !!chartInstance)
+  if (!chartInstance) {
+    // 如果图表实例不存在，尝试初始化
+    initChart()
+    return
+  }
 
   const { xAxis, series } = props.chartData
+  console.log('LineChart updateChart - 数据:', { xAxis, series })
 
+  // 如果没有数据，不更新
+  if (!xAxis?.length || !series?.length) return
+
+  // 重新构建完整的系列配置
   const seriesConfig = series.map(item => ({
     name: item.name,
+    type: 'line',
     data: item.data,
+    smooth: props.smooth,
+    symbol: 'circle',
+    symbolSize: 6,
     lineStyle: {
+      width: props.lineWidth,
       color: item.color
     },
     itemStyle: {
       color: item.color
+    },
+    emphasis: {
+      focus: 'series',
+      itemStyle: {
+        borderWidth: 2,
+        borderColor: '#fff',
+        shadowBlur: 4,
+        shadowColor: 'rgba(0, 0, 0, 0.2)'
+      }
     }
   }))
 
+  // 使用 notMerge 模式完全替换数据
   chartInstance.setOption({
     xAxis: { data: xAxis },
     series: seriesConfig
-  })
+  }, { notMerge: false })
 }
 
 // 监听窗口大小变化
@@ -291,16 +329,52 @@ const handleResize = () => {
   chartInstance?.resize()
 }
 
+// 是否已挂载
+const isMounted = ref(false)
+
 // 监听数据变化
-watch(() => props.chartData, () => {
-  nextTick(() => {
-    updateChart()
+watch(() => props.chartData, (newVal, oldVal) => {
+  console.log('LineChart watch 触发:', {
+    isMounted: isMounted.value,
+    hasXAxis: !!newVal?.xAxis?.length,
+    hasSeries: !!newVal?.series?.length,
+    chartInstance: !!chartInstance,
+    chartRefExists: !!chartRef.value,
+    newVal: newVal,
+    oldVal: oldVal
   })
-}, { deep: true })
+
+  // 必须等待组件挂载后才能操作
+  if (!isMounted.value) {
+    console.log('LineChart: 组件未挂载，跳过')
+    return
+  }
+
+  // 如果有数据变化，进行更新或初始化
+  if (newVal?.xAxis?.length && newVal?.series?.length) {
+    nextTick(() => {
+      if (chartInstance) {
+        console.log('LineChart: 更新已存在的图表')
+        updateChart()
+      } else {
+        console.log('LineChart: 初始化新图表')
+        initChart()
+      }
+    })
+  }
+}, { deep: true, immediate: true })
 
 onMounted(() => {
+  console.log('LineChart onMounted 开始, chartData:', props.chartData)
+  isMounted.value = true
+
+  // 组件挂载时，如果数据已存在则初始化
   nextTick(() => {
-    initChart()
+    console.log('LineChart nextTick 内, chartData:', props.chartData)
+    if (props.chartData?.xAxis?.length && props.chartData?.series?.length) {
+      console.log('LineChart: 挂载时有数据，初始化图表')
+      initChart()
+    }
     window.addEventListener('resize', handleResize)
   })
 })
@@ -310,10 +384,23 @@ onUnmounted(() => {
   chartInstance?.dispose()
 })
 
+// 切换系列显示/隐藏
+const toggleSeries = (seriesName) => {
+  if (!chartInstance) return
+
+  // 使用 ECharts 的 dispatchAction 切换图例选中状态
+  // 这会自动隐藏/显示对应的系列
+  chartInstance.dispatchAction({
+    type: 'legendToggleSelect',
+    name: seriesName
+  })
+}
+
 // 暴露方法
 defineExpose({
   resize: handleResize,
-  getChartInstance: () => chartInstance
+  getChartInstance: () => chartInstance,
+  toggleSeries
 })
 </script>
 
