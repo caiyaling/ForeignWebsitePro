@@ -118,11 +118,18 @@ export function getBoostBehaviorPage(params) {
  * 分页查询账号申诉信息
  * @param {Object} params - 查询参数
  * @param {string} params.accountCode - 账号编号
- * @param {string} params.bannedTime - 账号被封时间
  * @param {number} params.pageNum - 页码
  * @param {number} params.pageSize - 每页大小
  * @returns {Promise}
  */
 export function getAppealPage(params) {
   return request.get('/account-info/appeal/page', { params })
+}
+
+/**
+ * 获取更新时间列表（统计结束时间）
+ * @returns {Promise} 返回 List<String> 格式为 yyyy-MM-dd
+ */
+export function getUpdateTimeList() {
+  return request.get('/account-behavior-record/update-time/list')
 }

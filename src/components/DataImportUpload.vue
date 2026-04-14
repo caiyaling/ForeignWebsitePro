@@ -5,7 +5,7 @@
  */
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { UploadFilled, Document, Close } from '@element-plus/icons-vue'
+import { UploadFilled, Document, Close, Download } from '@element-plus/icons-vue'
 
 const props = defineProps({
   // 是否限制只能上传一个文件
@@ -20,7 +20,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'remove'])
+const emit = defineEmits(['change', 'remove', 'download-template'])
 
 // 已上传文件列表
 const fileList = ref([])
@@ -58,6 +58,11 @@ const clearFiles = () => {
   fileList.value = []
 }
 
+// 处理模板下载
+const handleTemplateDownload = () => {
+  emit('download-template')
+}
+
 // 暴露方法供父组件调用
 defineExpose({
   getFiles,
@@ -79,6 +84,12 @@ defineExpose({
       <el-icon class="upload-icon"><UploadFilled /></el-icon>
       <div class="upload-text">点击上传Excel文件</div>
     </el-upload>
+
+    <!-- 模板下载按钮 -->
+    <div class="template-download" @click="handleTemplateDownload">
+      <el-icon class="download-icon"><Download /></el-icon>
+      <span class="download-text">模版下载</span>
+    </div>
 
     <!-- 已上传文件列表 -->
     <div v-if="fileList.length > 0" class="file-list">
@@ -138,6 +149,32 @@ defineExpose({
     line-height: 22px;
     color: #0060ff;
     cursor: pointer;
+  }
+}
+
+.template-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 4px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  .download-icon {
+    font-size: 14px;
+    color: #0060ff;
+  }
+
+  .download-text {
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    color: #0060ff;
+    white-space: nowrap;
   }
 }
 

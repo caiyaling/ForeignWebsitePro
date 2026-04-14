@@ -13,7 +13,8 @@ import {
   getFansCountList,
   getPostBehaviorPage,
   getBoostBehaviorPage,
-  getAppealPage
+  getAppealPage,
+  getUpdateTimeList
 } from '@/api/account'
 
 const route = useRoute()
@@ -105,6 +106,9 @@ const behaviorData = ref([])
 const boostData = ref([])
 const appealData = ref([])
 const fansData = ref([])
+
+// 更新时间选项
+const updateTimeOptions = ref([])
 
 // 分页
 const pageSize = ref(10)
@@ -296,6 +300,25 @@ const fetchAppealData = async () => {
   }
 }
 
+// 获取更新时间列表
+const fetchUpdateTimeList = async () => {
+  try {
+    const res = await getUpdateTimeList()
+    if (res.code === 200 && res.data) {
+      // 转换为下拉选项格式
+      updateTimeOptions.value = [
+        { label: '全部', value: '' },
+        ...res.data.map(item => ({
+          label: item,
+          value: item
+        }))
+      ]
+    }
+  } catch (error) {
+    console.error('获取更新时间列表失败:', error)
+  }
+}
+
 // 初始化数据
 onMounted(() => {
   fetchAccountDetail()
@@ -304,6 +327,7 @@ onMounted(() => {
   fetchPostBehavior()
   fetchBoostData()
   fetchAppealData()
+  fetchUpdateTimeList()
 })
 
 // 根据来源和账号类型计算可见区块
@@ -420,12 +444,7 @@ const handleAttachmentClick = (url) => {
             :total="total"
             :max-height="300"
             show-select-filter
-            :select-options="[
-              { label: '全部', value: '' },
-              { label: '2024.03.15', value: '2024.03.15' },
-              { label: '2024.03.14', value: '2024.03.14' },
-              { label: '2024.03.13', value: '2024.03.13' }
-            ]"
+            :select-options="updateTimeOptions"
             select-placeholder="更新时间"
             show-select-filter2
             :select-options2="[
@@ -453,12 +472,7 @@ const handleAttachmentClick = (url) => {
             :total="total"
             :max-height="300"
             show-select-filter
-            :select-options="[
-              { label: '全部', value: '' },
-              { label: '2026.01.20', value: '2026.01.20' },
-              { label: '2026.01.19', value: '2026.01.19' },
-              { label: '2026.01.18', value: '2026.01.18' }
-            ]"
+            :select-options="updateTimeOptions"
             select-placeholder="更新时间"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
@@ -478,14 +492,6 @@ const handleAttachmentClick = (url) => {
             :current-page="currentPage"
             :total="total"
             :max-height="300"
-            show-select-filter
-            :select-options="[
-              { label: '全部', value: '' },
-              { label: '2026.01.20', value: '2026.01.20' },
-              { label: '2026.01.19', value: '2026.01.19' },
-              { label: '2026.01.18', value: '2026.01.18' }
-            ]"
-            select-placeholder="更新时间"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
             @detail="handleDetail"

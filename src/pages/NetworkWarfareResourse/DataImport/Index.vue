@@ -8,6 +8,14 @@ import { ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import DataImportUpload from '@/components/DataImportUpload.vue'
+import {
+  downloadAccountTemplate,
+  importAccountData,
+  downloadBehaviorTemplate,
+  importBehaviorData,
+  downloadHotPostTemplate,
+  importHotPostData
+} from '@/api/dataImport'
 
 // 当前激活的标签页
 const activeTab = ref('account')
@@ -15,20 +23,106 @@ const activeTab = ref('account')
 // 上传组件引用
 const uploadRef = ref(null)
 
+// 导入加载状态
+const importing = ref(false)
+
 // 处理文件变化
 const handleFileChange = (files) => {
   console.log('文件变化:', files)
 }
 
-// 提交上传
-const handleSubmit = () => {
+// 处理模板下载
+const handleDownloadTemplate = async () => {
+  try {
+    let res
+    let fileName
+
+    switch (activeTab.value) {
+      case 'account':
+        res = await downloadAccountTemplate()
+        fileName = '账号基本情况模板.xlsx'
+        break
+      case 'behavior':
+        res = await downloadBehaviorTemplate()
+        fileName = '账号行为记录模板.xlsx'
+        break
+      case 'popular':
+        res = await downloadHotPostTemplate()
+        fileName = '爆款贴文链接模板.xlsx'
+        break
+      default:
+        ElMessage.warning('未知的导入类型')
+        return
+    }
+
+    // 创建 blob 并在新窗口打开
+    const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = window.URL.createObjectURL(blob)
+
+    // 尝试在新窗口打开 Excel 文件
+    const newWindow = window.open(url, '_blank')
+
+    // 如果新窗口打开失败（可能被浏览器拦截），则下载文件
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
+    // 延迟释放 URL，确保文件可以被打开
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url)
+    }, 1000)
+  } catch (error) {
+    console.error('模板下载失败:', error)
+    ElMessage.error('模板下载失败')
+  }
+}
+
+// 处理导入
+const handleImport = async () => {
   const files = uploadRef.value?.getFiles()
   if (!files || files.length === 0) {
     ElMessage.warning('请先上传文件')
     return
   }
-  console.log('上传文件:', files)
-  ElMessage.success('上传成功')
+
+  importing.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', files[0].raw)
+
+    let res
+    switch (activeTab.value) {
+      case 'account':
+        res = await importAccountData(formData)
+        break
+      case 'behavior':
+        res = await importBehaviorData(formData)
+        break
+      case 'popular':
+        res = await importHotPostData(formData)
+        break
+      default:
+        ElMessage.warning('未知的导入类型')
+        return
+    }
+
+    if (res.code === 200) {
+      ElMessage.success('导入成功')
+      uploadRef.value?.clearFiles()
+    } else {
+      ElMessage.error(res.message || '导入失败')
+    }
+  } catch (error) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败')
+  } finally {
+    importing.value = false
+  }
 }
 </script>
 
@@ -71,6 +165,7 @@ const handleSubmit = () => {
               ref="uploadRef"
               :single-file="true"
               @change="handleFileChange"
+              @download-template="handleDownloadTemplate"
             />
           </div>
         </div>
