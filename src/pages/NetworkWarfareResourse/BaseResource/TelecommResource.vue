@@ -146,7 +146,7 @@ const smsColumns = [
   { prop: 'sendResult', label: '发送结果', minWidth: 100 },
   { prop: 'deliveryTime', label: '送达时间', minWidth: 120 },
   { prop: 'receiveNumber', label: '接收号码', minWidth: 140 },
-  { prop: 'smsContent', label: '短信内容', minWidth: 200 },
+  { prop: 'smsContent', label: '短信内容', minWidth: 220, type: 'overflow' },
   { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
@@ -178,13 +178,13 @@ const tableColumns = computed(() => {
 const smsData = ref([])
 const smsTotal = ref(0)
 const smsCurrentPage = ref(1)
-const smsPageSize = ref(100)
+const smsPageSize = ref(10)
 
 // 语音表格数据
 const voiceData = ref([])
 const voiceTotal = ref(0)
 const voiceCurrentPage = ref(1)
-const voicePageSize = ref(100)
+const voicePageSize = ref(10)
 
 // 加载状态
 const loading = ref(false)
@@ -239,7 +239,7 @@ const fetchSmsData = async () => {
       smsData.value = res.data.records || []
       smsTotal.value = res.data.total || 0
       smsCurrentPage.value = res.data.current || 1
-      smsPageSize.value = res.data.size || 100
+      smsPageSize.value = res.data.size || 10
     }
   } catch (error) {
     console.error('获取短信表格数据失败:', error)
@@ -263,7 +263,7 @@ const fetchVoiceData = async () => {
       voiceData.value = res.data.records || []
       voiceTotal.value = res.data.total || 0
       voiceCurrentPage.value = res.data.current || 1
-      voicePageSize.value = res.data.size || 100
+      voicePageSize.value = res.data.size || 10
     }
   } catch (error) {
     console.error('获取语音表格数据失败:', error)

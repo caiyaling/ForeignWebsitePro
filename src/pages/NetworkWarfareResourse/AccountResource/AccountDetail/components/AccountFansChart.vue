@@ -4,7 +4,7 @@
  * @author Claude
  * @date 2026-04-08
  */
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElDatePicker } from 'element-plus'
 import LineChart from '@/components/LineChart.vue'
 
@@ -23,8 +23,15 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['date-change'])
+
 // 日期范围
 const dateRange = ref([])
+
+// 监听日期范围变化
+watch(dateRange, (newVal) => {
+  emit('date-change', newVal)
+})
 
 // 默认图表数据（用于演示）
 const defaultChartData = computed(() => {
@@ -84,7 +91,6 @@ const yAxisFormatter = (value) => {
       </div>
       <div class="header-right">
         <div class="form-item">
-          <span class="required-mark">*</span>
           <span class="form-label">统计时间范围</span>
         </div>
         <el-date-picker

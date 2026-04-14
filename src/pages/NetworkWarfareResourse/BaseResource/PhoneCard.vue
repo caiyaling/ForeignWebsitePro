@@ -83,20 +83,20 @@ const tableColumns = [
   { prop: 'cardCode', label: '编号', minWidth: 120 },
   { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
   { prop: 'assetCategory', label: '资产类别', minWidth: 100 },
-  { prop: 'cardSerialNumber', label: '手机卡序列号', minWidth: 140 },
+  { prop: 'cardSerialNumber', label: '手机卡序列号', minWidth: 250 },
   { prop: 'phoneNumber', label: '手机号', minWidth: 120 },
   { prop: 'projectCode', label: '所属项目', minWidth: 120 },
   { prop: 'equipmentCode', label: '所属装备', minWidth: 120 },
   { prop: 'brandModel', label: '品牌型号', minWidth: 120 },
-  { prop: 'specParams', label: '规格参数', minWidth: 140 },
-  { prop: 'remark', label: '备注', minWidth: 100 },
+  { prop: 'specParams', label: '规格参数', minWidth: 160, type: 'overflow' },
+  { prop: 'remark', label: '备注', minWidth: 120, type: 'overflow' },
   { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 表格数据
 const tableData = ref([])
-const pageSize = ref(100)
+const pageSize = ref(10)
 const currentPage = ref(1)
 const total = ref(0)
 const loading = ref(false)
@@ -138,7 +138,7 @@ const fetchTableData = async () => {
       tableData.value = res.data.records || []
       total.value = res.data.total || 0
       currentPage.value = res.data.current || 1
-      pageSize.value = res.data.size || 100
+      pageSize.value = res.data.size || 10
     }
   } catch (error) {
     console.error('获取表格数据失败:', error)

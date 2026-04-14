@@ -68,19 +68,19 @@ const tableColumns = [
   { prop: 'isSampled', label: '是否抽检', width: 80, align: 'center' },
   { prop: 'sampleResult', label: '抽检结果', width: 80, align: 'center' },
   { prop: 'platformName', label: '平台名称', width: 120 },
-  { prop: 'accountCode', label: '账号编号', width: 100 },
+  { prop: 'accountCode', label: '账号编号', width: 130 },
   { prop: 'accountVersion', label: '账号版本号', width: 100 },
-  { prop: 'accountPositioning', label: '账号定位', width: 100 },
-  { prop: 'userNickname', label: '用户昵称', width: 120 },
-  { prop: 'accountId', label: '账号ID', width: 120 },
-  { prop: 'linkUrl', label: '链接URL', width: 100 },
-  { prop: 'registerRegion', label: '注册地区', width: 100 },
+  { prop: 'accountPositioning', label: '账号定位', minWidth: 120, type: 'overflow' },
+  { prop: 'userNickname', label: '用户昵称', minWidth: 120, type: 'overflow' },
+  { prop: 'accountId', label: '账号ID', width: 150 },
+  { prop: 'linkUrl', label: '链接URL', minWidth: 200, type: 'overflow' },
+  { prop: 'registerRegion', label: '注册地区', width: 150 },
   { prop: 'registerTime', label: '注册时间', width: 120 },
   { prop: 'fansCount', label: '粉丝数量', width: 100 },
   { prop: 'friendsCount', label: '好友数量', width: 100 },
   { prop: 'groupCount', label: '群组数量', width: 100 },
   { prop: 'accountInfoCompleteness', label: '账号完善度', width: 130, type: 'progress' },
-  { prop: 'deliveryParty', label: '交付方', width: 100 },
+  { prop: 'deliveryParty', label: '交付方', width: 200 },
   { prop: 'latestStatus', label: '最新状态', width: 100, type: 'status' },
   { prop: 'statisticsEndDate', label: '统计结束时间', width: 120 },
   { prop: 'action', label: '操作', width: 80, type: 'action' }
@@ -93,7 +93,7 @@ const latestStatusOptions = ref([])
 
 // 表格数据
 const tableData = ref([])
-const pageSize = ref(100)
+const pageSize = ref(10)
 const currentPage = ref(1)
 const total = ref(0)
 const loading = ref(false)
@@ -150,7 +150,7 @@ const fetchTableData = async () => {
       tableData.value = res.data.records || []
       total.value = res.data.total || 0
       currentPage.value = res.data.current || 1
-      pageSize.value = res.data.size || 100
+      pageSize.value = res.data.size || 10
     }
   } catch (error) {
     console.error('获取表格数据失败:', error)

@@ -153,7 +153,7 @@ const cloudPhoneColumns = [
   { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
   { prop: 'model', label: '型号', minWidth: 140 },
   { prop: 'brand', label: '品牌', minWidth: 100 },
-  { prop: 'configuration', label: '配置', minWidth: 200 },
+  { prop: 'configuration', label: '配置', minWidth: 200, type: 'overflow' },
   { prop: 'operatingSystem', label: '操作系统', minWidth: 100 },
   { prop: 'quantity', label: '数量', minWidth: 80 },
   { prop: 'updateTime', label: '更新时间', minWidth: 120 },
@@ -169,7 +169,7 @@ const physicalPhoneColumns = [
   { prop: 'model', label: '资产名称', minWidth: 140 },
   { prop: 'brand', label: '品牌', minWidth: 100 },
   { prop: 'serialNumber', label: '序列号', minWidth: 160 },
-  { prop: 'configuration', label: '基本配置', minWidth: 200 },
+  { prop: 'configuration', label: '基本配置', minWidth: 200, type: 'overflow' },
   { prop: 'unit', label: '单位', minWidth: 80 },
   { prop: 'quantity', label: '数量', minWidth: 80 },
   { prop: 'updateTime', label: '更新时间', minWidth: 120 },
@@ -203,7 +203,7 @@ const filters = ref({
   brand: ''
 })
 
-const pageSize = ref(100)
+const pageSize = ref(10)
 const currentPage = ref(1)
 const total = ref(0)
 const loading = ref(false)
@@ -266,7 +266,7 @@ const fetchTableData = async () => {
         cloudPhoneData.value = res.data.records || []
         total.value = res.data.total || 0
         currentPage.value = res.data.current || 1
-        pageSize.value = res.data.size || 100
+        pageSize.value = res.data.size || 10
       }
     } else {
       // 实体手机表格数据
@@ -275,7 +275,7 @@ const fetchTableData = async () => {
         physicalPhoneData.value = res.data.records || []
         total.value = res.data.total || 0
         currentPage.value = res.data.current || 1
-        pageSize.value = res.data.size || 100
+        pageSize.value = res.data.size || 10
       }
     }
   } catch (error) {

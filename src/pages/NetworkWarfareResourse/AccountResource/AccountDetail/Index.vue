@@ -52,16 +52,16 @@ const opsColumns = [
   { prop: 'loginMethod', label: '登录方式', minWidth: 126 },
   { prop: 'loginPassword', label: '登录密码', minWidth: 126 },
   { prop: 'bindPhone', label: '绑定手机号', minWidth: 126 },
-  { prop: 'phoneLocation', label: '手机号归属地', minWidth: 126 },
+  { prop: 'phoneRegion', label: '手机号归属地', minWidth: 126 },
   { prop: 'bindEmail', label: '绑定邮箱', minWidth: 126 },
-  { prop: 'networkIP', label: '网络IP', minWidth: 126 },
+  { prop: 'networkIp', label: '网络IP', minWidth: 126 },
   { prop: 'systemTimezone', label: '系统时区', minWidth: 126 },
   { prop: 'browserLanguage', label: '浏览器语言', minWidth: 126 },
-  { prop: 'userAgent', label: 'User Agent', minWidth: 126 },
+  { prop: 'userAgent', label: 'User Agent', minWidth: 200, type: 'overflow' },
   { prop: 'latestStatus', label: '最新状态', minWidth: 126 },
   { prop: 'checkDate', label: '检测日期', minWidth: 126 },
-  { prop: 'expiryDate', label: '失效日期', minWidth: 126 },
-  { prop: 'remark', label: '备注', minWidth: 126 }
+  { prop: 'invalidDate', label: '失效日期', minWidth: 126 },
+  { prop: 'remark', label: '备注', minWidth: 150, type: 'overflow' }
 ]
 
 // 发帖行为记录表格列
@@ -69,7 +69,7 @@ const behaviorColumns = [
   { prop: 'statisticsEndDate', label: '更新时间', minWidth: 140, sortable: true },
   { prop: 'postTime', label: '发帖时间', minWidth: 140, sortable: true },
   { prop: 'isHotPost', label: '是否爆款', minWidth: 100, type: 'isHot' },
-  { prop: 'postLink', label: '发帖链接', minWidth: 160 },
+  { prop: 'postLink', label: '发帖链接', minWidth: 180, type: 'overflow' },
   { prop: 'postReadCount', label: '贴文阅读量', minWidth: 126, sortable: true },
   { prop: 'postLikeCount', label: '贴文点赞量', minWidth: 126, sortable: true },
   { prop: 'postCommentCount', label: '贴文评论量', minWidth: 126, sortable: true },
@@ -78,7 +78,7 @@ const behaviorColumns = [
   { prop: 'attachmentCode', label: '附件编号', minWidth: 120 },
   { prop: 'isTaskDispatch', label: '是否派发任务', minWidth: 126 },
   { prop: 'pointPosition', label: '点位', minWidth: 100 },
-  { prop: 'remark', label: '备注', minWidth: 126 }
+  { prop: 'remark', label: '备注', minWidth: 150, type: 'overflow' }
 ]
 
 // 助推烘托行为表格列
@@ -97,7 +97,7 @@ const appealColumns = [
   { prop: 'accountRecoveryTime', label: '账号恢复时间', minWidth: 160 },
   { prop: 'accountReplaceTime', label: '账号替换时间', minWidth: 160 },
   { prop: 'replacedAccountId', label: '替换后账号ID', minWidth: 140 },
-  { prop: 'banReason', label: '账号封禁原因', minWidth: 140 }
+  { prop: 'banReason', label: '账号封禁原因', minWidth: 180, type: 'overflow' }
 ]
 
 // 表格数据
@@ -125,6 +125,7 @@ const boostFilter = ref({
   startTime: '',
   endTime: ''
 })
+const fansDateRange = ref([])
 
 // 加载状态
 const loading = ref({
@@ -210,7 +211,12 @@ const fetchFansData = async () => {
   if (!accountCode.value) return
   loading.value.fans = true
   try {
-    const res = await getFansCountList({ accountCode: accountCode.value })
+    const params = { accountCode: accountCode.value }
+    if (fansDateRange.value && fansDateRange.value.length === 2) {
+      params.startDate = fansDateRange.value[0]
+      params.endDate = fansDateRange.value[1]
+    }
+    const res = await getFansCountList(params)
     if (res.code === 200 && res.data) {
       fansData.value = res.data || []
     }
@@ -379,6 +385,35 @@ const showAppealRecord = computed(() => {
   return false
 })
 
+// 发帖行为记录筛选条件变化 - 更新时间
+const handlePostBehaviorFilterChange = (val) => {
+  postBehaviorFilter.value.startTime = val
+  postBehaviorFilter.value.endTime = val
+  currentPage.value = 1
+  fetchPostBehavior()
+}
+
+// 发帖行为记录筛选条件变化 - 是否爆款
+const handlePostBehaviorFilter2Change = (val) => {
+  postBehaviorFilter.value.isHotPost = val
+  currentPage.value = 1
+  fetchPostBehavior()
+}
+
+// 助推烘托记录筛选条件变化
+const handleBoostFilterChange = (val) => {
+  boostFilter.value.startTime = val
+  boostFilter.value.endTime = val
+  currentPage.value = 1
+  fetchBoostData()
+}
+
+// 账号粉丝情况日期范围变化
+const handleFansDateChange = (val) => {
+  fansDateRange.value = val
+  fetchFansData()
+}
+
 // 处理详情点击
 const handleDetail = (row) => {
   console.log('查看详情:', row)
@@ -429,7 +464,7 @@ const handleAttachmentClick = (url) => {
 
         <!-- 账号粉丝情况图表 -->
         <div v-if="showAccountFansChart" id="account-fans-chart" class="section-anchor">
-          <account-fans-chart title="账号粉丝情况" />
+          <account-fans-chart title="账号粉丝情况" @date-change="handleFansDateChange" />
         </div>
 
         <!-- 发帖行为记录表格 -->
@@ -455,6 +490,8 @@ const handleAttachmentClick = (url) => {
             select-placeholder2="是否爆款"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
+            @update:select-value="handlePostBehaviorFilterChange"
+            @update:select-value2="handlePostBehaviorFilter2Change"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
           />
@@ -476,6 +513,7 @@ const handleAttachmentClick = (url) => {
             select-placeholder="更新时间"
             @update:page-size="val => pageSize = val"
             @update:current-page="val => currentPage = val"
+            @update:select-value="handleBoostFilterChange"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
           />

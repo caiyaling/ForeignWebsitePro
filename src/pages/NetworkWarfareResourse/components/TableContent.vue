@@ -35,7 +35,7 @@ const props = defineProps({
   // 每页条数
   pageSize: {
     type: Number,
-    default: 100
+    default: 10
   },
   // 总条数
   total: {
@@ -231,7 +231,7 @@ onUnmounted(() => {
             </template>
           </el-table-column>
 
-          <!-- 文本溢出tooltip列 -->
+          <!-- 文本溢出tooltip列（支持多行） -->
           <el-table-column
             v-else-if="col.type === 'overflow'"
             :label="col.label"
@@ -243,9 +243,9 @@ onUnmounted(() => {
               <el-tooltip
                 :content="row[col.prop]"
                 placement="top"
-                :disabled="!row[col.prop] || row[col.prop].length <= 10"
+                :disabled="!row[col.prop]"
               >
-                <span class="overflow-text">{{ row[col.prop] }}</span>
+                <span class="multi-line-text">{{ row[col.prop] }}</span>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -396,7 +396,9 @@ onUnmounted(() => {
 
 :deep(.el-table__body td .cell) {
   padding: 0;
-  line-height: 51px;
+  line-height: 22px;
+  display: flex;
+  align-items: center;
 }
 
 :deep(.el-table__body .el-table__row:hover > td) {
@@ -467,16 +469,18 @@ onUnmounted(() => {
   }
 }
 
-/* 文本溢出样式 */
-.overflow-text {
-  display: block;
-  max-width: 100%;
+/* 文本溢出样式（支持两行） */
+.multi-line-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 14px;
+  line-height: 22px;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
   color: #303133;
+  word-break: break-all;
 }
 
 /* 申诉结果样式 */

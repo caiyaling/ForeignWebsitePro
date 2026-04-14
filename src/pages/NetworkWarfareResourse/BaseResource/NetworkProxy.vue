@@ -132,30 +132,30 @@ const fetchDynamicProxyStats = async () => {
 
 // 表格列配置
 const tableColumns = [
-  { prop: 'proxyCode', label: '资源编码', minWidth: 100 },
-  { prop: 'accountType', label: '账号类型', minWidth: 80 },
+  { prop: 'proxyCode', label: '资源编码', minWidth: 120 },
+  { prop: 'accountType', label: '账号类型', minWidth: 150 },
   { prop: 'ipAddress', label: 'IP地址', minWidth: 120 },
   { prop: 'ipType', label: 'IP类型', minWidth: 100 },
-  { prop: 'protocolType', label: '协议类型', minWidth: 80 },
-  { prop: 'exitRegion', label: '出口地区', minWidth: 80 },
-  { prop: 'latestStatus', label: '最新状态', minWidth: 80 },
-  { prop: 'checkTime', label: '检测日期', minWidth: 100 },
-  { prop: 'expireTime', label: '失效日期', minWidth: 100 },
-  { prop: 'resourceSource', label: '资源来源', minWidth: 100 },
+  { prop: 'protocolType', label: '协议类型', minWidth: 120 },
+  { prop: 'exitRegion', label: '出口地区', minWidth: 150 },
+  { prop: 'latestStatus', label: '最新状态', minWidth: 100, type: 'status' },
+  { prop: 'checkTime', label: '检测日期', minWidth: 120 },
+  { prop: 'expireTime', label: '失效日期', minWidth: 120 },
+  { prop: 'resourceSource', label: '资源来源', minWidth: 120 },
   { prop: 'resourceSourceType', label: '资源来源类型', minWidth: 120 },
-  { prop: 'deliveryParty', label: '交付方', minWidth: 80 },
-  { prop: 'deliveryTime', label: '交付日期', minWidth: 100 },
-  { prop: 'responsibilityUnit', label: '责任单位', minWidth: 100 },
+  { prop: 'deliveryParty', label: '交付方', minWidth: 200 },
+  { prop: 'deliveryTime', label: '交付日期', minWidth: 120 },
+  { prop: 'responsibilityUnit', label: '责任单位', minWidth: 120 },
   { prop: 'responsibilityPerson', label: '责任人', minWidth: 80 },
-  { prop: 'remark', label: '备注', minWidth: 80 },
-  { prop: 'updateTime', label: '更新时间', minWidth: 100 },
-  { prop: 'status', label: '状态', minWidth: 120, type: 'status' },
+  { prop: 'remark', label: '备注', minWidth: 200, type: 'overflow' },
+  { prop: 'updateTime', label: '更新时间', minWidth: 120 },
+  { prop: 'status', label: '状态', minWidth: 100, type: 'status' },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
 
 // 表格数据
 const tableData = ref([])
-const pageSize = ref(100)
+const pageSize = ref(10)
 const currentPage = ref(1)
 const total = ref(0)
 const loading = ref(false)
@@ -165,7 +165,7 @@ const filters = ref({
   keyword: '',
   accountType: '',
   ipType: '',
-  latestStatus: ''
+  status: ''
 })
 
 // 账号类型选项
@@ -174,8 +174,8 @@ const accountTypeOptions = ref([])
 // IP类型选项
 const ipTypeOptions = ref([])
 
-// 最新状态选项（固定值）
-const latestStatusOptions = ['已使用', '待分配']
+// 状态选项（固定值）
+const statusOptions = ['已使用', '待分配']
 
 // 获取账号类型列表
 const fetchAccountTypeList = async () => {
@@ -209,7 +209,7 @@ const fetchTableData = async () => {
       keyword: filters.value.keyword || undefined,
       accountType: filters.value.accountType || undefined,
       ipType: filters.value.ipType || undefined,
-      latestStatus: filters.value.latestStatus || undefined,
+      status: filters.value.status || undefined,
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
@@ -219,7 +219,7 @@ const fetchTableData = async () => {
       tableData.value = res.data.records || []
       total.value = res.data.total || 0
       currentPage.value = res.data.current || 1
-      pageSize.value = res.data.size || 100
+      pageSize.value = res.data.size || 10
     }
   } catch (error) {
     console.error('获取表格数据失败:', error)
@@ -311,7 +311,7 @@ const handleBatchExport = async () => {
       keyword: filters.value.keyword || undefined,
       accountType: filters.value.accountType || undefined,
       ipType: filters.value.ipType || undefined,
-      latestStatus: filters.value.latestStatus || undefined
+      status: filters.value.status || undefined
     }
 
     const blob = await exportNetworkProxy(params)
@@ -398,7 +398,7 @@ const handleAttachmentClick = (url) => {
           :custom-filters="[
             { key: 'accountType', placeholder: '账号类型', options: accountTypeOptions },
             { key: 'ipType', placeholder: 'IP类型', options: ipTypeOptions },
-            { key: 'latestStatus', placeholder: '最新状态', options: latestStatusOptions }
+            { key: 'status', placeholder: '状态', options: statusOptions }
           ]"
           search-placeholder="关键词：编号，IP地址"
           @update:filters="val => filters = val"
