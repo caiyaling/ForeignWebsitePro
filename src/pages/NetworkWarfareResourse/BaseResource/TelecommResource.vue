@@ -10,6 +10,7 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
+import ImportErrorDialog from '@/components/ImportErrorDialog.vue'
 import {
   getSmsStatistics,
   getSmsPage,
@@ -314,6 +315,10 @@ const onPageChange = ({ page, pageSize: size }) => {
 // 批量导入弹框
 const showBatchImportDialog = ref(false)
 
+// 导入错误弹框
+const showErrorDialog = ref(false)
+const errorList = ref([])
+
 // 批量导入
 const handleBatchImport = () => {
   showBatchImportDialog.value = true
@@ -333,20 +338,57 @@ const handleImportConfirm = async (files) => {
     if (activeCardIndex.value === 0) {
       const res = await importSms(formData)
       if (res.code === 200) {
-        ElMessage.success('短信台账导入成功')
-        fetchSmsData()
+        // 检查是否有错误列表
+        if (res.data?.errorList && res.data.errorList.length > 0) {
+          errorList.value = res.data.errorList
+          showErrorDialog.value = true
+          ElMessage.warning('部分数据导入失败')
+        } else {
+          ElMessage.success('短信台账导入成功')
+          fetchSmsData()
+          showBatchImportDialog.value = false
+        }
+      } else {
+        // 接口返回错误，检查是否有错误列表
+        if (res.data?.errorList && res.data.errorList.length > 0) {
+          errorList.value = res.data.errorList
+          showErrorDialog.value = true
+        } else {
+          ElMessage.error(res.message || '导入失败')
+        }
       }
     } else {
       const res = await importVoice(formData)
       if (res.code === 200) {
-        ElMessage.success('语音台账导入成功')
-        fetchVoiceData()
+        // 检查是否有错误列表
+        if (res.data?.errorList && res.data.errorList.length > 0) {
+          errorList.value = res.data.errorList
+          showErrorDialog.value = true
+          ElMessage.warning('部分数据导入失败')
+        } else {
+          ElMessage.success('语音台账导入成功')
+          fetchVoiceData()
+          showBatchImportDialog.value = false
+        }
+      } else {
+        // 接口返回错误，检查是否有错误列表
+        if (res.data?.errorList && res.data.errorList.length > 0) {
+          errorList.value = res.data.errorList
+          showErrorDialog.value = true
+        } else {
+          ElMessage.error(res.message || '导入失败')
+        }
       }
     }
-    showBatchImportDialog.value = false
   } catch (error) {
     console.error('导入失败:', error)
-    ElMessage.error('导入失败')
+    // 检查错误响应中是否有错误列表
+    if (error.response?.data?.errorList && error.response.data.errorList.length > 0) {
+      errorList.value = error.response.data.errorList
+      showErrorDialog.value = true
+    } else {
+      ElMessage.error('导入失败')
+    }
   }
 }
 
@@ -501,6 +543,12 @@ const handleAttachmentClick = (url) => {
       :single-file="true"
       @confirm="handleImportConfirm"
       @download-template="handleDownloadTemplate"
+    />
+
+    <!-- 导入错误弹框 -->
+    <import-error-dialog
+      v-model="showErrorDialog"
+      :error-list="errorList"
     />
   </div>
 </template>

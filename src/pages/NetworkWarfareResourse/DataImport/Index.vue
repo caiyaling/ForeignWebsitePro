@@ -8,6 +8,7 @@ import { ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import DataImportUpload from '@/components/DataImportUpload.vue'
+import ImportErrorDialog from '@/components/ImportErrorDialog.vue'
 import {
   downloadAccountTemplate,
   importAccountData,
@@ -25,6 +26,10 @@ const uploadRef = ref(null)
 
 // 导入加载状态
 const importing = ref(false)
+
+// 导入错误弹框
+const showErrorDialog = ref(false)
+const errorList = ref([])
 
 // 处理文件变化
 const handleFileChange = (files) => {
@@ -82,9 +87,8 @@ const handleDownloadTemplate = async () => {
   }
 }
 
-// 处理导入
-const handleImport = async () => {
-  const files = uploadRef.value?.getFiles()
+// 处理确认导入
+const handleConfirm = async (files) => {
   if (!files || files.length === 0) {
     ElMessage.warning('请先上传文件')
     return
@@ -112,14 +116,33 @@ const handleImport = async () => {
     }
 
     if (res.code === 200) {
-      ElMessage.success('导入成功')
-      uploadRef.value?.clearFiles()
+      // 检查是否有错误列表
+      if (res.data?.errorList && res.data.errorList.length > 0) {
+        errorList.value = res.data.errorList
+        showErrorDialog.value = true
+        ElMessage.warning('部分数据导入失败')
+      } else {
+        ElMessage.success('导入成功')
+        uploadRef.value?.clearFiles()
+      }
     } else {
-      ElMessage.error(res.message || '导入失败')
+      // 接口返回错误，检查是否有错误列表
+      if (res.data?.errorList && res.data.errorList.length > 0) {
+        errorList.value = res.data.errorList
+        showErrorDialog.value = true
+      } else {
+        ElMessage.error(res.message || '导入失败')
+      }
     }
   } catch (error) {
     console.error('导入失败:', error)
-    ElMessage.error('导入失败')
+    // 检查错误响应中是否有错误列表
+    if (error.response?.data?.errorList && error.response.data.errorList.length > 0) {
+      errorList.value = error.response.data.errorList
+      showErrorDialog.value = true
+    } else {
+      ElMessage.error('导入失败')
+    }
   } finally {
     importing.value = false
   }
@@ -164,13 +187,21 @@ const handleImport = async () => {
             <data-import-upload
               ref="uploadRef"
               :single-file="true"
+              :confirm-loading="importing"
               @change="handleFileChange"
               @download-template="handleDownloadTemplate"
+              @confirm="handleConfirm"
             />
           </div>
         </div>
       </main>
     </div>
+
+    <!-- 导入错误弹框 -->
+    <import-error-dialog
+      v-model="showErrorDialog"
+      :error-list="errorList"
+    />
   </div>
 </template>
 

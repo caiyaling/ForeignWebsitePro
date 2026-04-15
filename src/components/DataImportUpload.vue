@@ -17,10 +17,20 @@ const props = defineProps({
   accept: {
     type: String,
     default: '.xlsx,.xls'
+  },
+  // 是否显示确定按钮
+  showConfirm: {
+    type: Boolean,
+    default: true
+  },
+  // 确定按钮加载状态
+  confirmLoading: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['change', 'remove', 'download-template'])
+const emit = defineEmits(['change', 'remove', 'download-template', 'confirm'])
 
 // 已上传文件列表
 const fileList = ref([])
@@ -63,6 +73,11 @@ const handleTemplateDownload = () => {
   emit('download-template')
 }
 
+// 处理确认
+const handleConfirm = () => {
+  emit('confirm', fileList.value)
+}
+
 // 暴露方法供父组件调用
 defineExpose({
   getFiles,
@@ -100,6 +115,17 @@ defineExpose({
         </div>
         <el-icon class="remove-icon" @click.stop="handleRemove(file)"><Close /></el-icon>
       </div>
+    </div>
+
+    <!-- 确定按钮 -->
+    <div v-if="showConfirm" class="confirm-wrapper">
+      <el-button
+        type="primary"
+        :loading="confirmLoading"
+        @click="handleConfirm"
+      >
+        确定
+      </el-button>
     </div>
   </div>
 </template>
@@ -222,6 +248,32 @@ defineExpose({
 
     &:hover {
       color: #f56c6c;
+    }
+  }
+}
+
+.confirm-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  padding-top: 24px;
+
+  :deep(.el-button) {
+    flex: 1;
+    height: 32px;
+    background: #0060ff;
+    border-color: #0060ff;
+    border-radius: 4px;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+
+    &:hover {
+      background: #3380ff;
+      border-color: #3380ff;
     }
   }
 }
