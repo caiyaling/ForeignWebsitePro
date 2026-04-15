@@ -81,7 +81,7 @@ const fetchCloudPhoneStats = async () => {
       // 更新卡片数据
       cards.value[0] = {
         name: '云手机',
-        total: `${formatNumber(usedQuantity)}/${formatNumber(total)}`,
+        total: `${formatNumber(usedQuantity)}/${formatNumber(total)}台`,
         type: 'chart',
         icon: '/figma/device-cloud-phone.svg',
         chart: {

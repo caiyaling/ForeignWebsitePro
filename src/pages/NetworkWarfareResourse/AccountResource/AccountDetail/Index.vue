@@ -72,7 +72,7 @@ const opsColumns = [
 // 发帖行为记录表格列
 const behaviorColumns = [
   { prop: 'statisticsEndDate', label: '更新时间', minWidth: 140, sortable: true },
-  { prop: 'postTime', label: '发帖时间', minWidth: 140, sortable: true },
+  { prop: 'postTime', label: '发帖时间', minWidth: 200, sortable: true },
   { prop: 'isHotPost', label: '是否爆款', minWidth: 100, type: 'isHot' },
   { prop: 'postLink', label: '发帖链接', minWidth: 180, type: 'overflow' },
   { prop: 'postReadCount', label: '贴文阅读量', minWidth: 126, sortable: true },

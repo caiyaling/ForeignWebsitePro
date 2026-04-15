@@ -49,38 +49,33 @@ const handleDownloadTemplate = async () => {
         break
       case 'behavior':
         res = await downloadBehaviorTemplate()
-        fileName = '账号行为记录模板.xlsx'
+        fileName = '账号行为记录模板.zip'
         break
       case 'popular':
         res = await downloadHotPostTemplate()
-        fileName = '爆款贴文链接模板.xlsx'
+        fileName = '爆款贴文链接模板.zip'
         break
       default:
         ElMessage.warning('未知的导入类型')
         return
     }
 
-    // 创建 blob 并在新窗口打开
-    const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    // 根据响应数据自动判断文件类型
+    const blob = res instanceof Blob ? res : new Blob([res])
     const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
 
-    // 尝试在新窗口打开 Excel 文件
-    const newWindow = window.open(url, '_blank')
-
-    // 如果新窗口打开失败（可能被浏览器拦截），则下载文件
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-      const link = document.createElement('a')
-      link.href = url
-      link.download = fileName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    }
-
-    // 延迟释放 URL，确保文件可以被打开
+    // 延迟释放 URL，确保文件可以被下载
     setTimeout(() => {
       window.URL.revokeObjectURL(url)
     }, 1000)
+
+    ElMessage.success('模板下载成功')
   } catch (error) {
     console.error('模板下载失败:', error)
     ElMessage.error('模板下载失败')
