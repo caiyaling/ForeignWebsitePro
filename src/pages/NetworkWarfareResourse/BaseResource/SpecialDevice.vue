@@ -46,7 +46,6 @@ const cards = ref([
     total: '0',
     type: 'chart',
     icon: '/figma/device-cloud-phone.svg',
-    description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
     chart: {
       outerData: [
         { value: 0, name: '已使用', color: '#f77234' },
@@ -82,10 +81,9 @@ const fetchCloudPhoneStats = async () => {
       // 更新卡片数据
       cards.value[0] = {
         name: '云手机',
-        total: formatNumber(total),
+        total: `${formatNumber(usedQuantity)}/${formatNumber(total)}`,
         type: 'chart',
         icon: '/figma/device-cloud-phone.svg',
-        description: 'IP出口覆盖美国，日本，韩国，东南亚等国家/地区',
         chart: {
           outerData: [
             { value: usedQuantity, name: '已使用', color: '#f77234' },
@@ -118,11 +116,15 @@ const fetchPhysicalPhoneStats = async () => {
       const totalUsed = brandStatisticsList.reduce((sum, item) => sum + (item.usedQuantity || 0), 0)
       const totalAvailable = brandStatisticsList.reduce((sum, item) => sum + (item.availableQuantity || 0), 0)
 
-      // 构建品牌统计列表
-      const stats = brandStatisticsList.map(item => ({
-        label: item.brand || '未知',
-        value: formatNumber((item.usedQuantity || 0) + (item.availableQuantity || 0))
-      }))
+      // 构建品牌统计列表（格式：已使用/总计）
+      const stats = brandStatisticsList.map(item => {
+        const used = item.usedQuantity || 0
+        const total = used + (item.availableQuantity || 0)
+        return {
+          label: item.brand || '未知',
+          value: `${formatNumber(used)}/${formatNumber(total)}`
+        }
+      })
 
       // 更新卡片数据
       cards.value[1] = {
@@ -157,6 +159,7 @@ const cloudPhoneColumns = [
   { prop: 'configuration', label: '配置', minWidth: 200, type: 'overflow' },
   { prop: 'operatingSystem', label: '操作系统', minWidth: 100 },
   { prop: 'quantity', label: '数量', minWidth: 80 },
+  { prop: 'usedQuantity', label: '已使用数量', minWidth: 100 },
   { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]
@@ -170,9 +173,11 @@ const physicalPhoneColumns = [
   { prop: 'model', label: '资产名称', minWidth: 140 },
   { prop: 'brand', label: '品牌', minWidth: 100 },
   { prop: 'serialNumber', label: '序列号', minWidth: 160 },
+  { prop: 'model', label: '型号/规格/版本', minWidth: 140 },
   { prop: 'configuration', label: '基本配置', minWidth: 200, type: 'overflow' },
   { prop: 'unit', label: '单位', minWidth: 80 },
   { prop: 'quantity', label: '数量', minWidth: 80 },
+  { prop: 'usedQuantity', label: '已使用数量', minWidth: 100 },
   { prop: 'updateTime', label: '更新时间', minWidth: 120 },
   { prop: 'action', label: '操作', minWidth: 80, type: 'action', actionType: 'delete' }
 ]

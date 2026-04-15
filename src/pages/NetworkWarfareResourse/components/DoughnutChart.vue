@@ -58,6 +58,21 @@ const chartOption = computed(() => {
   const innerTotal = props.innerData.reduce((sum, item) => sum + item.value, 0)
 
   return {
+    tooltip: {
+      trigger: 'item',
+      formatter: (params) => {
+        const total = params.seriesIndex === 0 ? innerTotal : outerTotal
+        const percent = total > 0 ? ((params.value / total) * 100).toFixed(1) : 0
+        return `${params.name}<br/>${params.value} (${percent}%)`
+      },
+      backgroundColor: 'rgba(50, 50, 50, 0.9)',
+      borderColor: 'transparent',
+      textStyle: {
+        color: '#fff',
+        fontSize: 12
+      },
+      padding: [8, 12]
+    },
     series: [
       // 内环 (Doughnut 1) - 较大
       {

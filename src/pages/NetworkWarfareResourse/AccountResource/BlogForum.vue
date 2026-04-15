@@ -210,7 +210,7 @@ const handleAttachmentClick = (url) => {
           :platform-options="platformOptions"
           :account-type-options="accountTypeOptions"
           :latest-status-options="latestStatusOptions"
-          search-placeholder="关键词、账号编号、账号ID、用户昵称"
+          search-placeholder="关键词:账号编号、账号ID、用户昵称"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

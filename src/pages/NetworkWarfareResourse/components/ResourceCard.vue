@@ -208,11 +208,11 @@ onMounted(() => {
   height: 200px;
   overflow: hidden;
   flex-shrink: 0;
-  background: linear-gradient(152.53deg, #fff4fd 4.47%, #c9e5ff 85.39%);
+  background: linear-gradient(147.07deg, #fff4fd 4.47%, #c9e5ff 85.39%);
   padding: 16px 0;
   cursor: pointer;
-  border: 1px solid #fff;
-  border-radius: 8px;
+  border: 2px solid #fff;
+  border-radius: 4px;
   box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
     0 3px 6px -4px rgba(0, 0, 0, 0.12),
     0 9px 28px 8px rgba(0, 0, 0, 0.05);
@@ -224,7 +224,7 @@ onMounted(() => {
 }
 
 .card-active {
-  border: 2px solid #0060ff;
+  border: 2px solid var(--el-color-primary, #0060ff);
   border-radius: 4px;
   transform: translateY(-2px);
 }
@@ -240,45 +240,81 @@ onMounted(() => {
 
 // 云手机卡片样式（带环形图表）
 .card-chart-type {
-  background: linear-gradient(146.4deg, #fff4fd 4.47%, #c9e5ff 85.39%);
+  background: linear-gradient(147.07deg, #fff4fd 4.47%, #c9e5ff 85.39%);
 
   .card-profile {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     padding: 0 16px;
+    gap: 8px;
+    border-right: 1px solid rgba(22, 119, 255, 0.15);
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .card-icon-wrapper {
     width: 56px;
     height: 56px;
+    flex-shrink: 0;
   }
 
   .card-profile-info {
-    padding-left: 8px;
-    width: 171px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
   }
 
-  // 云手机卡片左侧使用水平布局
-  .profile-header {
+  .card-header-row {
+    padding: 0 8px;
+    width: 171px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .card-body-row {
+    padding: 0 8px;
+    width: 171px;
     display: flex;
     align-items: center;
   }
 
-  .card-header-row {
-    width: 171px;
+  .card-name {
+    font-size: 20px;
+    line-height: 28px;
+    color: var(--el-text-color-primary, #303133);
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    font-weight: 400;
+    white-space: nowrap;
   }
 
-  .card-body-row {
-    width: 171px;
-  }
-
-  .card-description {
-    margin-top: 8px;
+  .card-total {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0026ff;
+    line-height: normal;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    white-space: nowrap;
   }
 }
 
 // 实体手机卡片样式（带统计列表）
 .card-stats-type {
+  background: linear-gradient(147.07deg, #fff4fd 4.47%, #c9e5ff 85.39%);
+
   .card-profile {
-    padding: 0 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 16px;
+    gap: 8px;
+    border-right: 1px solid rgba(22, 119, 255, 0.15);
   }
 
   .card-icon-wrapper {
@@ -286,14 +322,47 @@ onMounted(() => {
     height: 64px;
   }
 
-  .card-profile-info {
-    padding-left: 20px;
-  }
-
-  // 实体手机卡片左侧使用水平布局
   .profile-header {
     display: flex;
     align-items: center;
+    gap: 8px;
+  }
+
+  .card-profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .card-header-row {
+    padding: 0 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .card-body-row {
+    padding: 0 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .card-name {
+    font-size: 20px;
+    line-height: 28px;
+    color: var(--el-text-color-primary, #303133);
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    font-weight: 400;
+  }
+
+  .card-total {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0026ff;
+    line-height: normal;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
   }
 }
 
@@ -414,7 +483,7 @@ onMounted(() => {
 
 .card-total {
   color: #0026ff;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 700;
   line-height: normal;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
