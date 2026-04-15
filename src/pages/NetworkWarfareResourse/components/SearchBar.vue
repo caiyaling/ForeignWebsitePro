@@ -35,6 +35,10 @@ const props = defineProps({
   showStatusFilter: {
     type: Boolean,
     default: true
+  },
+  searchPlaceholder: {
+    type: String,
+    default: '关键词，账号ID，用户昵称'
   }
 })
 
@@ -54,6 +58,7 @@ const emit = defineEmits(['update:filters', 'search'])
       :latest-status-options="latestStatusOptions"
       :show-sampled-filter="showSampledFilter"
       :show-status-filter="showStatusFilter"
+      :search-placeholder="searchPlaceholder"
       @update:filters="val => emit('update:filters', val)"
       @search="emit('search')"
     />

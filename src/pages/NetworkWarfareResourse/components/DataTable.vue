@@ -284,6 +284,7 @@ const handleAttachmentClick = (url) => {
         :latest-status-options="latestStatusOptions"
         :show-sampled-filter="showSampledFilter"
         :show-status-filter="showStatusFilter"
+        :search-placeholder="searchPlaceholder"
         @update:filters="val => emit('update:filters', val)"
         @search="handleSearch"
       />

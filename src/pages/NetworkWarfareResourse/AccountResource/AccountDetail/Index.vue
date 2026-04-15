@@ -383,15 +383,8 @@ const showAccountFansChart = computed(() => {
   const from = route.query.from || ''
   const accountType = route.query.accountType || ''
 
-  console.log('showAccountFansChart 计算:', {
-    from,
-    accountType,
-    condition: from === '/social',
-    result: from === '/social'
-  })
-
-  // 社交平台显示粉丝图表（暂时移除 accountType 条件用于调试）
-  if (from === '/social') return true
+  // 社交平台-贴靠发声账号显示粉丝图表，采集账号不显示
+  if (from === '/social' && accountType !== '采集') return true
   return false
 })
 

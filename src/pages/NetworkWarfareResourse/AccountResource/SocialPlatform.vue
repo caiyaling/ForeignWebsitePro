@@ -83,7 +83,7 @@ const tableColumns = [
   { prop: 'accountInfoCompleteness', label: '账号完善度', width: 130, type: 'progress' },
   { prop: 'deliveryParty', label: '交付方', width: 200 },
   { prop: 'latestStatus', label: '最新状态', width: 100, type: 'status' },
-  { prop: 'statisticsEndDate', label: '统计结束时间', width: 120 },
+  { prop: 'statisticsEndDate', label: '更新时间', width: 120 },
   { prop: 'action', label: '操作', width: 80, type: 'action' }
 ]
 
@@ -173,9 +173,9 @@ const onPageChange = ({ page, pageSize: size }) => {
   fetchTableData()
 }
 
-// 处理详情点击 - 跳转到账号详情页
+// 处理详情点击 - 新页面打开账号详情页
 const handleDetail = (row) => {
-  router.push({
+  const routeData = router.resolve({
     path: '/account-detail',
     query: {
       accountCode: row.accountCode,
@@ -183,6 +183,7 @@ const handleDetail = (row) => {
       accountType: row.accountType || ''
     }
   })
+  window.open(routeData.href, '_blank')
 }
 
 // 处理附件点击 - 打开附件预览
@@ -214,6 +215,7 @@ const handleAttachmentClick = (url) => {
           :platform-options="platformOptions"
           :account-type-options="accountTypeOptions"
           :latest-status-options="latestStatusOptions"
+          search-placeholder="关键词、账号编号、账号ID、用户昵称"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

@@ -36,6 +36,10 @@ const props = defineProps({
   showStatusFilter: {
     type: Boolean,
     default: true
+  },
+  searchPlaceholder: {
+    type: String,
+    default: '关键词，账号ID，用户昵称'
   }
 })
 
@@ -64,7 +68,7 @@ const handleSearch = () => {
       </div>
       <el-input
         :model-value="filters.keyword"
-        placeholder="关键词，账号ID，用户名，用户昵称"
+        :placeholder="searchPlaceholder"
         class="search-input"
         clearable
         @update:model-value="val => updateFilter('keyword', val)"
