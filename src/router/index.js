@@ -25,7 +25,7 @@ const routes = [
     name: 'InstantMessaging',
     component: InstantMessaging,
     meta: {
-      title: '即时通讯 - 网络资源库'
+      title: '即时通讯 - 作战资源库'
     }
   },
   {
@@ -33,7 +33,7 @@ const routes = [
     name: 'BlogForum',
     component: BlogForum,
     meta: {
-      title: '博客论坛 - 网络资源库'
+      title: '博客论坛 - 作战资源库'
     }
   },
   {
@@ -41,7 +41,7 @@ const routes = [
     name: 'Email',
     component: Email,
     meta: {
-      title: '电子邮件 - 网络资源库'
+      title: '电子邮件 - 作战资源库'
     }
   },
   {
@@ -49,7 +49,7 @@ const routes = [
     name: 'AccountDetail',
     component: AccountDetail,
     meta: {
-      title: '账号详情 - 网络资源库'
+      title: '账号详情 - 作战资源库'
     }
   },
   {
@@ -57,7 +57,7 @@ const routes = [
     name: 'SpecialDevice',
     component: SpecialDevice,
     meta: {
-      title: '专用设备 - 网络资源库'
+      title: '专用设备 - 作战资源库'
     }
   },
   {
@@ -65,7 +65,7 @@ const routes = [
     name: 'PhoneCard',
     component: PhoneCard,
     meta: {
-      title: '手机卡号 - 网络资源库'
+      title: '手机卡号 - 作战资源库'
     }
   },
   {
@@ -73,7 +73,7 @@ const routes = [
     name: 'NetworkProxy',
     component: NetworkProxy,
     meta: {
-      title: '网络代理 - 网络资源库'
+      title: '网络代理 - 作战资源库'
     }
   },
   {
@@ -81,7 +81,7 @@ const routes = [
     name: 'TelecommResource',
     component: TelecommResource,
     meta: {
-      title: '电信资源 - 网络资源库'
+      title: '电信资源 - 作战资源库'
     }
   },
   {
@@ -89,7 +89,7 @@ const routes = [
     name: 'DataImport',
     component: DataImport,
     meta: {
-      title: '数据导入 - 网络资源库'
+      title: '数据导入 - 作战资源库'
     }
   }
 ]
@@ -100,7 +100,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || '网络资源库'
+  document.title = to.meta.title || '作战资源库'
   next()
 })
 

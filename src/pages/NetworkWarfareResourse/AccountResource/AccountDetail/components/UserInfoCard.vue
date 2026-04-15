@@ -100,13 +100,7 @@ const displayAccountId = computed(() => {
   return props.userInfo.accountId || '-'
 })
 
-// 显示的用户昵称（电子邮箱页面显示邮箱地址）
-const displayUserNickname = computed(() => {
-  if (isEmail.value) {
-    return props.userInfo.bindEmail || props.userInfo.userNickname || '-'
-  }
-  return props.userInfo.userNickname || '-'
-})
+
 </script>
 
 <template>
@@ -120,7 +114,7 @@ const displayUserNickname = computed(() => {
       <div class="user-details">
         <!-- 用户ID行 -->
         <div class="user-id-row">
-          <span class="user-id">{{ displayAccountId }}<template v-if="displayUserNickname && displayUserNickname !== '-'"> ({{ displayUserNickname }})</template></span>
+          <span class="user-id">{{ displayAccountId }}<template v-if="userInfo.userNickname && userInfo.userNickname !== '-'"> ({{ userInfo.userNickname }})</template></span>
           <el-tag v-if="userInfo.tags && !isEmail && !isBlogForum && !isSocialCollection" size="small" class="user-tag">{{ userInfo.tags }}</el-tag>
         </div>
 

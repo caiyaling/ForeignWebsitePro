@@ -5,8 +5,8 @@ const username = 'admin'
 <template>
   <header class="global-header">
     <div class="brand">
-      <img src="/figma/mnijidos-5z28mpb.svg" alt="" class="brand-icon" />
-      <span class="brand-text">网络资源库</span>
+      <img src="/figma/logo-icon.svg" alt="" class="brand-icon" />
+      <span class="brand-text">作战资源库</span>
     </div>
 
     <div class="toolbar">
