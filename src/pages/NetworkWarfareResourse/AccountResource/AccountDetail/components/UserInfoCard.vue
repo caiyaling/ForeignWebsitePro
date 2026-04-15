@@ -131,8 +131,8 @@ const displayUserNickname = computed(() => {
           <el-tag v-if="userInfo.groupCount" type="primary" size="small" class="status-tag">群组 {{ userInfo.groupCount }}</el-tag>
           <el-tag v-if="userInfo.groupAvgCount && !isSocialCollection" type="warning" size="small" class="status-tag">群平均人数 {{ userInfo.groupAvgCount }}</el-tag>
           <el-tag v-if="userInfo.historyPostCount && !isSocialCollection" type="success" size="small" class="status-tag">历史发言数 {{ userInfo.historyPostCount }}</el-tag>
-          <el-tag v-if="userInfo.validFansRatio && !isSocialCollection" type="danger" size="small" class="status-tag">有效粉丝占比 {{ userInfo.validFansRatio }}</el-tag>
-          <el-tag v-if="userInfo.groupValidUserRatio && !isSocialCollection" type="primary" size="small" class="status-tag">群组有效用户占比 {{ userInfo.groupValidUserRatio }}</el-tag>
+          <el-tag v-if="!isSocialCollection" type="danger" size="small" class="status-tag">有效粉丝占比 {{ userInfo.validFansRatio || 0 }}%</el-tag>
+          <el-tag v-if="!isSocialCollection" type="primary" size="small" class="status-tag">群组有效用户占比 {{ userInfo.groupValidUserRatio || 0 }}%</el-tag>
         </div>
       </div>
     </div>
@@ -187,8 +187,8 @@ const displayUserNickname = computed(() => {
     <div v-else-if="isEmail" class="user-detail-info simple">
       <div class="info-row">
         <div class="info-item">
-          <span class="info-label">邮箱地址：</span>
-          <span class="info-value">{{ userInfo.bindEmail || '-' }}</span>
+          <span class="info-label">用户昵称：</span>
+          <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
@@ -225,21 +225,6 @@ const displayUserNickname = computed(() => {
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
-          <span class="info-label">粉丝数量：</span>
-          <span class="info-value">{{ userInfo.fansCount || '-' }}</span>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-item">
-          <span class="info-label">好友数量：</span>
-          <span class="info-value">{{ userInfo.friendsCount || '-' }}</span>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-item">
-          <span class="info-label">群组数量：</span>
-          <span class="info-value">{{ userInfo.groupCount || '-' }}</span>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-item">
           <span class="info-label">注册地区：</span>
           <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
         </div>
@@ -270,7 +255,7 @@ const displayUserNickname = computed(() => {
       <div class="info-row">
         <div class="info-item">
           <span class="info-label">用户昵称：</span>
-          <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
+          <span class="info-value ellipsis" :title="userInfo.userNickname || ''">{{ userInfo.userNickname || '-' }}</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
@@ -298,7 +283,7 @@ const displayUserNickname = computed(() => {
         <div class="info-divider"></div>
         <div class="info-item">
           <span class="info-label">毕业院校：</span>
-          <span class="info-value">{{ userInfo.school || '-' }}</span>
+          <span class="info-value ellipsis" :title="userInfo.school || ''">{{ userInfo.school || '-' }}</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
@@ -321,7 +306,7 @@ const displayUserNickname = computed(() => {
       <div class="info-row">
         <div class="info-item">
           <span class="info-label">所属行业：</span>
-          <span class="info-value">{{ userInfo.industry || '-' }}</span>
+          <span class="info-value ellipsis" :title="userInfo.industry || ''">{{ userInfo.industry || '-' }}</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
@@ -331,7 +316,7 @@ const displayUserNickname = computed(() => {
         <div class="info-divider"></div>
         <div class="info-item">
           <span class="info-label">兴趣爱好：</span>
-          <span class="info-value">{{ userInfo.hobbies || '-' }}</span>
+          <span class="info-value ellipsis" :title="userInfo.hobbies || ''">{{ userInfo.hobbies || '-' }}</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
@@ -341,7 +326,7 @@ const displayUserNickname = computed(() => {
         <div class="info-divider"></div>
         <div class="info-item">
           <span class="info-label">注册地区：</span>
-          <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+          <span class="info-value ellipsis" :title="userInfo.registerRegion || ''">{{ userInfo.registerRegion || '-' }}</span>
         </div>
         <div class="info-divider"></div>
         <div class="info-item">
@@ -464,6 +449,14 @@ const displayUserNickname = computed(() => {
   font-family: 'Alibaba PuHuiTi', sans-serif;
   font-size: 16px;
   color: rgba(0, 0, 0, 0.88);
+
+  &.ellipsis {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+  }
 
   &.link-url {
     max-width: 200px;

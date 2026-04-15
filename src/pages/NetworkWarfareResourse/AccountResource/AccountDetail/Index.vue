@@ -175,6 +175,7 @@ const fetchOpsData = async () => {
     })
     if (res.code === 200 && res.data) {
       opsData.value = res.data.records || []
+      opsPagination.value.total = res.data.total || 0
     }
   } catch (error) {
     console.error('获取账号运维信息失败:', error)
