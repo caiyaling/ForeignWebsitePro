@@ -146,7 +146,6 @@ const yAxisFormatter = (value) => {
       <div v-if="hasData" class="chart-inner">
         <!-- 图例 -->
         <div class="chart-legend">
-          <span class="unit-label">个</span>
           <div class="legend-items">
             <div
               v-for="(item, index) in legendItems"
@@ -168,7 +167,7 @@ const yAxisFormatter = (value) => {
             :chart-data="actualChartData"
             :show-legend="false"
             unit="个"
-            height="280px"
+            height="340px"
             :line-width="3"
             :y-axis-split-number="5"
             :y-axis-formatter="yAxisFormatter"
@@ -303,12 +302,6 @@ const yAxisFormatter = (value) => {
   padding-right: 20px;
 }
 
-.unit-label {
-  font-size: 14px;
-  color: #86909C;
-  font-family: 'Inter', 'Microsoft YaHei', sans-serif;
-  line-height: 22px;
-}
 
 .legend-items {
   display: flex;

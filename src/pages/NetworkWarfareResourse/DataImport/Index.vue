@@ -97,7 +97,9 @@ const handleConfirm = async (files) => {
   importing.value = true
   try {
     const formData = new FormData()
-    formData.append('file', files[0].raw)
+    // Element Plus Upload 组件返回的文件对象，需要通过 .raw 获取原始 File 对象
+    const rawFile = files[0].raw || files[0]
+    formData.append('file', rawFile)
 
     let res
     switch (activeTab.value) {
