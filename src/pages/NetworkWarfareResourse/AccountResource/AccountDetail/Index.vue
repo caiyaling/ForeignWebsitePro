@@ -14,7 +14,9 @@ import {
   getPostBehaviorPage,
   getBoostBehaviorPage,
   getAppealPage,
-  getUpdateTimeList
+  getUpdateTimeList,
+  downloadAccountBehaviorAttachment,
+  getMimeType
 } from '@/api/account'
 
 const route = useRoute()
@@ -58,7 +60,7 @@ const opsColumns = [
   { prop: 'loginPassword', label: '登录密码', minWidth: 126 },
   { prop: 'bindPhone', label: '绑定手机号', minWidth: 126 },
   { prop: 'phoneRegion', label: '手机号归属地', minWidth: 126 },
-  { prop: 'bindEmail', label: '绑定邮箱', minWidth: 126 },
+  { prop: 'bindEmail', label: '绑定邮箱', minWidth: 126,type: 'overflow'  },
   { prop: 'networkIp', label: '网络IP', minWidth: 126 },
   { prop: 'systemTimezone', label: '系统时区', minWidth: 126 },
   { prop: 'browserLanguage', label: '浏览器语言', minWidth: 126 },
@@ -80,7 +82,7 @@ const behaviorColumns = [
   { prop: 'postCommentCount', label: '贴文评论量', minWidth: 126, sortable: true },
   { prop: 'postForwardCount', label: '贴文转发量', minWidth: 126, sortable: true },
   { prop: 'attachedText', label: '附带文案', minWidth: 200, type: 'overflow' },
-  { prop: 'attachmentCode', label: '附件编号', minWidth: 120 },
+  { prop: 'attachments', label: '附件编号', minWidth: 120, type: 'attachment' },
   { prop: 'isTaskDispatch', label: '是否派发任务', minWidth: 126 },
   { prop: 'pointPosition', label: '点位', minWidth: 100 },
   { prop: 'remark', label: '备注', minWidth: 150, type: 'overflow' }
@@ -170,8 +172,8 @@ const fetchOpsData = async () => {
   try {
     const res = await getAccountOperationPage({
       accountCode: accountCode.value,
-      pageNum: 1,
-      pageSize: 100
+      pageNum: opsPagination.value.currentPage,
+      pageSize: opsPagination.value.pageSize
     })
     if (res.code === 200 && res.data) {
       opsData.value = res.data.records || []
@@ -250,8 +252,14 @@ const fetchPostBehavior = async () => {
       params.isHotPost = postBehaviorFilter.value.isHotPost
     }
     const res = await getPostBehaviorPage(params)
+    console.log('发帖行为记录接口返回:', res)
     if (res.code === 200 && res.data) {
       behaviorData.value = res.data.records || []
+      console.log('发帖行为记录数据:', behaviorData.value)
+      // 打印每条记录的 attachments 字段
+      behaviorData.value.forEach((record, index) => {
+        console.log(`记录${index} attachments:`, record.attachments)
+      })
       postBehaviorPagination.value.total = res.data.total || 0
     }
   } catch (error) {
@@ -444,6 +452,13 @@ const handleBoostFilterChange = (val) => {
   fetchBoostData()
 }
 
+// 账号运维信息分页变化
+const handleOpsPageChange = ({ page, pageSize }) => {
+  opsPagination.value.currentPage = page
+  opsPagination.value.pageSize = pageSize
+  fetchOpsData()
+}
+
 // 发帖行为记录分页变化
 const handlePostBehaviorPageChange = ({ page, pageSize }) => {
   postBehaviorPagination.value.currentPage = page
@@ -477,10 +492,55 @@ const handleDetail = (row) => {
   // 详情页内部不需要跳转
 }
 
-// 处理附件点击 - 打开附件预览
-const handleAttachmentClick = (url) => {
-  if (url) {
-    window.open(url, '_blank')
+// 处理附件点击 - 下载附件并在新窗口预览
+const handleAttachmentClick = async (attachment) => {
+  if (!attachment || !attachment.id) {
+    console.error('附件信息无效:', attachment)
+    return
+  }
+
+  try {
+    const res = await downloadAccountBehaviorAttachment(attachment.id)
+    console.log('附件下载响应:', res, '类型:', res?.type)
+
+    // 检查是否返回了错误信息（有些后端在错误时返回 JSON）
+    if (res && res.type === 'application/json') {
+      // 可能是错误响应，尝试解析
+      const text = await res.text()
+      try {
+        const errorData = JSON.parse(text)
+        console.error('服务器返回错误:', errorData)
+        alert(errorData.message || '下载失败')
+        return
+      } catch (e) {
+        // 不是 JSON，继续处理
+      }
+    }
+
+    // 根据文件名获取 MIME 类型
+    const mimeType = getMimeType(attachment.fileName)
+    // 创建带类型的 Blob
+    const blob = new Blob([res], { type: mimeType })
+    const url = window.URL.createObjectURL(blob)
+
+    // 图片、PDF、文本等可以直接预览，其他类型下载
+    const previewTypes = ['image/', 'application/pdf', 'text/']
+    const canPreview = previewTypes.some(type => mimeType.startsWith(type))
+
+    if (canPreview) {
+      window.open(url, '_blank')
+    } else {
+      // 不可预览的文件直接下载
+      const link = document.createElement('a')
+      link.href = url
+      link.download = attachment.fileName || 'download'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    }
+  } catch (error) {
+    console.error('下载附件失败:', error)
   }
 }
 </script>
@@ -512,6 +572,7 @@ const handleAttachmentClick = (url) => {
             :current-page="opsPagination.currentPage"
             :total="opsPagination.total"
             :max-height="200"
+            @page-change="handleOpsPageChange"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
           />

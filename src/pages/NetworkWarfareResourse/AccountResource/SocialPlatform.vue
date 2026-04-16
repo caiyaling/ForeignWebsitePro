@@ -73,7 +73,7 @@ const tableColumns = [
   { prop: 'accountVersion', label: '账号版本号', width: 100 },
   { prop: 'accountPositioning', label: '账号定位', minWidth: 120, type: 'overflow' },
   { prop: 'userNickname', label: '用户昵称', minWidth: 120, type: 'overflow' },
-  { prop: 'accountId', label: '账号ID', width: 150 },
+  { prop: 'accountId', label: '账号ID', width: 150,type: 'overflow'},
   { prop: 'linkUrl', label: '链接URL', minWidth: 200, type: 'overflow' },
   { prop: 'registerRegion', label: '注册地区', width: 150 },
   { prop: 'registerTime', label: '注册时间', width: 120 },

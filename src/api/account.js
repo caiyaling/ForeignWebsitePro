@@ -136,3 +136,53 @@ export function getAppealPage(params) {
 export function getUpdateTimeList() {
   return request.get('/account-behavior-record/update-time/list')
 }
+
+/**
+ * 下载账号行为记录附件
+ * @param {number} id - 附件ID
+ * @returns {Promise} 返回文件流
+ */
+export function downloadAccountBehaviorAttachment(id) {
+  return request.get(`/account-behavior-record/attachment/${id}`, {
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 获取附件 MIME 类型
+ * @param {string} fileName - 文件名
+ * @returns {string} MIME 类型
+ */
+export function getMimeType(fileName) {
+  const ext = fileName?.split('.').pop()?.toLowerCase() || ''
+  const mimeTypes = {
+    // 图片
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+    'bmp': 'image/bmp',
+    'svg': 'image/svg+xml',
+    // 文档
+    'pdf': 'application/pdf',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'xls': 'application/vnd.ms-excel',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    // 文本
+    'txt': 'text/plain',
+    'html': 'text/html',
+    'json': 'application/json',
+    // 视频
+    'mp4': 'video/mp4',
+    'avi': 'video/x-msvideo',
+    'mov': 'video/quicktime',
+    // 音频
+    'mp3': 'audio/mpeg',
+    'wav': 'audio/wav'
+  }
+  return mimeTypes[ext] || 'application/octet-stream'
+}

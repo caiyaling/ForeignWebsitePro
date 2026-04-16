@@ -3,7 +3,7 @@
  * @description 数据导入页面
  * @date 2024-04-10
  */
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
@@ -30,6 +30,28 @@ const importing = ref(false)
 // 导入错误弹框
 const showErrorDialog = ref(false)
 const errorList = ref([])
+
+// 根据标签页获取上传配置
+const uploadConfig = computed(() => {
+  switch (activeTab.value) {
+    case 'account':
+      return {
+        accept: '.xlsx,.xls',
+        uploadText: '点击上传文件'
+      }
+    case 'behavior':
+    case 'popular':
+      return {
+        accept: '.zip',
+        uploadText: '点击上传文件'
+      }
+    default:
+      return {
+        accept: '.xlsx,.xls',
+        uploadText: '点击上传文件'
+      }
+  }
+})
 
 // 处理文件变化
 const handleFileChange = (files) => {
@@ -184,6 +206,8 @@ const handleConfirm = async (files) => {
             <data-import-upload
               ref="uploadRef"
               :single-file="true"
+              :accept="uploadConfig.accept"
+              :upload-text="uploadConfig.uploadText"
               :confirm-loading="importing"
               @change="handleFileChange"
               @download-template="handleDownloadTemplate"

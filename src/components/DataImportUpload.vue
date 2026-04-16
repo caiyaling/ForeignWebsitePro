@@ -27,6 +27,11 @@ const props = defineProps({
   confirmLoading: {
     type: Boolean,
     default: false
+  },
+  // 上传区域文案
+  uploadText: {
+    type: String,
+    default: '点击上传Excel文件'
   }
 })
 
@@ -97,7 +102,7 @@ defineExpose({
       :on-change="handleFileChange"
     >
       <el-icon class="upload-icon"><UploadFilled /></el-icon>
-      <div class="upload-text">点击上传Excel文件</div>
+      <div class="upload-text">{{ uploadText }}</div>
     </el-upload>
 
     <!-- 模板下载按钮 -->

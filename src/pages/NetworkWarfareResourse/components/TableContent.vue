@@ -262,19 +262,22 @@ onUnmounted(() => {
           >
             <template #default="{ row }">
               <div class="attachment-list">
-                <template v-if="Array.isArray(row[col.prop])">
+                <template v-if="Array.isArray(row[col.prop]) && row[col.prop].length > 0">
                   <span
                     v-for="(file, index) in row[col.prop]"
                     :key="index"
                     class="attachment-link"
-                    @click="handleAttachmentClick(file.url)"
+                    @click="handleAttachmentClick(file)"
                   >
-                    {{ file.name }}
+                    {{ file.fileName || file.name }}
                   </span>
                 </template>
-                <span v-else class="attachment-link" @click="handleAttachmentClick(row[col.prop + 'Url'])">
-                  {{ row[col.prop] }}
-                </span>
+                <template v-else-if="row[col.prop]">
+                  <span class="attachment-link" @click="handleAttachmentClick(row[col.prop])">
+                    {{ row[col.prop].fileName || row[col.prop] }}
+                  </span>
+                </template>
+                <span v-else style="color: #999;">暂无附件</span>
               </div>
             </template>
           </el-table-column>
