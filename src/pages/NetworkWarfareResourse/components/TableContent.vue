@@ -92,6 +92,11 @@ const handleCurrentPageChange = (val) => {
   emit('pageChange', { page: val, pageSize: props.pageSize })
 }
 
+// 计算序号（支持分页）
+const getIndex = (index) => {
+  return (props.currentPage - 1) * props.pageSize + index + 1
+}
+
 // ResizeObserver 实例
 let resizeObserver = null
 
@@ -148,7 +153,7 @@ onUnmounted(() => {
         element-loading-text="加载中..."
       >
         <!-- 序号列 -->
-        <el-table-column type="index" label="序号" width="60" align="center" />
+        <el-table-column type="index" label="序号" width="60" align="center" :index="getIndex" />
 
         <template v-for="col in columns" :key="col.prop">
           <!-- 进度条列 -->

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
 import AccountDetailSidebar from './components/AccountDetailSidebar.vue'
@@ -21,8 +21,12 @@ import {
 
 const route = useRoute()
 
-// 获取 accountCode
-const accountCode = computed(() => route.query.accountCode || route.query.accountId || '')
+// 获取 accountCode - 确保在路由准备好后再获取
+const accountCode = computed(() => {
+  const code = route.query.accountCode || route.query.accountId || ''
+  console.log('accountCode computed - route.query:', route.query, 'result:', code)
+  return code
+})
 
 // 用户信息 - 直接使用接口字段名
 const userInfo = ref({
@@ -336,16 +340,33 @@ const fetchUpdateTimeList = async () => {
 }
 
 // 初始化数据
+const initPageData = () => {
+  if (accountCode.value) {
+    console.log('initPageData - accountCode:', accountCode.value)
+    fetchAccountDetail()
+    fetchOpsData()
+    fetchFansData()
+    fetchPostBehavior()
+    fetchBoostData()
+    fetchAppealData()
+    fetchUpdateTimeList()
+  }
+}
+
+// 监听 accountCode 变化（用于从其他页面跳转过来时重新加载数据）
+watch(accountCode, (newVal, oldVal) => {
+  if (newVal && newVal !== oldVal) {
+    console.log('watch accountCode changed:', newVal)
+    initPageData()
+  }
+})
+
+// 组件挂载时加载数据（支持直接打开 URL）
 onMounted(() => {
-  console.log('AccountDetail onMounted - route.query:', route.query)
-  console.log('AccountDetail onMounted - accountCode:', accountCode.value)
-  fetchAccountDetail()
-  fetchOpsData()
-  fetchFansData()
-  fetchPostBehavior()
-  fetchBoostData()
-  fetchAppealData()
-  fetchUpdateTimeList()
+  console.log('onMounted - route.query:', route.query)
+  console.log('onMounted - accountCode:', accountCode.value)
+  // 使用 nextTick 确保 DOM 和路由都已准备好
+  initPageData()
 })
 
 // 账号粉丝图表数据 - 直接使用接口返回的 ECharts 格式数据
