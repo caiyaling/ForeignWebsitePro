@@ -39,6 +39,9 @@ const props = defineProps({
 const chartRef = ref(null)
 let chartInstance = null
 
+// 当前高亮的图例索引
+const highlightedIndex = ref(null)
+
 /**
  * 精确位置计算（容器 163×163）:
  *
@@ -145,6 +148,63 @@ const updateChart = () => {
 const handleResize = () => {
   chartInstance?.resize()
 }
+
+// 高亮指定索引的扇形
+const highlight = (index) => {
+  if (chartInstance && index !== null) {
+    // 同时高亮内环和外环的对应扇形
+    chartInstance.dispatchAction({
+      type: 'highlight',
+      seriesIndex: 0,
+      dataIndex: index
+    })
+    chartInstance.dispatchAction({
+      type: 'highlight',
+      seriesIndex: 1,
+      dataIndex: index
+    })
+  }
+}
+
+// 取消高亮
+const downplay = (index) => {
+  if (chartInstance && index !== null) {
+    chartInstance.dispatchAction({
+      type: 'downplay',
+      seriesIndex: 0,
+      dataIndex: index
+    })
+    chartInstance.dispatchAction({
+      type: 'downplay',
+      seriesIndex: 1,
+      dataIndex: index
+    })
+  }
+}
+
+// 切换高亮状态
+const toggleHighlight = (index) => {
+  if (highlightedIndex.value === index) {
+    // 取消高亮
+    downplay(index)
+    highlightedIndex.value = null
+  } else {
+    // 先取消之前的高亮
+    if (highlightedIndex.value !== null) {
+      downplay(highlightedIndex.value)
+    }
+    // 高亮新的
+    highlight(index)
+    highlightedIndex.value = index
+  }
+}
+
+// 暴露方法给父组件
+defineExpose({
+  highlight,
+  downplay,
+  toggleHighlight
+})
 
 watch(
   () => [props.outerData, props.innerData],

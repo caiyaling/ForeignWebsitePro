@@ -80,7 +80,7 @@ const fetchSmsStatistics = async () => {
 
       cards.value[0] = {
         name: '短信',
-        total: `${formatNumber(used)}/${formatNumber(total)}万次`,
+        total: `${formatNumber(used)}/${formatNumber(total)}次`,
         type: 'chart',
         icon: '/figma/telecomm-sms.svg',
         chart: {
@@ -115,7 +115,7 @@ const fetchVoiceStatistics = async () => {
 
       cards.value[1] = {
         name: '语音',
-        total: `${formatNumber(used)}/${formatNumber(total)}万次`,
+        total: `${formatNumber(used)}/${formatNumber(total)}次`,
         type: 'chart',
         icon: '/figma/telecomm-voice.svg',
         chart: {
@@ -525,7 +525,7 @@ const handleAttachmentClick = (url) => {
           :show-project-filter="false"
           :show-brand-filter="false"
           :loading="loading"
-          search-placeholder="关键词：ID，主叫号码，被叫号码"
+          search-placeholder="关键词：任务ID、接收号码"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

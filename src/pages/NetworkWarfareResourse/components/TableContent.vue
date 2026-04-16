@@ -175,6 +175,7 @@ onUnmounted(() => {
           >
             <template #default="{ row }">
               <el-button
+                v-if="row[col.prop]"
                 :type="row[col.prop] === '已使用' ? 'danger' : 'primary'"
                 plain
                 size="small"
@@ -182,6 +183,7 @@ onUnmounted(() => {
               >
                 {{ row[col.prop] }}
               </el-button>
+              <span v-else></span>
             </template>
           </el-table-column>
 

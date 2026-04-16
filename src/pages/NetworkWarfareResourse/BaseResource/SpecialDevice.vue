@@ -151,9 +151,9 @@ onMounted(() => {
 // 云手机表格列配置
 const cloudPhoneColumns = [
   { prop: 'phoneCode', label: '编号', minWidth: 120 },
-  { prop: 'usagePurpose', label: '用途', minWidth: 100 },
+  { prop: 'usagePurpose', label: '用途', minWidth: 100,type: 'overflow'},
   { prop: 'projectCode', label: '所属项目', minWidth: 140 },
-  { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
+  { prop: 'deliveryParty', label: '交付方', minWidth: 150 },
   { prop: 'model', label: '型号', minWidth: 140 },
   { prop: 'brand', label: '品牌', minWidth: 100 },
   { prop: 'configuration', label: '配置', minWidth: 200, type: 'overflow' },
@@ -167,12 +167,12 @@ const cloudPhoneColumns = [
 // 实体手机表格列配置
 const physicalPhoneColumns = [
   { prop: 'phoneCode', label: '编号', minWidth: 120 },
-  { prop: 'usagePurpose', label: '用途', minWidth: 100 },
-  { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
+  { prop: 'usagePurpose', label: '用途', minWidth: 100,type: 'overflow' },
+  { prop: 'deliveryParty', label: '交付方', minWidth: 150 },
   { prop: 'projectCode', label: '所属项目', minWidth: 140 },
   { prop: 'model', label: '资产名称', minWidth: 140 },
   { prop: 'brand', label: '品牌', minWidth: 100 },
-  { prop: 'serialNumber', label: '序列号', minWidth: 160 },
+  { prop: 'serialNumber', label: '序列号', minWidth: 160,type: 'overflow' },
   { prop: 'model', label: '型号/规格/版本', minWidth: 140 },
   { prop: 'configuration', label: '基本配置', minWidth: 200, type: 'overflow' },
   { prop: 'unit', label: '单位', minWidth: 80 },

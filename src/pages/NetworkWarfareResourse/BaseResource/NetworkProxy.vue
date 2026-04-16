@@ -65,22 +65,20 @@ const fetchStaticProxyStats = async () => {
     const res = await getStaticProxyStats()
     if (res.code === 200 && res.data) {
       const data = res.data
-      // 计算总计
-      const totalCount = data.reduce((sum, item) => sum + (item.total || 0), 0)
-      const totalUsed = data.reduce((sum, item) => sum + (item.use || 0), 0)
 
-      // 构建 progressItems，第一项为总计
-      const progressItems = [
-        ...data.map(item => ({
-          label: item.label,
-          total: item.total || 0,
-          used: item.use || 0
-        }))
-      ]
+      // 构建 progressItems
+      const progressItems = data.map(item => ({
+        label: item.label,
+        total: item.total || 0,
+        used: item.use || 0
+      }))
+
+      // 取第一项的 total 作为总数（接口返回的第一项是总计）
+      const totalCount = data[0]?.total || 0
 
       cards.value[0] = {
         name: '静态代理',
-        total: formatNumber(totalCount),
+        total: formatNumber(totalCount) + '个',
         type: 'progress',
         icon: '/figma/network-proxy-static.svg',
         description: `覆盖${data.length}个国家/地区`,
@@ -105,7 +103,7 @@ const fetchDynamicProxyStats = async () => {
 
         cards.value[1] = {
           name: '动态代理',
-          total: formatNumber(total),
+          total: formatNumber(total) + '个',
           type: 'chart',
           icon: '/figma/network-proxy-dynamic.svg',
           description: 'IP出口覆盖多个国家/地区',

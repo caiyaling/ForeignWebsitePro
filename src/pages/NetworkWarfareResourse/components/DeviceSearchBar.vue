@@ -3,6 +3,7 @@
  * @description 设备资源搜索栏组件
  * @date 2024-04-13
  */
+import { computed } from 'vue'
 import { ElInput, ElSelect, ElOption, ElButton, ElIcon } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
@@ -101,6 +102,29 @@ const props = defineProps({
 
 const emit = defineEmits(['update:filters', 'search', 'batchImport', 'batchExport'])
 
+// 计算筛选器数量
+const filterCount = computed(() => {
+  if (props.customFilters.length > 0) {
+    return props.customFilters.length
+  }
+  let count = 0
+  if (props.showProjectFilter) count++
+  if (props.showBrandFilter) count++
+  if (props.showThirdFilter) count++
+  return count
+})
+
+// 根据筛选器数量计算宽度
+const filterSelectWidth = computed(() => {
+  // 根据设计稿：1个筛选框513px，2个筛选框各248px
+  if (filterCount.value === 1) {
+    return '513px'
+  } else if (filterCount.value >= 2) {
+    return '248px'
+  }
+  return '248px'
+})
+
 // 更新筛选条件
 const updateFilter = (key, value) => {
   emit('update:filters', { ...props.filters, [key]: value })
@@ -145,84 +169,87 @@ const handleBatchExport = () => {
       </div>
 
       <!-- 下拉筛选器 -->
-      <div class="filter-selects">
-        <!-- 自定义筛选器（优先使用） -->
-        <template v-if="customFilters.length > 0">
-          <el-select
-            v-for="filter in customFilters"
-            :key="filter.key"
-            :model-value="filters[filter.key]"
-            :placeholder="filter.placeholder"
-            clearable
-            class="filter-select"
-            @update:model-value="val => updateFilter(filter.key, val)"
-          >
-            <el-option
-              v-for="item in filter.options"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
-        </template>
+      <el-select
+        v-if="customFilters.length > 0"
+        v-for="filter in customFilters"
+        :key="filter.key"
+        :model-value="filters[filter.key]"
+        :placeholder="filter.placeholder"
+        clearable
+        class="filter-select"
+        :style="{ width: filterSelectWidth }"
+        @update:model-value="val => updateFilter(filter.key, val)"
+      >
+        <el-option
+          v-for="item in filter.options"
+          :key="item"
+          :label="item"
+          :value="item"
+        />
+      </el-select>
 
-        <!-- 默认筛选器 -->
-        <template v-else>
-          <!-- 所属项目 -->
-          <el-select
-            v-if="showProjectFilter"
-            :model-value="filters.project"
-            placeholder="所属项目"
-            clearable
-            class="filter-select"
-            @update:model-value="val => updateFilter('project', val)"
-          >
-            <el-option
-              v-for="item in projectOptions"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
+      <!-- 默认筛选器 -->
+      <template v-else>
+        <!-- 所属项目 -->
+        <el-select
+          v-if="showProjectFilter"
+          :model-value="filters.project"
+          placeholder="所属项目"
+          clearable
+          class="filter-select"
+          :style="{ width: filterSelectWidth }"
+          @update:model-value="val => updateFilter('project', val)"
+        >
+          <el-option
+            v-for="item in projectOptions"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
 
-          <!-- 品牌/第二筛选器 -->
-          <el-select
-            v-if="showBrandFilter"
-            :model-value="filters[brandFilterKey]"
-            :placeholder="brandPlaceholder"
-            clearable
-            class="filter-select"
-            @update:model-value="val => updateFilter(brandFilterKey, val)"
-          >
-            <el-option
-              v-for="item in brandOptions"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
+        <!-- 品牌/第二筛选器 -->
+        <el-select
+          v-if="showBrandFilter"
+          :model-value="filters[brandFilterKey]"
+          :placeholder="brandPlaceholder"
+          clearable
+          class="filter-select"
+          :style="{ width: filterSelectWidth }"
+          @update:model-value="val => updateFilter(brandFilterKey, val)"
+        >
+          <el-option
+            v-for="item in brandOptions"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
 
-          <!-- 第三筛选器 -->
-          <el-select
-            v-if="showThirdFilter"
-            :model-value="filters[thirdFilterKey]"
-            :placeholder="thirdFilterPlaceholder"
-            clearable
-            class="filter-select"
-            @update:model-value="val => updateFilter(thirdFilterKey, val)"
-          >
-            <el-option
-              v-for="item in thirdFilterOptions"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
-        </template>
-      </div>
+        <!-- 第三筛选器 -->
+        <el-select
+          v-if="showThirdFilter"
+          :model-value="filters[thirdFilterKey]"
+          :placeholder="thirdFilterPlaceholder"
+          clearable
+          class="filter-select"
+          :style="{ width: filterSelectWidth }"
+          @update:model-value="val => updateFilter(thirdFilterKey, val)"
+        >
+          <el-option
+            v-for="item in thirdFilterOptions"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
+      </template>
 
       <!-- 搜索按钮 -->
       <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+
+      <!-- 占位区域 -->
+      <div class="filter-spacer"></div>
     </div>
 
     <!-- 操作按钮 -->
@@ -263,14 +290,6 @@ const handleBatchExport = () => {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex: 1;
-  min-width: 0;
-}
-
-.filter-selects {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   flex: 1;
   min-width: 0;
 }
@@ -332,8 +351,13 @@ const handleBatchExport = () => {
 }
 
 .filter-select {
-  flex: 1;
-  min-width: 0;
+  flex-shrink: 0;
+}
+
+.filter-spacer {
+  width: 280px;
+  height: 32px;
+  flex-shrink: 0;
 }
 
 .filter-select :deep(.el-input__wrapper) {

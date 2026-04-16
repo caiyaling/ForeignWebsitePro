@@ -52,7 +52,7 @@ const fetchLocationStats = async () => {
         name: '归属地',
         stats: res.data.map(item => ({
           label: item.label,
-          value: formatNumber(item.value)
+          value: formatNumber(item.value) + '张'
         }))
       }
     }
@@ -70,7 +70,7 @@ const fetchTypeStats = async () => {
         name: '卡号类型',
         stats: res.data.map(item => ({
           label: item.label,
-          value: formatNumber(item.value)
+          value: formatNumber(item.value) + '张'
         }))
       }
     }

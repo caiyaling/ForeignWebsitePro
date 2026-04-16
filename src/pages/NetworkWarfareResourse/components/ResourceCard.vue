@@ -36,6 +36,12 @@ const progressListRefs = ref({})
 const scrollbarThumbTop = ref({})
 const showScrollbar = ref({})
 
+// 图表组件引用
+const chartRefs = ref({})
+
+// 当前高亮的图例索引（按卡片索引）
+const highlightedLegendIndex = ref({})
+
 // 初始化滚动条状态
 const initScrollbar = (cardIndex) => {
   const listEl = progressListRefs.value[cardIndex]
@@ -66,6 +72,34 @@ const setProgressListRef = (el, cardIndex) => {
   if (el) {
     progressListRefs.value[cardIndex] = el
     nextTick(() => initScrollbar(cardIndex))
+  }
+}
+
+// 设置图表组件引用
+const setChartRef = (el, cardIndex) => {
+  if (el) {
+    chartRefs.value[cardIndex] = el
+  }
+}
+
+// 处理图例点击
+const handleLegendClick = (cardIndex, legendIndex) => {
+  const chartRef = chartRefs.value[cardIndex]
+  if (!chartRef) return
+
+  // 切换高亮状态
+  if (highlightedLegendIndex.value[cardIndex] === legendIndex) {
+    // 取消高亮
+    chartRef.downplay(legendIndex)
+    highlightedLegendIndex.value[cardIndex] = null
+  } else {
+    // 先取消之前的高亮
+    if (highlightedLegendIndex.value[cardIndex] !== undefined && highlightedLegendIndex.value[cardIndex] !== null) {
+      chartRef.downplay(highlightedLegendIndex.value[cardIndex])
+    }
+    // 高亮新的
+    chartRef.highlight(legendIndex)
+    highlightedLegendIndex.value[cardIndex] = legendIndex
   }
 }
 
@@ -130,11 +164,17 @@ onMounted(() => {
         <!-- 右侧：环形图表类型 -->
         <div v-if="card.type === 'chart'" class="card-chart-section">
           <doughnut-chart
+            :ref="(el) => setChartRef(el, index)"
             :outer-data="card.chart.outerData"
             :inner-data="card.chart.innerData"
           />
           <div class="chart-legend">
-            <div v-for="(item, idx) in card.chart.legends" :key="idx" class="legend-item">
+            <div
+              v-for="(item, idx) in card.chart.legends"
+              :key="idx"
+              :class="['legend-item', { 'legend-active': highlightedLegendIndex[index] === idx }]"
+              @click="handleLegendClick(index, idx)"
+            >
               <div class="legend-dot" :style="{ background: item.color }"></div>
               <span class="legend-text">{{ item.label }}</span>
             </div>
@@ -517,6 +557,23 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 72, 255, 0.08);
+  }
+
+  &.legend-active {
+    background: rgba(0, 72, 255, 0.12);
+
+    .legend-text {
+      color: #0048ff;
+      font-weight: 500;
+    }
+  }
 }
 
 .legend-dot {
