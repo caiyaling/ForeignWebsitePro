@@ -170,7 +170,7 @@ const onPageChange = ({ page, pageSize: size }) => {
 // 处理详情点击 - 新页面打开账号详情页
 const handleDetail = (row) => {
   const routeData = router.resolve({
-    path: '/account-detail',
+    path: '/network-warfare-resource/account-detail',
     query: {
       accountCode: row.accountCode,
       from: router.currentRoute.value.path,

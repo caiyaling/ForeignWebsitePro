@@ -26,7 +26,7 @@ const menuItems = computed(() => {
   const accountType = route.query.accountType || ''
 
   // 社交平台
-  if (from === '/social') {
+  if (from.includes('/social')) {
     // 采集账号：只显示虚拟人设信息、账号运维信息
     if (accountType === '采集') {
       return [
@@ -39,7 +39,7 @@ const menuItems = computed(() => {
   }
 
   // 即时通讯：显示虚拟人设信息、账号运维信息、申诉/替换记录
-  if (from === '/instant-messaging') {
+  if (from.includes('/instant-messaging')) {
     return [
       { id: 'virtual-persona', title: '虚拟人设信息' },
       { id: 'account-ops', title: '账号运维信息' },
@@ -48,7 +48,7 @@ const menuItems = computed(() => {
   }
 
   // 博客论坛：显示虚拟人设信息、账号运维信息、申诉/替换记录
-  if (from === '/blog-forum') {
+  if (from.includes('/blog-forum')) {
     return [
       { id: 'virtual-persona', title: '虚拟人设信息' },
       { id: 'account-ops', title: '账号运维信息' },
@@ -57,7 +57,7 @@ const menuItems = computed(() => {
   }
 
   // 电子邮箱：只显示虚拟人设信息
-  if (from === '/email') {
+  if (from.includes('/email')) {
     return [
       { id: 'virtual-persona', title: '虚拟人设信息' }
     ]

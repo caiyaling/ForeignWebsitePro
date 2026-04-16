@@ -403,7 +403,7 @@ const showAccountOps = computed(() => {
   const accountType = route.query.accountType || ''
 
   // 电子邮箱不显示账号运维信息
-  if (from === '/email') return false
+  if (from.includes('/email')) return false
 
   return true
 })
@@ -413,7 +413,7 @@ const showAccountFansChart = computed(() => {
   const accountType = route.query.accountType || ''
 
   // 社交平台-贴靠发声账号显示粉丝图表，采集账号不显示
-  if (from === '/social' && accountType !== '采集') return true
+  if (from.includes('/social') && accountType !== '采集') return true
   return false
 })
 
@@ -422,7 +422,7 @@ const showPostBehavior = computed(() => {
   const accountType = route.query.accountType || ''
 
   // 只有社交平台-贴靠发声账号显示
-  if (from === '/social' && accountType !== '采集') return true
+  if (from.includes('/social') && accountType !== '采集') return true
   return false
 })
 
@@ -431,7 +431,7 @@ const showBoostRecord = computed(() => {
   const accountType = route.query.accountType || ''
 
   // 只有社交平台-贴靠发声账号显示
-  if (from === '/social' && accountType !== '采集') return true
+  if (from.includes('/social') && accountType !== '采集') return true
   return false
 })
 
@@ -440,9 +440,9 @@ const showAppealRecord = computed(() => {
   const accountType = route.query.accountType || ''
 
   // 社交平台-贴靠发声账号、即时通讯、博客论坛显示
-  if (from === '/social' && accountType !== '采集') return true
-  if (from === '/instant-messaging') return true
-  if (from === '/blog-forum') return true
+  if (from.includes('/social') && accountType !== '采集') return true
+  if (from.includes('/instant-messaging')) return true
+  if (from.includes('/blog-forum')) return true
   return false
 })
 

@@ -12,16 +12,27 @@ const router = useRouter()
 
 // 来源页面映射
 const sourcePageMap = {
-  '/social': '社交平台',
-  '/instant-messaging': '即时通讯',
-  '/blog-forum': '博客论坛',
-  '/email': '电子邮箱'
+  '/network-warfare-resource/social': '社交平台',
+  '/network-warfare-resource/instant-messaging': '即时通讯',
+  '/network-warfare-resource/blog-forum': '博客论坛',
+  '/network-warfare-resource/email': '电子邮箱'
 }
 
 // 面包屑数据
 const breadcrumbs = computed(() => {
   const from = route.query.from || ''
-  const sourceName = sourcePageMap[from] || '未知来源'
+  // 支持新旧路径格式
+  let sourceName = sourcePageMap[from]
+  if (!sourceName) {
+    // 兼容旧路径格式
+    const oldPathMap = {
+      '/social': '社交平台',
+      '/instant-messaging': '即时通讯',
+      '/blog-forum': '博客论坛',
+      '/email': '电子邮箱'
+    }
+    sourceName = oldPathMap[from] || '未知来源'
+  }
 
   return [
     { label: sourceName, path: from || '/' },

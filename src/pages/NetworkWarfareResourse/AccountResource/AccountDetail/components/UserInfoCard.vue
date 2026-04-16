@@ -56,22 +56,22 @@ const fromPage = computed(() => {
 // 判断是否为社交平台采集账号
 const isSocialCollection = computed(() => {
   const accountType = route.query.accountType || ''
-  return fromPage.value === '/social' && accountType === '采集'
+  return fromPage.value.includes('/social') && accountType === '采集'
 })
 
 // 判断是否为博客论坛页面
 const isBlogForum = computed(() => {
-  return fromPage.value === '/blog-forum'
+  return fromPage.value.includes('/blog-forum')
 })
 
 // 判断是否为电子邮箱页面
 const isEmail = computed(() => {
-  return fromPage.value === '/email'
+  return fromPage.value.includes('/email')
 })
 
 // 判断是否为即时通讯页面
 const isInstantMessaging = computed(() => {
-  return fromPage.value === '/instant-messaging'
+  return fromPage.value.includes('/instant-messaging')
 })
 
 // 是否显示简化版本（社交平台采集账号、博客论坛、电子邮箱）
