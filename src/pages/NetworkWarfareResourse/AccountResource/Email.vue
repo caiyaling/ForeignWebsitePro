@@ -6,17 +6,18 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
+import { getAssetUrl } from '@/utils/assets'
 
 const router = useRouter()
 
 // 平台配置映射
 const platformConfig = {
-  'Gmail': { icon: '/figma/email-gmail.svg', variant: 'warm' },
-  'Outlook': { icon: '/figma/email-outlook.svg', variant: 'warm' },
-  'Yahoo Mail': { icon: '/figma/email-yahoo.svg', variant: 'cool' },
-  'Hotmail': { icon: '/figma/email-hotmail.svg', variant: 'cool' },
-  'ProtonMail': { icon: '/figma/email-proton.svg', variant: 'warm' },
-  'iCloud': { icon: '/figma/email-icloud.svg', variant: 'cool' }
+  'Gmail': { icon: getAssetUrl('/figma/email-gmail.svg'), variant: 'warm' },
+  'Outlook': { icon: getAssetUrl('/figma/email-outlook.svg'), variant: 'warm' },
+  'Yahoo Mail': { icon: getAssetUrl('/figma/email-yahoo.svg'), variant: 'cool' },
+  'Hotmail': { icon: getAssetUrl('/figma/email-hotmail.svg'), variant: 'cool' },
+  'ProtonMail': { icon: getAssetUrl('/figma/email-proton.svg'), variant: 'warm' },
+  'iCloud': { icon: getAssetUrl('/figma/email-icloud.svg'), variant: 'cool' }
 }
 
 // 格式化数字（添加千分位）
@@ -170,7 +171,7 @@ const onPageChange = ({ page, pageSize: size }) => {
 // 处理详情点击 - 新页面打开账号详情页
 const handleDetail = (row) => {
   const routeData = router.resolve({
-    path: '/network-warfare-resource/account-detail',
+    path: '/account-detail',
     query: {
       accountCode: row.accountCode,
       from: router.currentRoute.value.path,

@@ -13,14 +13,10 @@ import DataImport from '@/pages/NetworkWarfareResourse/DataImport/Index.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/network-warfare-resource/social'
+    redirect: '/social'
   },
   {
-    path: '/network-warfare-resource',
-    redirect: '/network-warfare-resource/social'
-  },
-  {
-    path: '/network-warfare-resource/social',
+    path: '/social',
     name: 'SocialPlatform',
     component: SocialPlatform,
     meta: {
@@ -28,7 +24,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/instant-messaging',
+    path: '/instant-messaging',
     name: 'InstantMessaging',
     component: InstantMessaging,
     meta: {
@@ -36,7 +32,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/blog-forum',
+    path: '/blog-forum',
     name: 'BlogForum',
     component: BlogForum,
     meta: {
@@ -44,7 +40,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/email',
+    path: '/email',
     name: 'Email',
     component: Email,
     meta: {
@@ -52,7 +48,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/account-detail',
+    path: '/account-detail',
     name: 'AccountDetail',
     component: AccountDetail,
     meta: {
@@ -60,7 +56,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/device',
+    path: '/device',
     name: 'SpecialDevice',
     component: SpecialDevice,
     meta: {
@@ -68,7 +64,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/phone',
+    path: '/phone',
     name: 'PhoneCard',
     component: PhoneCard,
     meta: {
@@ -76,7 +72,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/proxy',
+    path: '/proxy',
     name: 'NetworkProxy',
     component: NetworkProxy,
     meta: {
@@ -84,7 +80,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/telecom',
+    path: '/telecom',
     name: 'TelecommResource',
     component: TelecommResource,
     meta: {
@@ -92,7 +88,7 @@ const routes = [
     }
   },
   {
-    path: '/network-warfare-resource/data-import',
+    path: '/data-import',
     name: 'DataImport',
     component: DataImport,
     meta: {
@@ -102,7 +98,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/network-warfare-resource/'),
   routes
 })
 

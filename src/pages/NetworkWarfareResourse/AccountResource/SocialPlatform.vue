@@ -6,19 +6,20 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
+import { getAssetUrl } from '@/utils/assets'
 
 const router = useRouter()
 
 // 平台配置映射
 const platformConfig = {
-  'Facebook': { icon: '/figma/mnijidos-mhm8ijf.svg', variant: 'warm' },
-  'Instagram': { icon: '/figma/mnijidos-9h6v96r.svg', variant: 'warm' },
-  'Threads': { icon: '/figma/mnijidos-927feh6.svg', variant: 'warm' },
-  'YouTube': { icon: '/figma/mnijidos-hh4aiod.svg', variant: 'cool' },
-  'TikTok': { icon: '/figma/mnijidos-neinw5m.svg', variant: 'cool' },
-  'X': { icon: '/figma/mnijidos-63851so.svg', variant: 'cool' },
-  'Twitter': { icon: '/figma/mnijidos-63851so.svg', variant: 'cool' },
-  'line': { icon: '/figma/mnijidos-9h6v96r.svg', variant: 'warm' }
+  'Facebook': { icon: getAssetUrl('/figma/mnijidos-mhm8ijf.svg'), variant: 'warm' },
+  'Instagram': { icon: getAssetUrl('/figma/mnijidos-9h6v96r.svg'), variant: 'warm' },
+  'Threads': { icon: getAssetUrl('/figma/mnijidos-927feh6.svg'), variant: 'warm' },
+  'YouTube': { icon: getAssetUrl('/figma/mnijidos-hh4aiod.svg'), variant: 'cool' },
+  'TikTok': { icon: getAssetUrl('/figma/mnijidos-neinw5m.svg'), variant: 'cool' },
+  'X': { icon: getAssetUrl('/figma/mnijidos-63851so.svg'), variant: 'cool' },
+  'Twitter': { icon: getAssetUrl('/figma/mnijidos-63851so.svg'), variant: 'cool' },
+  'line': { icon: getAssetUrl('/figma/mnijidos-9h6v96r.svg'), variant: 'warm' }
 }
 
 // 格式化数字（添加千分位）
@@ -176,7 +177,7 @@ const onPageChange = ({ page, pageSize: size }) => {
 // 处理详情点击 - 新页面打开账号详情页
 const handleDetail = (row) => {
   const routeData = router.resolve({
-    path: '/network-warfare-resource/account-detail',
+    path: '/account-detail',
     query: {
       accountCode: row.accountCode,
       from: router.currentRoute.value.path,

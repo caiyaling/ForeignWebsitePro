@@ -23,6 +23,7 @@ import {
   downloadNetworkProxyTemplate,
   exportNetworkProxy
 } from '@/api/networkProxy'
+import { getAssetUrl } from '@/utils/assets'
 
 const router = useRouter()
 
@@ -38,7 +39,7 @@ const cards = ref([
     name: '静态代理',
     total: '0',
     type: 'progress',
-    icon: '/figma/network-proxy-static.svg',
+    icon: getAssetUrl('/figma/network-proxy-static.svg'),
     description: '加载中...',
     progressItems: []
   },
@@ -46,7 +47,7 @@ const cards = ref([
     name: '动态代理',
     total: '0',
     type: 'chart',
-    icon: '/figma/network-proxy-dynamic.svg',
+    icon: getAssetUrl('/figma/network-proxy-dynamic.svg'),
     description: '加载中...',
     chart: {
       outerData: [],
@@ -80,7 +81,7 @@ const fetchStaticProxyStats = async () => {
         name: '静态代理',
         total: formatNumber(totalCount) + '个',
         type: 'progress',
-        icon: '/figma/network-proxy-static.svg',
+        icon: getAssetUrl('/figma/network-proxy-static.svg'),
         description: `覆盖${data.length}个国家/地区`,
         progressItems
       }
@@ -105,7 +106,7 @@ const fetchDynamicProxyStats = async () => {
           name: '动态代理',
           total: formatNumber(total) + '个',
           type: 'chart',
-          icon: '/figma/network-proxy-dynamic.svg',
+          icon: getAssetUrl('/figma/network-proxy-dynamic.svg'),
           description: 'IP出口覆盖多个国家/地区',
           chart: {
             outerData: [

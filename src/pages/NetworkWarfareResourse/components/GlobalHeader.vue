@@ -1,24 +1,26 @@
 ﻿<script setup>
+import { getAssetUrl } from '@/utils/assets'
+
 const username = 'admin'
 </script>
 
 <template>
   <header class="global-header">
     <div class="brand">
-      <img src="/figma/logo-icon.svg" alt="" class="brand-icon" />
+      <img :src="getAssetUrl('/figma/logo-icon.svg')" alt="" class="brand-icon" />
       <span class="brand-text">作战资源库</span>
     </div>
 
     <div class="toolbar">
       <button class="toolbar-button" type="button" aria-label="搜索">
-        <img src="/figma/mnijidos-cf8wmtt.svg" alt="" />
+        <img :src="getAssetUrl('/figma/mnijidos-cf8wmtt.svg')" alt="" />
       </button>
       <button class="toolbar-button" type="button" aria-label="通知">
-        <img src="/figma/mnijidos-7thb8hs.svg" alt="" />
+        <img :src="getAssetUrl('/figma/mnijidos-7thb8hs.svg')" alt="" />
       </button>
       <button class="account-button" type="button" aria-label="当前用户">
         <span class="avatar">
-          <img src="/figma/mnijidos-cxocglf.svg" alt="" />
+          <img :src="getAssetUrl('/figma/mnijidos-cxocglf.svg')" alt="" />
         </span>
         <span class="username">{{ username }}</span>
       </button>

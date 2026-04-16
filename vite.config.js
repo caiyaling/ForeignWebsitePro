@@ -4,6 +4,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/network-warfare-resource/',
   plugins: [vue()],
   server: {
     host: '0.0.0.0',

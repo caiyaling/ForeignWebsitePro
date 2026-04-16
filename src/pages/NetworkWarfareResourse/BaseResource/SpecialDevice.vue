@@ -29,6 +29,7 @@ import {
   downloadPhysicalPhoneTemplate,
   exportPhysicalPhone
 } from '@/api/device'
+import { getAssetUrl } from '@/utils/assets'
 
 // 当前选中的卡片索引
 const activeCardIndex = ref(0)
@@ -45,7 +46,7 @@ const cards = ref([
     name: '云手机',
     total: '0',
     type: 'chart',
-    icon: '/figma/device-cloud-phone.svg',
+    icon: getAssetUrl('/figma/device-cloud-phone.svg'),
     chart: {
       outerData: [
         { value: 0, name: '已使用', color: '#f77234' },
@@ -65,7 +66,7 @@ const cards = ref([
     name: '实体手机',
     total: '0/0台',
     type: 'stats',
-    icon: '/figma/device-physical-phone.svg',
+    icon: getAssetUrl('/figma/device-physical-phone.svg'),
     stats: []
   }
 ])
@@ -83,7 +84,7 @@ const fetchCloudPhoneStats = async () => {
         name: '云手机',
         total: `${formatNumber(usedQuantity)}/${formatNumber(total)}台`,
         type: 'chart',
-        icon: '/figma/device-cloud-phone.svg',
+        icon: getAssetUrl('/figma/device-cloud-phone.svg'),
         chart: {
           outerData: [
             { value: usedQuantity, name: '已使用', color: '#f77234' },
@@ -131,7 +132,7 @@ const fetchPhysicalPhoneStats = async () => {
         name: '实体手机',
         total: `${formatNumber(totalUsed)}/${formatNumber(totalUsed + totalAvailable)}台`,
         type: 'stats',
-        icon: '/figma/device-physical-phone.svg',
+        icon: getAssetUrl('/figma/device-physical-phone.svg'),
         stats
       }
     }

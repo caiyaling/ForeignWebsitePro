@@ -6,15 +6,16 @@ import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
+import { getAssetUrl } from '@/utils/assets'
 
 const router = useRouter()
 
 // 平台配置映射
 const platformConfig = {
-  'PTT': { icon: '/figma/blog-ptt.svg', variant: 'warm' },
-  'PPT': { icon: '/figma/blog-ppt.svg', variant: 'warm' },
-  'Dcard': { icon: '/figma/blog-dcard.svg', variant: 'warm' },
-  'Pixnet': { icon: '/figma/blog-pixnet.svg', variant: 'warm' }
+  'PTT': { icon: getAssetUrl('/figma/blog-ptt.svg'), variant: 'warm' },
+  'PPT': { icon: getAssetUrl('/figma/blog-ppt.svg'), variant: 'warm' },
+  'Dcard': { icon: getAssetUrl('/figma/blog-dcard.svg'), variant: 'warm' },
+  'Pixnet': { icon: getAssetUrl('/figma/blog-pixnet.svg'), variant: 'warm' }
 }
 
 // 格式化数字（添加千分位）
@@ -170,7 +171,7 @@ const onPageChange = ({ page, pageSize: size }) => {
 // 处理详情点击 - 新页面打开账号详情页
 const handleDetail = (row) => {
   const routeData = router.resolve({
-    path: '/network-warfare-resource/account-detail',
+    path: '/account-detail',
     query: {
       accountCode: row.accountCode,
       from: router.currentRoute.value.path,

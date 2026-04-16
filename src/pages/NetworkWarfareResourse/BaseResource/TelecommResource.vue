@@ -27,6 +27,7 @@ import {
   importVoice,
   downloadVoiceTemplate
 } from '@/api/voice'
+import { getAssetUrl } from '@/utils/assets'
 
 // 当前选中的卡片索引
 const activeCardIndex = ref(0)
@@ -43,7 +44,7 @@ const cards = ref([
     name: '短信',
     total: '加载中...',
     type: 'chart',
-    icon: '/figma/telecomm-sms.svg',
+    icon: getAssetUrl('/figma/telecomm-sms.svg'),
     chart: {
       outerData: [],
       innerData: [],
@@ -57,7 +58,7 @@ const cards = ref([
     name: '语音',
     total: '加载中...',
     type: 'chart',
-    icon: '/figma/telecomm-voice.svg',
+    icon: getAssetUrl('/figma/telecomm-voice.svg'),
     chart: {
       outerData: [],
       innerData: [],
@@ -82,7 +83,7 @@ const fetchSmsStatistics = async () => {
         name: '短信',
         total: `${formatNumber(used)}/${formatNumber(total)}次`,
         type: 'chart',
-        icon: '/figma/telecomm-sms.svg',
+        icon: getAssetUrl('/figma/telecomm-sms.svg'),
         chart: {
           outerData: [
             { value: used, name: '已使用', color: '#f77234' },
@@ -117,7 +118,7 @@ const fetchVoiceStatistics = async () => {
         name: '语音',
         total: `${formatNumber(used)}/${formatNumber(total)}次`,
         type: 'chart',
-        icon: '/figma/telecomm-voice.svg',
+        icon: getAssetUrl('/figma/telecomm-voice.svg'),
         chart: {
           outerData: [
             { value: used, name: '已使用', color: '#f77234' },

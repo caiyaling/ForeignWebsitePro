@@ -7,17 +7,18 @@ import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import { useTableData } from '@/composables/useTableData'
 import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
+import { getAssetUrl } from '@/utils/assets'
 
 const router = useRouter()
 
 // 平台配置映射
 const platformConfig = {
-  'Telegram': { icon: '/figma/im-telegram.svg', variant: 'warm' },
-  'WhatsApp': { icon: '/figma/im-whatsapp.svg', variant: 'warm' },
-  'Signal': { icon: '/figma/im-signal.svg', variant: 'warm' },
-  'Line': { icon: '/figma/im-line.svg', variant: 'warm' },
-  'Skype': { icon: '/figma/im-skype.svg', variant: 'cool' },
-  'Teams': { icon: '/figma/im-teams.svg', variant: 'cool' }
+  'Telegram': { icon: getAssetUrl('/figma/im-telegram.svg'), variant: 'warm' },
+  'WhatsApp': { icon: getAssetUrl('/figma/im-whatsapp.svg'), variant: 'warm' },
+  'Signal': { icon: getAssetUrl('/figma/im-signal.svg'), variant: 'warm' },
+  'Line': { icon: getAssetUrl('/figma/im-line.svg'), variant: 'warm' },
+  'Skype': { icon: getAssetUrl('/figma/im-skype.svg'), variant: 'cool' },
+  'Teams': { icon: getAssetUrl('/figma/im-teams.svg'), variant: 'cool' }
 }
 
 // 格式化数字（添加千分位）
@@ -175,7 +176,7 @@ const onPageChange = ({ page, pageSize: size }) => {
 // 处理详情点击 - 新页面打开账号详情页
 const handleDetail = (row) => {
   const routeData = router.resolve({
-    path: '/network-warfare-resource/account-detail',
+    path: '/account-detail',
     query: {
       accountCode: row.accountCode,
       from: router.currentRoute.value.path,
