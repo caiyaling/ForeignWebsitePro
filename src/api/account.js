@@ -131,10 +131,15 @@ export function getAppealPage(params) {
 
 /**
  * 获取更新时间列表（统计结束时间）
+ * @param {string} accountCode - 账号编号（可选，传入时只返回该账号的更新时间）
  * @returns {Promise} 返回 List<String> 格式为 yyyy-MM-dd
  */
-export function getUpdateTimeList() {
-  return request.get('/account-behavior-record/update-time/list')
+export function getUpdateTimeList(accountCode) {
+  const params = {}
+  if (accountCode) {
+    params.accountCode = accountCode
+  }
+  return request.get('/account-behavior-record/update-time/list', { params })
 }
 
 /**

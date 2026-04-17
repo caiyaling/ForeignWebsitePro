@@ -323,7 +323,7 @@ const fetchAppealData = async () => {
 // 获取更新时间列表
 const fetchUpdateTimeList = async () => {
   try {
-    const res = await getUpdateTimeList()
+    const res = await getUpdateTimeList(accountCode.value)
     if (res.code === 200 && res.data) {
       // 转换为下拉选项格式
       updateTimeOptions.value = [

@@ -8,15 +8,15 @@ const route = useRoute()
 
 // 菜单项对应的路由路径
 const menuRoutes = {
-  '社交平台': '/social',
-  '即时通讯': '/instant-messaging',
-  '博客论坛': '/blog-forum',
-  '电子邮件': '/email',
-  '专用设备': '/device',
-  '手机卡号': '/phone',
-  '网络代理': '/proxy',
-  '电信资源': '/telecom',
-  '数据导入': '/data-import'
+  '社交平台': '/network-warfare-resource/social',
+  '即时通讯': '/network-warfare-resource/instant-messaging',
+  '博客论坛': '/network-warfare-resource/blog-forum',
+  '电子邮件': '/network-warfare-resource/email',
+  '专用设备': '/network-warfare-resource/device',
+  '手机卡号': '/network-warfare-resource/phone',
+  '网络代理': '/network-warfare-resource/proxy',
+  '电信资源': '/network-warfare-resource/telecom',
+  '数据导入': '/network-warfare-resource/data-import'
 }
 
 // 菜单配置

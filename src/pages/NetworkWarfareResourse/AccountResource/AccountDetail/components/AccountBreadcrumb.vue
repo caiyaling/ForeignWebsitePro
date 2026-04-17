@@ -12,10 +12,10 @@ const router = useRouter()
 
 // 来源页面映射
 const sourcePageMap = {
-  '/social': '社交平台',
-  '/instant-messaging': '即时通讯',
-  '/blog-forum': '博客论坛',
-  '/email': '电子邮箱'
+  '/network-warfare-resource/social': '社交平台',
+  '/network-warfare-resource/instant-messaging': '即时通讯',
+  '/network-warfare-resource/blog-forum': '博客论坛',
+  '/network-warfare-resource/email': '电子邮箱'
 }
 
 // 面包屑数据
