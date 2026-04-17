@@ -9,11 +9,20 @@ import PhoneCard from '@/pages/NetworkWarfareResourse/BaseResource/PhoneCard.vue
 import NetworkProxy from '@/pages/NetworkWarfareResourse/BaseResource/NetworkProxy.vue'
 import TelecommResource from '@/pages/NetworkWarfareResourse/BaseResource/TelecommResource.vue'
 import DataImport from '@/pages/NetworkWarfareResourse/DataImport/Index.vue'
+import Overview from '@/pages/NetworkWarfareResourse/Overview/Index.vue'
 
 const routes = [
   {
     path: '/',
     redirect: '/network-warfare-resource/social'
+  },
+  {
+    path: '/network-warfare-resource/overview',
+    name: 'Overview',
+    component: Overview,
+    meta: {
+      title: '资源概览 - 作战资源库'
+    }
   },
   {
     path: '/network-warfare-resource/social',
