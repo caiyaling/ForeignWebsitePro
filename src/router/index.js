@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import SocialPlatform from '@/pages/NetworkWarfareResourse/AccountResource/SocialPlatform.vue'
 import InstantMessaging from '@/pages/NetworkWarfareResourse/AccountResource/InstantMessaging.vue'
 import BlogForum from '@/pages/NetworkWarfareResourse/AccountResource/BlogForum.vue'
@@ -98,7 +98,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/network-warfare-resource/'),
+  history: createWebHashHistory(),
   routes
 })
 
