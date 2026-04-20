@@ -354,6 +354,8 @@ const handleImportConfirm = async (files) => {
         } else {
           ElMessage.success('云手机台账导入成功')
           fetchTableData()
+          // 刷新卡片统计数据
+          fetchCloudPhoneStats()
           showBatchImportDialog.value = false
         }
       } else {
@@ -376,6 +378,8 @@ const handleImportConfirm = async (files) => {
         } else {
           ElMessage.success('实体手机台账导入成功')
           fetchTableData()
+          // 刷新卡片统计数据
+          fetchPhysicalPhoneStats()
           showBatchImportDialog.value = false
         }
       } else {
@@ -476,6 +480,8 @@ const handleDelete = (row) => {
         if (index > -1) {
           cloudPhoneData.value.splice(index, 1)
         }
+        // 刷新卡片统计数据
+        fetchCloudPhoneStats()
       } else {
         // 删除实体手机台账
         await deletePhysicalPhone(row.id)
@@ -483,6 +489,8 @@ const handleDelete = (row) => {
         if (index > -1) {
           physicalPhoneData.value.splice(index, 1)
         }
+        // 刷新卡片统计数据
+        fetchPhysicalPhoneStats()
       }
       ElMessage.success('删除成功')
     } catch (error) {

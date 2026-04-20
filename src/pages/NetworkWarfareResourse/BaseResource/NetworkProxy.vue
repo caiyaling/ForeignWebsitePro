@@ -285,6 +285,9 @@ const handleImportConfirm = async (files) => {
       } else {
         ElMessage.success('网络代理台账导入成功')
         fetchTableData()
+        // 刷新卡片统计数据
+        fetchStaticProxyStats()
+        fetchDynamicProxyStats()
         showBatchImportDialog.value = false
       }
     } else {
@@ -373,6 +376,9 @@ const handleDelete = (row) => {
       if (index > -1) {
         tableData.value.splice(index, 1)
       }
+      // 刷新卡片统计数据
+      fetchStaticProxyStats()
+      fetchDynamicProxyStats()
       ElMessage.success('删除成功')
     } catch (error) {
       console.error('删除失败:', error)

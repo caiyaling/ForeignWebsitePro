@@ -54,7 +54,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'detail', 'attachment-click', 'update:pageSize', 'update:currentPage', 'pageChange'])
+const emit = defineEmits(['delete', 'detail', 'attachment-click', 'update:pageSize', 'update:currentPage', 'pageChange', 'sortChange'])
 
 // 点击详情
 const handleDetailClick = (row) => {
@@ -95,6 +95,18 @@ const handleCurrentPageChange = (val) => {
 // 计算序号（支持分页）
 const getIndex = (index) => {
   return (props.currentPage - 1) * props.pageSize + index + 1
+}
+
+// 排序变化处理
+const handleSortChange = ({ prop, order }) => {
+  // order: 'ascending' 升序, 'descending' 降序, null 取消排序
+  let sortField = ''
+  let sortOrder = ''
+  if (order) {
+    sortField = prop
+    sortOrder = order === 'ascending' ? 'asc' : 'desc'
+  }
+  emit('sortChange', { sortField, sortOrder })
 }
 
 // ResizeObserver 实例
@@ -151,6 +163,7 @@ onUnmounted(() => {
         :height="tableHeight"
         v-loading="loading"
         element-loading-text="加载中..."
+        @sort-change="handleSortChange"
       >
         <!-- 序号列 -->
         <el-table-column type="index" label="序号" width="60" align="center" :index="getIndex" />
@@ -197,7 +210,7 @@ onUnmounted(() => {
             v-else-if="col.type === 'appealStatus'"
             :label="col.label"
             :min-width="col.minWidth"
-            :sortable="col.sortable"
+            :sortable="col.sortable ? 'custom' : false"
           >
             <template #default="{ row }">
               <el-tag
@@ -214,7 +227,7 @@ onUnmounted(() => {
             v-else-if="col.type === 'appealResult'"
             :label="col.label"
             :min-width="col.minWidth"
-            :sortable="col.sortable"
+            :sortable="col.sortable ? 'custom' : false"
           >
             <template #default="{ row }">
               <span :class="['appeal-result', getResultClass(row[col.prop])]">
@@ -229,7 +242,7 @@ onUnmounted(() => {
             :label="col.label"
             :width="col.width"
             :min-width="col.minWidth"
-            :sortable="col.sortable"
+            :sortable="col.sortable ? 'custom' : false"
           >
             <template #default="{ row }">
               <span :class="['hot-text', { 'is-hot': row[col.prop] === '是' }]">
@@ -244,7 +257,7 @@ onUnmounted(() => {
             :label="col.label"
             :width="col.width"
             :min-width="col.minWidth"
-            :sortable="col.sortable"
+            :sortable="col.sortable ? 'custom' : false"
           >
             <template #default="{ row }">
               <el-tooltip
@@ -261,29 +274,41 @@ onUnmounted(() => {
           <el-table-column
             v-else-if="col.type === 'attachment'"
             :label="col.label"
-            :width="col.width"
+            :width="col.width || 180"
             :min-width="col.minWidth"
-            :sortable="col.sortable"
+            :sortable="col.sortable ? 'custom' : false"
           >
             <template #default="{ row }">
-              <div class="attachment-list">
-                <template v-if="Array.isArray(row[col.prop]) && row[col.prop].length > 0">
+              <div class="attachment-list" v-if="Array.isArray(row[col.prop]) && row[col.prop].length > 0">
+                <el-tooltip
+                  v-for="(file, index) in row[col.prop]"
+                  :key="index"
+                  :content="file.fileName || file.name"
+                  placement="top"
+                  :disabled="!(file.fileName || file.name)"
+                >
                   <span
-                    v-for="(file, index) in row[col.prop]"
-                    :key="index"
                     class="attachment-link"
                     @click="handleAttachmentClick(file)"
                   >
                     {{ file.fileName || file.name }}
                   </span>
-                </template>
-                <template v-else-if="row[col.prop]">
-                  <span class="attachment-link" @click="handleAttachmentClick(row[col.prop])">
-                    {{ row[col.prop].fileName || row[col.prop] }}
-                  </span>
-                </template>
-                <span v-else style="color: #999;">暂无附件</span>
+                </el-tooltip>
               </div>
+              <template v-else-if="row[col.prop] && row[col.prop] !== '[]'">
+                <el-tooltip
+                  :content="row[col.prop].fileName || row[col.prop]"
+                  placement="top"
+                  :disabled="!(row[col.prop].fileName || row[col.prop])"
+                >
+                  <div class="attachment-list">
+                    <span class="attachment-link" @click="handleAttachmentClick(row[col.prop])">
+                      {{ row[col.prop].fileName || row[col.prop] }}
+                    </span>
+                  </div>
+                </el-tooltip>
+              </template>
+              <span v-else class="no-attachment">暂无附件</span>
             </template>
           </el-table-column>
 
@@ -310,7 +335,7 @@ onUnmounted(() => {
             :width="col.width"
             :min-width="col.minWidth"
             :align="col.align"
-            :sortable="col.sortable"
+            :sortable="col.sortable ? 'custom' : false"
           />
         </template>
       </el-table>
@@ -514,8 +539,31 @@ onUnmounted(() => {
 /* 附件列表样式 */
 .attachment-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-height: 66px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  /* 自定义滚动条 */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c0c4cc;
+    border-radius: 2px;
+
+    &:hover {
+      background: #909399;
+    }
+  }
 }
 
 .attachment-link {
@@ -524,15 +572,23 @@ onUnmounted(() => {
   color: #165DFF;
   cursor: pointer;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  display: block;
+  line-height: 22px;
 
   &:hover {
     color: #4080FF;
   }
+}
 
-  &:not(:last-child)::after {
-    content: '、';
-    color: #165DFF;
-  }
+/* 无附件样式 */
+.no-attachment {
+  font-size: 14px;
+  color: #999;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
 }
 
 /* 状态按钮样式 */

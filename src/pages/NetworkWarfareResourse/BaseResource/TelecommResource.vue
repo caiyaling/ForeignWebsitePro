@@ -349,6 +349,8 @@ const handleImportConfirm = async (files) => {
         } else {
           ElMessage.success('短信台账导入成功')
           fetchSmsData()
+          // 刷新卡片统计数据
+          fetchSmsStatistics()
           showBatchImportDialog.value = false
         }
       } else {
@@ -371,6 +373,8 @@ const handleImportConfirm = async (files) => {
         } else {
           ElMessage.success('语音台账导入成功')
           fetchVoiceData()
+          // 刷新卡片统计数据
+          fetchVoiceStatistics()
           showBatchImportDialog.value = false
         }
       } else {
@@ -468,12 +472,16 @@ const handleDelete = (row) => {
         if (index > -1) {
           smsData.value.splice(index, 1)
         }
+        // 刷新卡片统计数据
+        fetchSmsStatistics()
       } else {
         await deleteVoice(row.id)
         const index = voiceData.value.findIndex(item => item.id === row.id)
         if (index > -1) {
           voiceData.value.splice(index, 1)
         }
+        // 刷新卡片统计数据
+        fetchVoiceStatistics()
       }
       ElMessage.success('删除成功')
     } catch (error) {
@@ -526,7 +534,7 @@ const handleAttachmentClick = (url) => {
           :show-project-filter="false"
           :show-brand-filter="false"
           :loading="loading"
-          search-placeholder="关键词：任务ID、接收号码"
+          :search-placeholder="activeCardIndex === 0 ? '关键词：任务ID、接收号码' : '关键词：主叫号码、被叫号码'"
           @update:filters="val => filters = val"
           @search="handleSearch"
           @page-change="onPageChange"

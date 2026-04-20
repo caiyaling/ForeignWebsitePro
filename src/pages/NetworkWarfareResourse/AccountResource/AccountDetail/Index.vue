@@ -61,11 +61,11 @@ const userInfo = ref({
 // 账号运维信息表格列
 const opsColumns = [
   { prop: 'loginMethod', label: '登录方式', minWidth: 126 },
-  { prop: 'loginPassword', label: '登录密码', minWidth: 126 },
+  { prop: 'loginPassword', label: '登录密码', minWidth: 126,type: 'overflow'  },
   { prop: 'bindPhone', label: '绑定手机号', minWidth: 126 },
   { prop: 'phoneRegion', label: '手机号归属地', minWidth: 126 },
   { prop: 'bindEmail', label: '绑定邮箱', minWidth: 126,type: 'overflow'  },
-  { prop: 'networkIp', label: '网络IP', minWidth: 126 },
+  { prop: 'networkIp', label: '网络IP', minWidth: 126,type: 'overflow'  },
   { prop: 'systemTimezone', label: '系统时区', minWidth: 126 },
   { prop: 'browserLanguage', label: '浏览器语言', minWidth: 126 },
   { prop: 'userAgent', label: 'User Agent', minWidth: 200, type: 'overflow' },
@@ -139,6 +139,10 @@ const boostFilter = ref({
   updateTime: ''
 })
 const boostSelectValue = ref('')
+
+// 排序状态
+const postBehaviorSort = ref({ sortField: '', sortOrder: '' })
+const boostSort = ref({ sortField: '', sortOrder: '' })
 
 const fansDateRange = ref([])
 
@@ -255,6 +259,11 @@ const fetchPostBehavior = async () => {
     if (postBehaviorFilter.value.isHotPost) {
       params.isHotPost = postBehaviorFilter.value.isHotPost
     }
+    // 添加排序参数
+    if (postBehaviorSort.value.sortField && postBehaviorSort.value.sortOrder) {
+      params.sortField = postBehaviorSort.value.sortField
+      params.sortOrder = postBehaviorSort.value.sortOrder
+    }
     const res = await getPostBehaviorPage(params)
     console.log('发帖行为记录接口返回:', res)
     if (res.code === 200 && res.data) {
@@ -285,6 +294,11 @@ const fetchBoostData = async () => {
     }
     if (boostFilter.value.updateTime) {
       params.updateTime = boostFilter.value.updateTime
+    }
+    // 添加排序参数
+    if (boostSort.value.sortField && boostSort.value.sortOrder) {
+      params.sortField = boostSort.value.sortField
+      params.sortOrder = boostSort.value.sortOrder
     }
     const res = await getBoostBehaviorPage(params)
     if (res.code === 200 && res.data) {
@@ -501,6 +515,32 @@ const handleAppealPageChange = ({ page, pageSize }) => {
   fetchAppealData()
 }
 
+// 发帖行为记录排序变化
+// 前端字段名 -> 接口字段名映射
+const postBehaviorSortFieldMap = {
+  'statisticsEndDate': 'statisticsEndDate',
+  'postTime': 'postTime',
+  'postReadCount': 'readCount',
+  'postLikeCount': 'likeCount',
+  'postCommentCount': 'commentCount',
+  'postForwardCount': 'forwardCount'
+}
+
+const handlePostBehaviorSortChange = ({ sortField, sortOrder }) => {
+  // 将前端字段名转换为接口字段名
+  const apiSortField = postBehaviorSortFieldMap[sortField] || sortField
+  postBehaviorSort.value = { sortField: apiSortField, sortOrder }
+  postBehaviorPagination.value.currentPage = 1 // 排序时重置到第一页
+  fetchPostBehavior()
+}
+
+// 助推烘托记录排序变化
+const handleBoostSortChange = ({ sortField, sortOrder }) => {
+  boostSort.value = { sortField, sortOrder }
+  boostPagination.value.currentPage = 1 // 排序时重置到第一页
+  fetchBoostData()
+}
+
 // 账号粉丝情况日期范围变化
 const handleFansDateChange = (val) => {
   fansDateRange.value = val
@@ -638,6 +678,7 @@ const handleAttachmentClick = async (attachment) => {
             @update:select-value2="handlePostBehaviorFilter2Change"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
+            @sort-change="handlePostBehaviorSortChange"
           />
         </div>
 
@@ -661,6 +702,7 @@ const handleAttachmentClick = async (attachment) => {
             @update:select-value="handleBoostFilterChange"
             @detail="handleDetail"
             @attachment-click="handleAttachmentClick"
+            @sort-change="handleBoostSortChange"
           />
         </div>
 

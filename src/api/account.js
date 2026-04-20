@@ -95,6 +95,8 @@ export function getFansCountList(params) {
  * @param {string} params.accountCode - 账号编号
  * @param {string} params.updateTime - 更新时间（完全匹配统计结束时间，格式：yyyy-MM-dd）
  * @param {string} params.isHotPost - 是否爆款
+ * @param {string} params.sortField - 排序字段：readCount-浏览量，likeCount-点赞量，commentCount-评论量，forwardCount-转发量
+ * @param {string} params.sortOrder - 排序方向：asc-升序，desc-降序
  * @param {number} params.pageNum - 页码
  * @param {number} params.pageSize - 每页大小
  * @returns {Promise}
@@ -109,6 +111,9 @@ export function getPostBehaviorPage(params) {
  * @param {string} params.accountCode - 账号编号
  * @param {string} params.startTime - 开始时间
  * @param {string} params.endTime - 结束时间
+ * @param {string} params.updateTime - 更新时间（完全匹配统计结束时间的日期部分，格式：yyyy-MM-dd）
+ * @param {string} params.sortField - 排序字段：browseCount-浏览量，likeCount-点赞量，commentCount-评论量，forwardCount-转发量
+ * @param {string} params.sortOrder - 排序方向：asc-升序，desc-降序
  * @param {number} params.pageNum - 页码
  * @param {number} params.pageSize - 每页大小
  * @returns {Promise}

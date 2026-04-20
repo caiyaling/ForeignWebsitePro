@@ -208,7 +208,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'pageChange', 'update:selectValue', 'update:selectValue2', 'update:thirdFilter', 'delete', 'detail', 'attachment-click', 'batchImport', 'batchExport'])
+const emit = defineEmits(['update:filters', 'search', 'update:pageSize', 'update:currentPage', 'pageChange', 'update:selectValue', 'update:selectValue2', 'update:thirdFilter', 'delete', 'detail', 'attachment-click', 'batchImport', 'batchExport', 'sortChange'])
 
 const handleSearch = () => {
   emit('search')
@@ -251,6 +251,11 @@ const handleDetail = (row) => {
 // 点击附件
 const handleAttachmentClick = (url) => {
   emit('attachment-click', url)
+}
+
+// 排序变化
+const handleSortChange = (sortData) => {
+  emit('sortChange', sortData)
 }
 </script>
 
@@ -332,6 +337,7 @@ const handleAttachmentClick = (url) => {
       @update:page-size="handlePageSizeChange"
       @update:current-page="handleCurrentPageChange"
       @page-change="handlePageChange"
+      @sort-change="handleSortChange"
     />
   </section>
 </template>
