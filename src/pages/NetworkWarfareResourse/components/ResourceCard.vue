@@ -286,6 +286,8 @@ onMounted(() => {
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    flex: 0 0 250px;
+    width: 250px;
     padding: 0 16px;
     gap: 8px;
     border-right: 1px solid rgba(22, 119, 255, 0.15);
@@ -544,7 +546,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 0 20px;
+  // padding: 0 20px;
 }
 
 .chart-legend {
