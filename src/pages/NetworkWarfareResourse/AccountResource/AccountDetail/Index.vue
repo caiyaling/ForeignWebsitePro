@@ -632,6 +632,7 @@ const handleAttachmentClick = async (attachment) => {
             :page-size="opsPagination.pageSize"
             :current-page="opsPagination.currentPage"
             :total="opsPagination.total"
+            :loading="loading.ops"
             :max-height="200"
             @page-change="handleOpsPageChange"
             @detail="handleDetail"
@@ -658,6 +659,7 @@ const handleAttachmentClick = async (attachment) => {
             :page-size="postBehaviorPagination.pageSize"
             :current-page="postBehaviorPagination.currentPage"
             :total="postBehaviorPagination.total"
+            :loading="loading.post"
             :max-height="500"
             show-select-filter
             :select-options="updateTimeOptions"
@@ -692,6 +694,7 @@ const handleAttachmentClick = async (attachment) => {
             :page-size="boostPagination.pageSize"
             :current-page="boostPagination.currentPage"
             :total="boostPagination.total"
+            :loading="loading.boost"
             :max-height="500"
             show-select-filter
             :select-options="updateTimeOptions"
@@ -716,6 +719,7 @@ const handleAttachmentClick = async (attachment) => {
             :page-size="appealPagination.pageSize"
             :current-page="appealPagination.currentPage"
             :total="appealPagination.total"
+            :loading="loading.appeal"
             :max-height="500"
             @page-change="handleAppealPageChange"
             @detail="handleDetail"
