@@ -14,7 +14,7 @@ import Overview from '@/pages/NetworkWarfareResourse/Overview/Index.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/network-warfare-resource/social'
+    redirect: '/network-warfare-resource/overview'
   },
   {
     path: '/network-warfare-resource/overview',

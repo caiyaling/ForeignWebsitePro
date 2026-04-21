@@ -85,7 +85,7 @@ const tableColumns = [
   { prop: 'deliveryParty', label: '交付方', minWidth: 100 },
   { prop: 'assetCategory', label: '资产类别', minWidth: 100 },
   { prop: 'cardSerialNumber', label: '手机卡序列号', minWidth: 250 },
-  { prop: 'phoneNumber', label: '手机号', minWidth: 120 },
+  { prop: 'phoneNumber', label: '手机号', minWidth: 200,type: 'overflow' },
   { prop: 'projectCode', label: '所属项目', minWidth: 120 },
   { prop: 'equipmentCode', label: '所属装备', minWidth: 120 },
   { prop: 'brandModel', label: '品牌型号', minWidth: 120 },

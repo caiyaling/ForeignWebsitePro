@@ -8,7 +8,7 @@ const route = useRoute()
 
 // 菜单项对应的路由路径
 const menuRoutes = {
-  // '资源概览': '/network-warfare-resource/overview',
+  '资源概览': '/network-warfare-resource/overview',
   '社交平台': '/network-warfare-resource/social',
   '即时通讯': '/network-warfare-resource/instant-messaging',
   '博客论坛': '/network-warfare-resource/blog-forum',

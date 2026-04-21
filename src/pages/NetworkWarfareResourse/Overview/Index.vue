@@ -23,7 +23,10 @@ import DashboardContent from '@/pages/NetworkWarfareResourse/Overview/DashboardC
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #02040a;
+  background-image: url('@/assets/overviewBg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .page-shell {
