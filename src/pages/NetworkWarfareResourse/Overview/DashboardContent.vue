@@ -1,12 +1,9 @@
 <template>
   <div class="dashboard-content-wrapper">
-    <div class="ambient-light"></div>
-    <div class="ambient-highlight"></div>
-
-    <canvas ref="particleCanvasRef" id="particle-canvas"></canvas>
+    <AmbientBackground />
 
     <div class="dashboard-container">
-      <PageHeader title="资源总览" />
+      <PageHeader title="资源总览" centered />
 
       <!-- 账号资源总览 -->
       <AccountResourceSection :cards="accountCards" />
@@ -19,10 +16,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import PageHeader from './components/PageHeader.vue'
+import PageHeader from '../components/PageHeader.vue'
+import AmbientBackground from '../components/AmbientBackground.vue'
 import AccountResourceSection from './components/AccountResourceSection.vue'
 import BaseResourceSection from './components/BaseResourceSection.vue'
-import { useParticles } from './composables/useParticles'
 
 // 导入图标
 import socialPlatformIcon from '../assets/icon/social-platform.png'
@@ -32,9 +29,6 @@ import dedicatedDeviceIcon from '../assets/icon/dedicated-device.png'
 import phoneCardIcon from '../assets/icon/phone-card.png'
 import networkProxyIcon from '../assets/icon/network-proxy.png'
 import telecomResourceIcon from '../assets/icon/telecom-resource.png'
-
-// 粒子系统
-const { particleCanvasRef } = useParticles({ count: 60 })
 
 // 账号资源卡片数据
 const accountCards = ref([
@@ -54,7 +48,7 @@ const accountCards = ref([
   },
   {
     name: '即时通信',
-    icon: socialPlatformIcon, // 暂无对应图标，使用社交平台图标
+    icon: socialPlatformIcon,
     typeCount: 4,
     totalCount: 1150,
     items: [
@@ -253,25 +247,6 @@ const baseCards = ref([
 
 ::-webkit-scrollbar { display: none; width: 0; height: 0; }
 * { scrollbar-width: none; }
-
-.ambient-light {
-  position: absolute; top: -25vh; left: 50%; transform: translateX(-50%);
-  width: 120vw; height: 80vh;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(30, 50, 120, 0.3) 0%, rgba(10, 15, 30, 0.1) 60%, transparent 100%);
-  filter: blur(80px); z-index: 0; pointer-events: none;
-}
-
-.ambient-highlight {
-  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
-  width: 60vw; height: 300px;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 240, 255, 0.1) 0%, transparent 100%);
-  filter: blur(60px); z-index: 0; pointer-events: none; mix-blend-mode: screen;
-}
-
-#particle-canvas {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 1; pointer-events: none;
-}
 
 .dashboard-container {
   flex: 1;

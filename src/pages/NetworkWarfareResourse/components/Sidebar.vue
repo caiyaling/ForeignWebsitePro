@@ -20,6 +20,7 @@ const menuRoutes = {
   '手机卡号': '/network-warfare-resource/phone',
   '网络代理': '/network-warfare-resource/proxy',
   '电信资源': '/network-warfare-resource/telecom',
+  '运营数据概览': '/network-warfare-resource/operation-overview',
   '数据导入': '/network-warfare-resource/data-import'
 }
 

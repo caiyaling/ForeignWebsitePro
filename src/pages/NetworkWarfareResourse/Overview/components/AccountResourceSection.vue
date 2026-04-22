@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import SectionHeader from './SectionHeader.vue'
+import SectionTitle from '../../components/SectionTitle.vue'
 import ResourceCard from './ResourceCard.vue'
 
 const props = defineProps({
@@ -18,7 +18,7 @@ const totalCount = computed(() => {
 
 <template>
   <div class="resource-section">
-    <SectionHeader title="账号资源总览" :count="totalCount" />
+    <SectionTitle title="账号资源总览" :count="totalCount" />
 
     <div class="grid-row">
       <ResourceCard

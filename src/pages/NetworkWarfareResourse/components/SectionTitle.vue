@@ -6,13 +6,22 @@ defineProps({
   },
   count: {
     type: Number,
-    default: 0
+    default: null
+  },
+  simple: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
 
 <template>
-  <div class="section-header">
+  <div v-if="simple" class="section-title-wrap">
+    <div class="section-title-deco-arrow"></div>
+    <div class="section-title">{{ title }}</div>
+    <div class="section-title-deco-line"></div>
+  </div>
+  <div v-else class="section-header">
     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="30" viewBox="0 0 15 30" fill="none" class="section-arrow">
       <path d="M0 0V29.4L14.4 15.2L0 0Z" fill="url(#paint_section_arrow)"/>
       <defs>
@@ -24,13 +33,45 @@ defineProps({
       </defs>
     </svg>
     <div class="section-title">{{ title }}</div>
-    <div class="section-count">{{ count }}</div>
+    <div v-if="count !== null" class="section-count">{{ count }}</div>
     <div class="section-deco-bar"></div>
     <div class="section-line"></div>
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+// 简洁模式样式（运营数据概览使用）
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 16px;
+}
+
+.section-title-deco-arrow {
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 10px solid #00f0ff;
+  filter: drop-shadow(0 0 4px #00f0ff);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.section-title-deco-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.6), transparent);
+  margin-left: 8px;
+}
+
+// 完整模式样式（资源概览使用）
 .section-header {
   display: flex;
   align-items: center;
@@ -57,7 +98,7 @@ defineProps({
   font-weight: bold;
   color: #00f0ff;
   font-family: 'Segoe UI', sans-serif;
-  text-shadow: 0 0 5px rgba(0,240,255,0.4);
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);
   letter-spacing: 1px;
 }
 

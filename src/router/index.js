@@ -10,6 +10,7 @@ import NetworkProxy from '@/pages/NetworkWarfareResourse/BaseResource/NetworkPro
 import TelecommResource from '@/pages/NetworkWarfareResourse/BaseResource/TelecommResource.vue'
 import DataImport from '@/pages/NetworkWarfareResourse/DataImport/Index.vue'
 import Overview from '@/pages/NetworkWarfareResourse/Overview/Index.vue'
+import OperationOverview from '@/pages/NetworkWarfareResourse/OperationOverview/Index.vue'
 
 const routes = [
   {
@@ -102,6 +103,14 @@ const routes = [
     component: DataImport,
     meta: {
       title: '数据导入 - 作战资源库'
+    }
+  },
+  {
+    path: '/network-warfare-resource/operation-overview',
+    name: 'OperationOverview',
+    component: OperationOverview,
+    meta: {
+      title: '运营数据概览 - 作战资源库'
     }
   }
 ]
