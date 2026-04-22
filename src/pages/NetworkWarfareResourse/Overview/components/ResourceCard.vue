@@ -305,7 +305,7 @@ const parseFooterText = (subSection) => {
 }
 
 .sub-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: normal;
   color: #fff;
   margin-bottom: 6px;
@@ -358,8 +358,8 @@ const parseFooterText = (subSection) => {
 
 .marker-val {
   position: absolute;
-  top: 0;
-  font-size: 14px;
+  top: -6px;
+  font-size: 16px;
   font-weight: bold;
   font-family: 'Segoe UI', sans-serif;
   transform: translateX(-50%);

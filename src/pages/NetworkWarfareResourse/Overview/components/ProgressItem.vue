@@ -43,7 +43,7 @@ const handleMouseMove = (e) => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 4px;
-  font-size: 14px;
+  font-size: 16px;
   color: #fff;
 }
 

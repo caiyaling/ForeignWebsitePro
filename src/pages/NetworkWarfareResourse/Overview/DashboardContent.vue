@@ -246,7 +246,7 @@ const baseCards = ref([
   width: 100%;
   display: flex;
   flex-direction: column;
-  font-size: 14px;
+  font-size: 16px;
   position: relative;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, "Microsoft YaHei", sans-serif;
 }
