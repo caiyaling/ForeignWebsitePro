@@ -4,8 +4,6 @@ import ProgressItem from './ProgressItem.vue'
 
 const router = useRouter()
 
-// 不再需要 getAssetUrl，使用内联 SVG
-
 const props = defineProps({
   name: {
     type: String,
@@ -98,7 +96,7 @@ const parseFooterText = (subSection) => {
     <div class="card-header">
       <div class="card-title-row">
         <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" v-html="icon"></svg>
+          <img v-if="icon" :src="icon" :alt="name" class="icon-img" />
         </div>
         <span class="card-name">{{ name }}</span>
       </div>
@@ -250,33 +248,17 @@ const parseFooterText = (subSection) => {
 }
 
 .card-icon {
-  width: 40px;
-  height: 40px;
+  width: 54px;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 20, 50, 0.3) 100%);
-  border: 1px solid rgba(0, 240, 255, 0.3);
-  box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.1), 0 5px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 240, 255, 0.2);
-  transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
 }
 
-.card:hover .card-icon {
-  border-color: #00f0ff;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-  transform: scale(1.05);
-}
-
-.card-icon svg {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-  color: #00f0ff;
-  stroke-width: 1.8;
-  fill: none;
-  filter: drop-shadow(0 0 2px rgba(0, 240, 255, 0.4));
+.card-icon .icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .card-name {

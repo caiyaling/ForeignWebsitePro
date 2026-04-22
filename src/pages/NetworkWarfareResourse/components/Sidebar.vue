@@ -1,10 +1,13 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Menu, Document, ArrowDown } from '@element-plus/icons-vue'
+import { Menu, Document, ArrowDown, DArrowLeft, DArrowRight } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
+
+// 菜单收起状态
+const isCollapsed = ref(false)
 
 // 菜单项对应的路由路径
 const menuRoutes = {
@@ -99,6 +102,27 @@ const isSectionExpanded = (section) => {
 
 // 切换分组展开/收起
 const toggleSection = (section) => {
+  // 收起状态下，点击直接跳转
+  if (isCollapsed.value) {
+    if (section.children.length > 0) {
+      // 有子菜单，跳转到第一个子菜单
+      const firstChild = section.children[0]
+      activeMenu.value = firstChild
+      const path = menuRoutes[firstChild]
+      if (path) {
+        router.push(path)
+      }
+    } else {
+      // 无子菜单，直接跳转
+      activeMenu.value = section.title
+      const path = menuRoutes[section.title]
+      if (path) {
+        router.push(path)
+      }
+    }
+    return
+  }
+
   // 无箭头的菜单项，直接跳转
   if (!section.hasArrow) {
     activeMenu.value = section.title
@@ -115,6 +139,11 @@ const toggleSection = (section) => {
   } else {
     expandedSections.value.push(section.title)
   }
+}
+
+// 切换菜单收起状态
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
 }
 
 // 点击二级菜单
@@ -135,41 +164,60 @@ onMounted(() => {
 </script>
 
 <template>
-  <aside class="sidebar">
+  <aside :class="['sidebar', { collapsed: isCollapsed }]">
     <div class="sidebar-inner">
-      <div v-for="section in sections" :key="section.title" class="section">
-        <!-- 一级菜单 -->
-        <div
-          :class="['section-row', { active: isSectionActive(section) }]"
-          @click="toggleSection(section)"
-        >
-          <div class="section-left">
-            <el-icon class="section-icon">
-              <Menu v-if="section.icon === 'menu'" />
-              <Document v-else />
-            </el-icon>
-            <span class="section-title">{{ section.title }}</span>
-          </div>
-          <el-icon
-            v-if="section.hasArrow"
-            :class="['section-arrow', { expanded: isSectionExpanded(section) }]"
+      <!-- 菜单内容 -->
+      <div class="menu-content">
+        <div v-for="section in sections" :key="section.title" class="section">
+          <!-- 一级菜单 -->
+          <el-tooltip
+            :content="section.title"
+            placement="right"
+            :disabled="!isCollapsed"
           >
-            <ArrowDown />
-          </el-icon>
-        </div>
+            <div
+              :class="['section-row', { active: isSectionActive(section) }]"
+              @click="toggleSection(section)"
+            >
+              <div class="section-left">
+                <el-icon class="section-icon">
+                  <Menu v-if="section.icon === 'menu'" />
+                  <Document v-else />
+                </el-icon>
+                <span class="section-title">{{ section.title }}</span>
+              </div>
+              <el-icon
+                v-if="section.hasArrow"
+                :class="['section-arrow', { expanded: isSectionExpanded(section) }]"
+              >
+                <ArrowDown />
+              </el-icon>
+            </div>
+          </el-tooltip>
 
-        <!-- 二级菜单 -->
-        <div v-if="section.children.length && isSectionExpanded(section)" class="children">
-          <div
-            v-for="child in section.children"
-            :key="child"
-            :class="['child-row', { active: activeMenu === child }]"
-            @click="handleMenuClick(child)"
-          >
-            {{ child }}
+          <!-- 二级菜单 -->
+          <div v-if="section.children.length && isSectionExpanded(section)" class="children">
+            <div
+              v-for="child in section.children"
+              :key="child"
+              :class="['child-row', { active: activeMenu === child }]"
+              @click="handleMenuClick(child)"
+            >
+              {{ child }}
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- 底部收起/展开按钮 -->
+      <!-- <el-tooltip :content="isCollapsed ? '展开菜单' : '收起菜单'" placement="right"> -->
+        <div class="collapse-btn" @click="toggleCollapse">
+          <el-icon>
+            <DArrowLeft v-if="!isCollapsed" />
+            <DArrowRight v-else />
+          </el-icon>
+        </div>
+      <!-- </el-tooltip> -->
     </div>
   </aside>
 </template>
@@ -181,13 +229,71 @@ onMounted(() => {
   background: #080027;
   border-right: 1px solid #414243;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.36);
+  transition: width 0.3s ease, flex 0.3s ease;
+
+  &.collapsed {
+    width: 60px;
+    flex: 0 0 60px;
+  }
 }
 
 .sidebar-inner {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.menu-content {
+  flex: 1;
+  overflow-y: auto;
   padding-top: 12px;
+
+  // 隐藏滚动条但保留滚动功能
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE/Edge
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome/Safari/Opera
+  }
+}
+
+.collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 46px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: #e5eaf3;
+  transition: background 0.2s, padding 0.3s ease, color 0.2s;
+
+  &:hover {
+    color: #1677ff;
+  }
+
+  .el-icon {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  .collapse-text {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.3s ease;
+  }
+}
+
+.sidebar.collapsed .collapse-btn {
+  justify-content: center;
+  padding: 12px;
+
+  .collapse-text {
+    opacity: 0;
+    width: 0;
+  }
 }
 
 .section {
@@ -223,16 +329,24 @@ onMounted(() => {
   }
 }
 
+.sidebar.collapsed .section-row {
+  justify-content: center;
+  padding: 12px;
+}
+
 .section-left {
   display: flex;
   align-items: center;
   gap: 4px;
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .section-icon {
   font-size: 18px;
   color: #e5eaf3;
+  flex-shrink: 0;
 }
 
 .section-title {
@@ -241,21 +355,48 @@ onMounted(() => {
   line-height: 22px;
   color: #e5eaf3;
   white-space: nowrap;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.2s ease 0.1s, transform 0.2s ease 0.1s;
+}
+
+.sidebar.collapsed .section-title {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
 }
 
 .section-arrow {
   font-size: 12px;
   color: #e5eaf3;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease 0.1s;
+  opacity: 1;
+  flex-shrink: 0;
 
   &.expanded {
     transform: rotate(180deg);
   }
 }
 
+.sidebar.collapsed .section-arrow {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .children {
   display: flex;
   flex-direction: column;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease 0.1s, transform 0.2s ease 0.1s;
+}
+
+.sidebar.collapsed .children {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
 }
 
 .child-row {

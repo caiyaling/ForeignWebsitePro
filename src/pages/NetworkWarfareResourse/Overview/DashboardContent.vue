@@ -24,6 +24,15 @@ import AccountResourceSection from './components/AccountResourceSection.vue'
 import BaseResourceSection from './components/BaseResourceSection.vue'
 import { useParticles } from './composables/useParticles'
 
+// 导入图标
+import socialPlatformIcon from '../assets/icon/social-platform.png'
+import blogForumIcon from '../assets/icon/blog-forum.png'
+import emailIcon from '../assets/icon/email.png'
+import dedicatedDeviceIcon from '../assets/icon/dedicated-device.png'
+import phoneCardIcon from '../assets/icon/phone-card.png'
+import networkProxyIcon from '../assets/icon/network-proxy.png'
+import telecomResourceIcon from '../assets/icon/telecom-resource.png'
+
 // 粒子系统
 const { particleCanvasRef } = useParticles({ count: 60 })
 
@@ -31,7 +40,7 @@ const { particleCanvasRef } = useParticles({ count: 60 })
 const accountCards = ref([
   {
     name: '社交平台',
-    icon: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>',
+    icon: socialPlatformIcon,
     typeCount: 6,
     totalCount: 5300,
     items: [
@@ -45,7 +54,7 @@ const accountCards = ref([
   },
   {
     name: '即时通信',
-    icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
+    icon: socialPlatformIcon, // 暂无对应图标，使用社交平台图标
     typeCount: 4,
     totalCount: 1150,
     items: [
@@ -57,7 +66,7 @@ const accountCards = ref([
   },
   {
     name: '博客论坛',
-    icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
+    icon: blogForumIcon,
     typeCount: 3,
     totalCount: 15,
     items: [
@@ -68,7 +77,7 @@ const accountCards = ref([
   },
   {
     name: '电子邮箱',
-    icon: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>',
+    icon: emailIcon,
     typeCount: 2,
     totalCount: 200,
     items: [
@@ -82,7 +91,7 @@ const accountCards = ref([
 const baseCards = ref([
   {
     name: '专用设备',
-    icon: '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>',
+    icon: dedicatedDeviceIcon,
     typeCount: 2,
     totalCount: 620,
     unit: '个',
@@ -119,7 +128,7 @@ const baseCards = ref([
   },
   {
     name: '手机卡号',
-    icon: '<path d="M6 2h8l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path><rect x="8" y="10" width="8" height="8"></rect>',
+    icon: phoneCardIcon,
     typeCount: 2,
     totalCount: 601,
     unit: '个',
@@ -146,7 +155,7 @@ const baseCards = ref([
   },
   {
     name: '网络代理',
-    icon: '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>',
+    icon: networkProxyIcon,
     typeCount: 2,
     totalCount: 10700,
     unit: '个',
@@ -187,7 +196,7 @@ const baseCards = ref([
   },
   {
     name: '电信资源',
-    icon: '<path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line>',
+    icon: telecomResourceIcon,
     typeCount: 2,
     totalCount: 250,
     unit: '万',
