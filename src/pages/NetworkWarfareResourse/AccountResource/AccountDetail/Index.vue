@@ -584,8 +584,8 @@ const handleAttachmentClick = async (attachment) => {
     const blob = new Blob([res], { type: mimeType })
     const url = window.URL.createObjectURL(blob)
 
-    // 图片、PDF、文本等可以直接预览，其他类型下载
-    const previewTypes = ['image/', 'application/pdf', 'text/']
+    // 图片、PDF、文本、音频、视频可以直接预览，其他类型下载
+    const previewTypes = ['image/', 'application/pdf', 'text/', 'audio/', 'video/']
     const canPreview = previewTypes.some(type => mimeType.startsWith(type))
 
     if (canPreview) {
