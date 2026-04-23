@@ -33,7 +33,7 @@ const historyPosts = ref(generateMockData('history'))
 
 <template>
   <page-layout>
-    <div class="hit-posts-detail-content">
+    <div class="dashboard-wrapper">
       <!-- 背景光效与粒子 -->
       <ambient-background />
 
@@ -80,34 +80,29 @@ const historyPosts = ref(generateMockData('history'))
 </template>
 
 <style lang="scss" scoped>
-.hit-posts-detail-content {
+.dashboard-wrapper {
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --accent-cyan: #00f0ff;
+
+  color: var(--text-main);
   height: 100%;
-  position: relative;
-  background-color: #02040a;
-  color: #ffffff;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
   font-size: 16px;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  position: relative;
+  font-family: 'Inter', system-ui, sans-serif;
 
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    radial-gradient(circle at 50% 0%, #081029 0%, #02040a 100%);
-  background-size: 50px 50px, 50px 50px, 100% 100%;
-
-  // 隐藏原生滚动条
-  * {
-    scrollbar-width: none;
-  }
-
-  ::-webkit-scrollbar {
+  // 隐藏滚动条
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
     display: none;
-    width: 0;
-    height: 0;
   }
 }
 
 .dashboard-container {
-  height: 100%;
+  flex: 1;
   padding: 20px 40px 40px 40px;
   position: relative;
   z-index: 5;
