@@ -6,8 +6,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
-import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
+import PageLayout from '@/pages/NetworkWarfareResourse/components/PageLayout.vue'
 import ResourceCard from '@/pages/NetworkWarfareResourse/components/ResourceCard.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import BatchImportDialog from '@/components/BatchImportDialog.vue'
@@ -404,21 +403,15 @@ const handleAttachmentClick = (url) => {
 </script>
 
 <template>
-  <div class="network-proxy-page">
-    <global-header />
+  <page-layout background="gray">
+    <!-- 使用ResourceCard组件 - 禁用选中交互 -->
+    <resource-card
+      :cards="cards"
+      :disable-select="true"
+    />
 
-    <div class="page-shell">
-      <sidebar />
-
-      <main class="page-main">
-        <!-- 使用ResourceCard组件 - 禁用选中交互 -->
-        <resource-card
-          :cards="cards"
-          :disable-select="true"
-        />
-
-        <!-- 数据表格 - 设备模式 -->
-        <data-table
+    <!-- 数据表格 - 设备模式 -->
+    <data-table
           title="网络代理台账"
           :filters="filters"
           :table-data="tableData"
@@ -443,47 +436,23 @@ const handleAttachmentClick = (url) => {
           @batch-import="handleBatchImport"
           @batch-export="handleBatchExport"
         />
-      </main>
-    </div>
+  </page-layout>
 
-    <!-- 批量导入弹框 -->
-    <batch-import-dialog
-      v-model="showBatchImportDialog"
-      title="批量导入"
-      :single-file="true"
-      @confirm="handleImportConfirm"
-      @download-template="handleDownloadTemplate"
-    />
+  <!-- 批量导入弹框 -->
+  <batch-import-dialog
+    v-model="showBatchImportDialog"
+    title="批量导入"
+    :single-file="true"
+    @confirm="handleImportConfirm"
+    @download-template="handleDownloadTemplate"
+  />
 
-    <!-- 导入错误弹框 -->
-    <import-error-dialog
-      v-model="showErrorDialog"
-      :error-list="errorList"
-    />
-  </div>
+  <!-- 导入错误弹框 -->
+  <import-error-dialog
+    v-model="showErrorDialog"
+    :error-list="errorList"
+  />
 </template>
 
 <style lang="scss" scoped>
-.network-proxy-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #efefef;
-}
-
-.page-shell {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
-.page-main {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 10px 12px 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 </style>

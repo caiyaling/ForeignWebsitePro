@@ -14,28 +14,31 @@ class Particle {
   reset(initial = false) {
     this.x = Math.random() * this.width
     this.y = initial ? Math.random() * this.height : this.height + 10
-    this.vx = (Math.random() - 0.5) * 0.2
-    this.vy = Math.random() * 0.2 + 0.1
-    this.size = Math.random() * 2 + 1
-    this.baseAlpha = Math.random() * 0.3 + 0.05
+    this.vx = (Math.random() - 0.5) * 0.4
+    this.vy = Math.random() * 0.3 + 0.1
+    this.size = Math.random() * 3 + 2
+    this.baseAlpha = Math.random() * 0.3 + 0.1
     this.angle = Math.random() * Math.PI * 2
-    this.angleSpeed = 0.01 + Math.random() * 0.02
+    this.angleSpeed = 0.02 + Math.random() * 0.03
   }
 
   update() {
     this.x += this.vx
     this.y -= this.vy
     this.angle += this.angleSpeed
-    this.alpha = this.baseAlpha + Math.sin(this.angle) * 0.05
+    this.alpha = this.baseAlpha + Math.sin(this.angle) * 0.1
     if (this.y < -10) this.reset()
   }
 
   draw(ctx) {
     ctx.globalAlpha = Math.max(0, this.alpha)
-    ctx.fillStyle = 'rgba(180, 255, 255, 0.6)'
+    ctx.fillStyle = 'rgba(100, 240, 255, 0.9)'
+    ctx.shadowBlur = 5
+    ctx.shadowColor = 'rgba(0, 240, 255, 0.5)'
     ctx.beginPath()
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
     ctx.fill()
+    ctx.shadowBlur = 0
   }
 }
 

@@ -1,8 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
-import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
+import PageLayout from '@/pages/NetworkWarfareResourse/components/PageLayout.vue'
 import SummaryCards from '@/pages/NetworkWarfareResourse/components/SummaryCards.vue'
 import DataTable from '@/pages/NetworkWarfareResourse/components/DataTable.vue'
 import { getAccountTypeStats, getPlatforms, getAccountTypes, getStatuses, getAccountPage } from '@/api/account'
@@ -190,18 +189,12 @@ const handleAttachmentClick = (url) => {
 </script>
 
 <template>
-  <div class="blog-forum-page">
-    <global-header />
+  <page-layout background="gray">
+    <!-- 使用SummaryCards组件 -->
+    <summary-cards :cards="cards" />
 
-    <div class="page-shell">
-      <sidebar />
-
-      <main class="page-main">
-        <!-- 使用SummaryCards组件 -->
-        <summary-cards :cards="cards" />
-
-        <!-- 使用DataTable组件 -->
-        <data-table
+    <!-- 使用DataTable组件 -->
+    <data-table
           :filters="filters"
           :table-data="tableData"
           :page-size="pageSize"
@@ -219,32 +212,8 @@ const handleAttachmentClick = (url) => {
           @detail="handleDetail"
           @attachment-click="handleAttachmentClick"
         />
-      </main>
-    </div>
-  </div>
+  </page-layout>
 </template>
 
 <style lang="scss" scoped>
-.blog-forum-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #efefef;
-}
-
-.page-shell {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
-.page-main {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 10px 12px 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 </style>

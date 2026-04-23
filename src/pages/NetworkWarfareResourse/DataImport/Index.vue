@@ -5,8 +5,7 @@
  */
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import GlobalHeader from '@/pages/NetworkWarfareResourse/components/GlobalHeader.vue'
-import Sidebar from '@/pages/NetworkWarfareResourse/components/Sidebar.vue'
+import PageLayout from '@/pages/NetworkWarfareResourse/components/PageLayout.vue'
 import DataImportUpload from '@/components/DataImportUpload.vue'
 import ImportErrorDialog from '@/components/ImportErrorDialog.vue'
 import {
@@ -169,87 +168,56 @@ const handleConfirm = async (files) => {
 </script>
 
 <template>
-  <div class="data-import-page">
-    <global-header />
-
-    <div class="page-shell">
-      <sidebar />
-
-      <main class="page-main">
-        <!-- Tabs 标签页 -->
-        <div class="tabs-wrapper">
-          <div class="tabs-container">
-            <div
-              :class="['tab-item', { active: activeTab === 'account' }]"
-              @click="activeTab = 'account'"
-            >
-              账号基本情况
-            </div>
-            <div
-              :class="['tab-item', { active: activeTab === 'behavior' }]"
-              @click="activeTab = 'behavior'"
-            >
-              账号行为记录
-            </div>
-            <div
-              :class="['tab-item', { active: activeTab === 'popular' }]"
-              @click="activeTab = 'popular'"
-            >
-              爆款贴文链接
-            </div>
-          </div>
+  <page-layout background="gray">
+    <!-- Tabs 标签页 -->
+    <div class="tabs-wrapper">
+      <div class="tabs-container">
+        <div
+          :class="['tab-item', { active: activeTab === 'account' }]"
+          @click="activeTab = 'account'"
+        >
+          账号基本情况
         </div>
-
-        <!-- 上传区域 -->
-        <div class="upload-wrapper">
-          <div class="upload-container">
-            <data-import-upload
-              ref="uploadRef"
-              :single-file="true"
-              :accept="uploadConfig.accept"
-              :upload-text="uploadConfig.uploadText"
-              :confirm-loading="importing"
-              @change="handleFileChange"
-              @download-template="handleDownloadTemplate"
-              @confirm="handleConfirm"
-            />
-          </div>
+        <div
+          :class="['tab-item', { active: activeTab === 'behavior' }]"
+          @click="activeTab = 'behavior'"
+        >
+          账号行为记录
         </div>
-      </main>
+        <div
+          :class="['tab-item', { active: activeTab === 'popular' }]"
+          @click="activeTab = 'popular'"
+        >
+          爆款贴文链接
+        </div>
+      </div>
     </div>
 
-    <!-- 导入错误弹框 -->
-    <import-error-dialog
-      v-model="showErrorDialog"
-      :error-list="errorList"
-    />
-  </div>
+    <!-- 上传区域 -->
+    <div class="upload-wrapper">
+      <div class="upload-container">
+        <data-import-upload
+          ref="uploadRef"
+          :single-file="true"
+          :accept="uploadConfig.accept"
+          :upload-text="uploadConfig.uploadText"
+          :confirm-loading="importing"
+          @change="handleFileChange"
+          @download-template="handleDownloadTemplate"
+          @confirm="handleConfirm"
+        />
+      </div>
+    </div>
+  </page-layout>
+
+  <!-- 导入错误弹框 -->
+  <import-error-dialog
+    v-model="showErrorDialog"
+    :error-list="errorList"
+  />
 </template>
 
 <style lang="scss" scoped>
-.data-import-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #efefef;
-}
-
-.page-shell {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
-.page-main {
-  flex: 1;
-  min-width: 0;
-  padding: 16px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 // Tabs 标签页样式
 .tabs-wrapper {
   background: #fff;
