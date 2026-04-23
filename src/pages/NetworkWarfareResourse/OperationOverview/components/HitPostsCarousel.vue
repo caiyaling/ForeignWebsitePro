@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import HitPostCard from './HitPostCard.vue'
+
+const router = useRouter()
 
 const props = defineProps({
   posts: {
@@ -58,10 +61,8 @@ const pauseCarousel = () => {
   }
 }
 
-const emit = defineEmits(['more'])
-
 const handleMore = () => {
-  emit('more')
+  router.push('/network-warfare-resource/hit-posts')
 }
 
 onMounted(() => {

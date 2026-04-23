@@ -67,6 +67,13 @@ const activeMenu = ref('社交平台')
 // 根据当前路由确定激活菜单
 const setActiveMenuByRoute = () => {
   const currentPath = route.path
+
+  // 爆款帖文页面应该激活运营数据概览菜单
+  if (currentPath === '/network-warfare-resource/hit-posts') {
+    activeMenu.value = '运营数据概览'
+    return
+  }
+
   for (const [name, path] of Object.entries(menuRoutes)) {
     if (path === currentPath) {
       activeMenu.value = name

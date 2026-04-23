@@ -11,6 +11,7 @@ import TelecommResource from '@/pages/NetworkWarfareResourse/BaseResource/Teleco
 import DataImport from '@/pages/NetworkWarfareResourse/DataImport/Index.vue'
 import Overview from '@/pages/NetworkWarfareResourse/Overview/Index.vue'
 import OperationOverview from '@/pages/NetworkWarfareResourse/OperationOverview/Index.vue'
+import HitPostsDetail from '@/pages/NetworkWarfareResourse/OperationOverview/HitPostsDetail.vue'
 
 const routes = [
   {
@@ -111,6 +112,14 @@ const routes = [
     component: OperationOverview,
     meta: {
       title: '运营数据概览 - 作战资源库'
+    }
+  },
+  {
+    path: '/network-warfare-resource/hit-posts',
+    name: 'HitPostsDetail',
+    component: HitPostsDetail,
+    meta: {
+      title: '爆款贴文排行榜 - 作战资源库'
     }
   }
 ]
