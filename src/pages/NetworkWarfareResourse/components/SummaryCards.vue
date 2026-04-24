@@ -182,7 +182,7 @@ defineProps({
 
 .stat-label {
   color: #606266;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 28px;
   font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', SimHei, Arial, Helvetica, sans-serif;
 }
