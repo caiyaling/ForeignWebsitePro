@@ -161,39 +161,37 @@ const displayAccountId = computed(() => {
 
     <!-- 用户详细信息 - 博客论坛页面简化版 -->
     <div v-if="isBlogForum" class="user-detail-info">
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">用户昵称</div>
-          <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
+      <div class="info-columns">
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">用户昵称</div>
+            <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">历史发言数量</div>
+            <span class="info-value">{{ userInfo.historyPostCount || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">链接URL</div>
-          <span class="info-value link-url" :title="userInfo.linkUrl || ''">{{ userInfo.linkUrl || '-' }}</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">链接URL</div>
+            <span class="info-value link-url" :title="userInfo.linkUrl || ''">{{ userInfo.linkUrl || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">账号信息完善度</div>
+            <span class="info-value">{{ completenessValue }}%</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">注册地区</div>
-          <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">注册地区</div>
+            <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">注册时间</div>
-          <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
-        </div>
-      </div>
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">历史发言数量</div>
-          <span class="info-value">{{ userInfo.historyPostCount || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">账号信息完善度</div>
-          <div class="completeness-wrapper">
-            <el-progress
-              :percentage="completenessValue"
-              :stroke-width="6"
-              :show-text="false"
-              :color="progressColor"
-            />
-            <span class="completeness-text">{{ completenessValue }}%</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">注册时间</div>
+            <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
           </div>
         </div>
       </div>
@@ -201,29 +199,29 @@ const displayAccountId = computed(() => {
 
     <!-- 用户详细信息 - 电子邮箱页面简化版 -->
     <div v-else-if="isEmail" class="user-detail-info">
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">用户昵称</div>
-          <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
+      <div class="info-columns">
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">用户昵称</div>
+            <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">注册地区</div>
-          <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">账号信息完善度</div>
+            <span class="info-value">{{ completenessValue }}%</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">注册时间</div>
-          <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">注册地区</div>
+            <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">账号信息完善度</div>
-          <div class="completeness-wrapper">
-            <el-progress
-              :percentage="completenessValue"
-              :stroke-width="6"
-              :show-text="false"
-              :color="progressColor"
-            />
-            <span class="completeness-text">{{ completenessValue }}%</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">注册时间</div>
+            <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
           </div>
         </div>
       </div>
@@ -231,117 +229,115 @@ const displayAccountId = computed(() => {
 
     <!-- 用户详细信息 - 社交平台采集账号简化版 -->
     <div v-else-if="isSocialCollection" class="user-detail-info">
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">用户昵称</div>
-          <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
+      <div class="info-columns">
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">用户昵称</div>
+            <span class="info-value">{{ userInfo.userNickname || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">注册地区</div>
-          <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">账号信息完善度</div>
+            <span class="info-value">{{ completenessValue }}%</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">注册时间</div>
-          <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">注册地区</div>
+            <span class="info-value">{{ userInfo.registerRegion || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">账号信息完善度</div>
-          <div class="completeness-wrapper">
-            <el-progress
-              :percentage="completenessValue"
-              :stroke-width="6"
-              :show-text="false"
-              :color="progressColor"
-            />
-            <span class="completeness-text">{{ completenessValue }}%</span>
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">注册时间</div>
+            <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 用户详细信息 - 完整版 -->
+    <!-- 用户详细信息 - 完整版（按列分组排列） -->
     <div v-else class="user-detail-info">
-      <!-- 第一行 -->
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">用户昵称</div>
-          <span class="info-value" :title="userInfo.userNickname || ''">{{ userInfo.userNickname || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">账号信息完善度</div>
-          <div class="completeness-wrapper">
-            <el-progress
-              :percentage="completenessValue"
-              :stroke-width="6"
-              :show-text="false"
-              :color="progressColor"
-            />
-            <span class="completeness-text">{{ completenessValue }}%</span>
+      <div class="info-columns">
+        <!-- 第1列 -->
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">用户名称</div>
+            <span class="info-value" :title="userInfo.userNickname || ''">{{ userInfo.userNickname || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">毕业院校</div>
+            <span class="info-value" :title="userInfo.school || ''">{{ userInfo.school || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">行业</div>
+            <span class="info-value" :title="userInfo.industry || ''">{{ userInfo.industry || '-' }}</span>
           </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">性别</div>
-          <span class="info-value">{{ userInfo.gender || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">民族</div>
-          <span class="info-value">{{ userInfo.nation || '-' }}</span>
-        </div>
-      </div>
 
-      <!-- 第二行 -->
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">毕业院校</div>
-          <span class="info-value" :title="userInfo.school || ''">{{ userInfo.school || '-' }}</span>
+        <!-- 第2列 -->
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">账号信息完善度</div>
+            <span class="info-value">{{ completenessValue }}%</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">性别</div>
+            <span class="info-value">{{ userInfo.gender || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">民族</div>
+            <span class="info-value">{{ userInfo.nation || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">学历</div>
-          <span class="info-value">{{ userInfo.education || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">地区</div>
-          <span class="info-value">{{ userInfo.region || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">婚姻状况</div>
-          <span class="info-value">{{ userInfo.maritalStatus || '-' }}</span>
-        </div>
-      </div>
 
-      <!-- 第三行 -->
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">所属行业</div>
-          <span class="info-value" :title="userInfo.industry || ''">{{ userInfo.industry || '-' }}</span>
+        <!-- 第3列 -->
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">学历</div>
+            <span class="info-value">{{ userInfo.education || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">地区</div>
+            <span class="info-value">{{ userInfo.region || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">职业</div>
+            <span class="info-value">{{ userInfo.occupation || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">职业</div>
-          <span class="info-value">{{ userInfo.occupation || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">兴趣爱好</div>
-          <span class="info-value" :title="userInfo.hobbies || ''">{{ userInfo.hobbies || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">宗教信仰</div>
-          <span class="info-value">{{ userInfo.religion || '-' }}</span>
-        </div>
-      </div>
 
-      <!-- 第四行 -->
-      <div class="info-row">
-        <div class="info-item">
-          <div class="info-label-box">注册地区</div>
-          <span class="info-value" :title="userInfo.registerRegion || ''">{{ userInfo.registerRegion || '-' }}</span>
+        <!-- 第4列 -->
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">婚姻状况</div>
+            <span class="info-value">{{ userInfo.maritalStatus || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">宗教信仰</div>
+            <span class="info-value">{{ userInfo.religion || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">注册地区</div>
+            <span class="info-value" :title="userInfo.registerRegion || ''">{{ userInfo.registerRegion || '-' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <div class="info-label-box">注册时间</div>
-          <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <div class="info-label-box">链接URL</div>
-          <span class="info-value link-url" :title="userInfo.linkUrl || ''">{{ userInfo.linkUrl || '-' }}</span>
+
+        <!-- 第5列 -->
+        <div class="info-column">
+          <div class="info-item">
+            <div class="info-label-box">兴趣爱好</div>
+            <span class="info-value" :title="userInfo.hobbies || ''">{{ userInfo.hobbies || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">链接URL</div>
+            <span class="info-value link-url" :title="userInfo.linkUrl || ''">{{ userInfo.linkUrl || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <div class="info-label-box">注册时间</div>
+            <span class="info-value">{{ userInfo.registerTime || '-' }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -411,7 +407,7 @@ const displayAccountId = computed(() => {
 }
 
 .user-id {
-  font-family: 'Alibaba PuHuiTi', sans-serif;
+  font-family: 'Alibaba PuHuiTi', 'Microsoft YaHei', sans-serif;
   font-size: 20px;
   font-weight: 500;
   color: #000;
@@ -436,23 +432,27 @@ const displayAccountId = computed(() => {
 }
 
 .user-detail-info {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   padding-top: 16px;
 }
 
-.info-row {
+/* 按列分组的布局 */
+.info-columns {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 56px;
+}
+
+.info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
 .info-item {
   display: flex;
   align-items: center;
   gap: 16px;
-  min-width: 322px;
 }
 
 .info-label-box {
@@ -460,55 +460,26 @@ const displayAccountId = computed(() => {
   padding: 4px 8px;
   background: #f5f7fa;
   border-radius: 2px;
-  font-family: 'Alibaba PuHuiTi', sans-serif;
+  font-family: 'Alibaba PuHuiTi', 'Microsoft YaHei', sans-serif;
   font-size: 16px;
+  font-weight: 400;
   color: rgba(0, 0, 0, 0.45);
   line-height: 22px;
+  letter-spacing: 0.16px;
   white-space: nowrap;
 }
 
 .info-value {
-  flex: 1;
-  font-family: 'Alibaba PuHuiTi', sans-serif;
+  font-family: 'Alibaba PuHuiTi', 'Microsoft YaHei', sans-serif;
   font-size: 16px;
+  font-weight: 400;
   color: rgba(0, 0, 0, 0.88);
   line-height: 22px;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: 0.16px;
   white-space: nowrap;
 
   &.link-url {
     cursor: pointer;
   }
-}
-
-.completeness-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-}
-
-.completeness-wrapper :deep(.el-progress) {
-  flex: 1;
-  min-width: 60px;
-}
-
-.completeness-wrapper :deep(.el-progress-bar__outer) {
-  background: #ebedf0;
-  border-radius: 20px;
-}
-
-.completeness-wrapper :deep(.el-progress-bar__inner) {
-  border-radius: 20px;
-}
-
-.completeness-text {
-  font-family: 'Microsoft YaHei', sans-serif;
-  font-size: 12px;
-  color: #606266;
-  min-width: 32px;
 }
 </style>

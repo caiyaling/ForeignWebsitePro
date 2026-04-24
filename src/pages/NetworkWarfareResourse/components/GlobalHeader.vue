@@ -33,7 +33,8 @@ const username = 'admin'
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 64px;
+  height: 64px; /* 使用固定高度而非 min-height */
+  flex-shrink: 0; /* 防止在 flex 布局中被压缩 */
   padding: 0 16px;
   border-bottom: 1px solid #414243;
   background: #080027;
@@ -71,7 +72,8 @@ const username = 'admin'
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 64px;
+  height: 64px; /* 使用固定高度 */
+  flex-shrink: 0; /* 防止压缩 */
   padding: 0 12px;
   border: 0;
   background: transparent;

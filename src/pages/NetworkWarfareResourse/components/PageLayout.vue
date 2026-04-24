@@ -29,7 +29,7 @@ const props = defineProps({
 .page-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh; /* 使用固定高度而非 min-height，确保子元素能正确继承高度 */
   background-image: url('@/assets/overviewBg.jpg');
   background-size: cover;
   background-position: center;
@@ -45,12 +45,18 @@ const props = defineProps({
   display: flex;
   flex: 1;
   min-height: 0;
+  height: calc(100vh - 64px); /* 明确设置高度，减去 header 高度 */
+  overflow: hidden;
 }
 
 .page-main {
   flex: 1;
   min-width: 0;
+  min-height: 0; /* 确保 flex 子元素正确收缩 */
+  height: 100%; /* 明确设置高度 */
   overflow: hidden;
+  display: flex; /* 默认使用 flex 布局 */
+  flex-direction: column;
 
   // 灰色背景页面的 padding
   &:has(.data-table),
@@ -58,16 +64,12 @@ const props = defineProps({
   &:has(.resource-card),
   &:has(.phone-card-panel) {
     padding: 12px 10px 12px 12px;
-    display: flex;
-    flex-direction: column;
     gap: 8px;
   }
 
   // 数据导入页面的 padding
   &:has(.tabs-wrapper) {
     padding: 16px;
-    display: flex;
-    flex-direction: column;
     gap: 16px;
   }
 }

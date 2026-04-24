@@ -345,7 +345,7 @@ const handleSortChange = (sortData) => {
 <style lang="scss" scoped>
 .table-panel {
   flex: 1;
-  min-height: 0;
+  min-height: 300px; /* 设置最小高度，防止高度塌陷 */
   padding: 20px 20px 16px;
   border-radius: 4px;
   background: #fff;

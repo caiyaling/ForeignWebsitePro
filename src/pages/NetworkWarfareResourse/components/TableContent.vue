@@ -124,8 +124,13 @@ const updateTableHeight = () => {
 
   // 否则动态计算高度
   const wrapperHeight = tableWrapperRef.value.clientHeight
+  // 设置最小高度为 200px，防止高度为 0 或很小的情况
+  const minHeight = 200
   if (wrapperHeight > 0) {
-    tableHeight.value = wrapperHeight
+    tableHeight.value = Math.max(wrapperHeight, minHeight)
+  } else {
+    // 如果 wrapper 高度为 0，使用最小高度作为后备值
+    tableHeight.value = minHeight
   }
 }
 
@@ -369,7 +374,7 @@ onUnmounted(() => {
 
 .table-wrapper {
   flex: 1;
-  min-height: 0;
+  min-height: 200px; /* 设置最小高度，防止高度塌陷 */
   overflow: hidden;
 }
 

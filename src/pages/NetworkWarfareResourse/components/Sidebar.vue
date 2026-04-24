@@ -233,7 +233,8 @@ onMounted(() => {
 <style lang="scss" scoped>
 .sidebar {
   width: 200px;
-  flex: 0 0 200px;
+  flex: 0 0 200px; /* 固定宽度，不参与 flex 计算 */
+  height: 100%; /* 明确设置高度 */
   background: #080027;
   border-right: 1px solid #414243;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.36);
@@ -271,7 +272,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  height: 46px;
+  height: 46px; /* 使用固定高度 */
+  flex-shrink: 0; /* 防止压缩 */
   padding: 12px 20px;
   cursor: pointer;
   color: #e5eaf3;
@@ -313,7 +315,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 46px;
+  height: 46px; /* 使用固定高度 */
+  flex-shrink: 0; /* 防止压缩 */
   padding: 12px 20px;
   cursor: pointer;
   transition: background 0.2s;
@@ -408,7 +411,8 @@ onMounted(() => {
 }
 
 .child-row {
-  min-height: 46px;
+  height: 46px; /* 使用固定高度 */
+  flex-shrink: 0; /* 防止压缩 */
   padding: 12px 20px 12px 40px;
   color: #e5eaf3;
   font-size: 14px;
