@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElProgress, ElTag } from 'element-plus'
+import { ElProgress, ElTag, ElTooltip } from 'element-plus'
 import defaultAvatar from '@/assets/default-avatar.svg'
 import { getAssetUrl } from '@/utils/assets'
 
@@ -175,7 +175,9 @@ const displayAccountId = computed(() => {
         <div class="info-column">
           <div class="info-item">
             <div class="info-label-box">链接URL</div>
-            <span class="info-value link-url" :title="userInfo.linkUrl || ''">{{ userInfo.linkUrl || '-' }}</span>
+            <el-tooltip :content="userInfo.linkUrl || '-'" placement="top" :disabled="!userInfo.linkUrl">
+              <span class="info-value link-url">{{ userInfo.linkUrl || '-' }}</span>
+            </el-tooltip>
           </div>
           <div class="info-item">
             <div class="info-label-box">账号信息完善度</div>
@@ -328,11 +330,15 @@ const displayAccountId = computed(() => {
         <div class="info-column">
           <div class="info-item">
             <div class="info-label-box">兴趣爱好</div>
-            <span class="info-value" :title="userInfo.hobbies || ''">{{ userInfo.hobbies || '-' }}</span>
+            <el-tooltip :content="userInfo.hobbies || '-'" placement="top" :disabled="!userInfo.hobbies">
+              <span class="info-value">{{ userInfo.hobbies || '-' }}</span>
+            </el-tooltip>
           </div>
           <div class="info-item">
             <div class="info-label-box">链接URL</div>
-            <span class="info-value link-url" :title="userInfo.linkUrl || ''">{{ userInfo.linkUrl || '-' }}</span>
+            <el-tooltip :content="userInfo.linkUrl || '-'" placement="top" :disabled="!userInfo.linkUrl">
+              <span class="info-value link-url">{{ userInfo.linkUrl || '-' }}</span>
+            </el-tooltip>
           </div>
           <div class="info-item">
             <div class="info-label-box">注册时间</div>
@@ -467,6 +473,7 @@ const displayAccountId = computed(() => {
   line-height: 22px;
   letter-spacing: 0.16px;
   white-space: nowrap;
+  text-align: center;
 }
 
 .info-value {
@@ -480,6 +487,10 @@ const displayAccountId = computed(() => {
 
   &.link-url {
     cursor: pointer;
+    max-width: 163px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
   }
 }
 </style>
