@@ -1,170 +1,26 @@
 <script setup>
 /**
  * @description 数据导入页面
- * @date 2024-04-10
+ * @date 2024-04-23
  */
-import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, watch } from 'vue'
 import PageLayout from '@/pages/NetworkWarfareResourse/components/PageLayout.vue'
-import DataImportUpload from '@/components/DataImportUpload.vue'
-import ImportErrorDialog from '@/components/ImportErrorDialog.vue'
-import {
-  downloadAccountTemplate,
-  importAccountData,
-  downloadBehaviorTemplate,
-  importBehaviorData,
-  downloadHotPostTemplate,
-  importHotPostData
-} from '@/api/dataImport'
+import AccountTable from './components/AccountTable.vue'
+import BehaviorTable from './components/BehaviorTable.vue'
+import PopularPostUpload from './components/PopularPostUpload.vue'
 
 // 当前激活的标签页
 const activeTab = ref('account')
 
-// 上传组件引用
-const uploadRef = ref(null)
+// 行为记录表格组件引用
+const behaviorTableRef = ref(null)
 
-// 导入加载状态
-const importing = ref(false)
-
-// 导入错误弹框
-const showErrorDialog = ref(false)
-const errorList = ref([])
-
-// 根据标签页获取上传配置
-const uploadConfig = computed(() => {
-  switch (activeTab.value) {
-    case 'account':
-      return {
-        accept: '.xlsx,.xls',
-        uploadText: '点击上传文件'
-      }
-    case 'behavior':
-    case 'popular':
-      return {
-        accept: '.zip',
-        uploadText: '点击上传文件'
-      }
-    default:
-      return {
-        accept: '.xlsx,.xls',
-        uploadText: '点击上传文件'
-      }
+// 监听tab切换
+watch(activeTab, (newTab) => {
+  if (newTab === 'behavior' && behaviorTableRef.value) {
+    behaviorTableRef.value.init()
   }
 })
-
-// 处理文件变化
-const handleFileChange = (files) => {
-  console.log('文件变化:', files)
-}
-
-// 处理模板下载
-const handleDownloadTemplate = async () => {
-  try {
-    let res
-    let fileName
-
-    switch (activeTab.value) {
-      case 'account':
-        res = await downloadAccountTemplate()
-        fileName = '账号基本情况模板.xlsx'
-        break
-      case 'behavior':
-        res = await downloadBehaviorTemplate()
-        fileName = '账号行为记录模板.zip'
-        break
-      case 'popular':
-        res = await downloadHotPostTemplate()
-        fileName = '爆款贴文链接模板.zip'
-        break
-      default:
-        ElMessage.warning('未知的导入类型')
-        return
-    }
-
-    // 根据响应数据自动判断文件类型
-    const blob = res instanceof Blob ? res : new Blob([res])
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = fileName
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
-    // 延迟释放 URL，确保文件可以被下载
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url)
-    }, 1000)
-
-    ElMessage.success('模板下载成功')
-  } catch (error) {
-    console.error('模板下载失败:', error)
-    ElMessage.error('模板下载失败')
-  }
-}
-
-// 处理确认导入
-const handleConfirm = async (files) => {
-  if (!files || files.length === 0) {
-    ElMessage.warning('请先上传文件')
-    return
-  }
-
-  importing.value = true
-  try {
-    const formData = new FormData()
-    // Element Plus Upload 组件返回的文件对象，需要通过 .raw 获取原始 File 对象
-    const rawFile = files[0].raw || files[0]
-    formData.append('file', rawFile)
-
-    let res
-    switch (activeTab.value) {
-      case 'account':
-        res = await importAccountData(formData)
-        break
-      case 'behavior':
-        res = await importBehaviorData(formData)
-        break
-      case 'popular':
-        res = await importHotPostData(formData)
-        break
-      default:
-        ElMessage.warning('未知的导入类型')
-        return
-    }
-
-    if (res.code === 200) {
-      // 检查是否有错误列表
-      if (res.data?.errorList && res.data.errorList.length > 0) {
-        errorList.value = res.data.errorList
-        showErrorDialog.value = true
-        ElMessage.warning('部分数据导入失败')
-      } else {
-        ElMessage.success('导入成功')
-        uploadRef.value?.clearFiles()
-      }
-    } else {
-      // 接口返回错误，检查是否有错误列表
-      if (res.data?.errorList && res.data.errorList.length > 0) {
-        errorList.value = res.data.errorList
-        showErrorDialog.value = true
-      } else {
-        ElMessage.error(res.message || '导入失败')
-      }
-    }
-  } catch (error) {
-    console.error('导入失败:', error)
-    // 检查错误响应中是否有错误列表
-    if (error.response?.data?.errorList && error.response.data.errorList.length > 0) {
-      errorList.value = error.response.data.errorList
-      showErrorDialog.value = true
-    } else {
-      ElMessage.error('导入失败')
-    }
-  } finally {
-    importing.value = false
-  }
-}
 </script>
 
 <template>
@@ -193,32 +49,21 @@ const handleConfirm = async (files) => {
       </div>
     </div>
 
-    <!-- 上传区域 -->
-    <div class="upload-wrapper">
-      <div class="upload-container">
-        <data-import-upload
-          ref="uploadRef"
-          :single-file="true"
-          :accept="uploadConfig.accept"
-          :upload-text="uploadConfig.uploadText"
-          :confirm-loading="importing"
-          @change="handleFileChange"
-          @download-template="handleDownloadTemplate"
-          @confirm="handleConfirm"
-        />
-      </div>
-    </div>
-  </page-layout>
+    <!-- 账号基本情况 -->
+    <account-table v-if="activeTab === 'account'" />
 
-  <!-- 导入错误弹框 -->
-  <import-error-dialog
-    v-model="showErrorDialog"
-    :error-list="errorList"
-  />
+    <!-- 账号行为记录 -->
+    <behavior-table
+      v-if="activeTab === 'behavior'"
+      ref="behaviorTableRef"
+    />
+
+    <!-- 爆款贴文链接 -->
+    <popular-post-upload v-if="activeTab === 'popular'" />
+  </page-layout>
 </template>
 
 <style lang="scss" scoped>
-// Tabs 标签页样式
 .tabs-wrapper {
   background: #fff;
 }
@@ -249,25 +94,5 @@ const handleConfirm = async (files) => {
     color: #0060ff;
     border-bottom-color: #0060ff;
   }
-}
-
-// 上传区域样式
-.upload-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.upload-container {
-  flex: 1;
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 </style>

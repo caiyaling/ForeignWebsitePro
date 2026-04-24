@@ -24,6 +24,11 @@ const props = defineProps({
     type: String,
     default: '.xlsx,.xls'
   },
+  // 上传提示文字
+  uploadText: {
+    type: String,
+    default: '点击上传Excel文件'
+  },
   // 是否限制只能上传一个文件
   singleFile: {
     type: Boolean,
@@ -123,7 +128,7 @@ const handleClose = () => {
         :on-change="handleFileChange"
       >
         <el-icon class="upload-icon"><UploadFilled /></el-icon>
-        <div class="upload-text">点击上传Excel文件</div>
+        <div class="upload-text">{{ uploadText }}</div>
       </el-upload>
 
       <!-- 模版下载按钮 -->

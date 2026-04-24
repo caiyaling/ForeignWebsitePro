@@ -72,3 +72,13 @@ export function importHotPostData(formData) {
     }
   })
 }
+
+/**
+ * 导出账号基本情况数据
+ * @returns {Promise} 返回文件流
+ */
+export function exportAccountData() {
+  return request.get('/account-info/export', {
+    responseType: 'blob'
+  })
+}
